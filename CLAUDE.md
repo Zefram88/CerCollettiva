@@ -14,11 +14,25 @@ CerCollettiva is a Django-based Energy Community Management System (Comunità En
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies (requirements file needs to be created)
-pip install django djangorestframework channels paho-mqtt
-pip install psycopg2-binary python-dotenv crispy-forms crispy-bootstrap5
-pip install widget-tweaks django-filters whitenoise geopy
-pip install openpyxl pandas  # For GAUDI document processing
+# Upgrade pip
+pip install --upgrade pip
+
+# Install core Django dependencies first
+pip install Django==5.0 psycopg2-binary python-dotenv
+
+# Install other core dependencies
+pip install djangorestframework channels django-crispy-forms crispy-bootstrap5
+pip install django-widget-tweaks django-filter django-extensions paho-mqtt
+
+# Install all remaining dependencies from requirements file
+pip install -r app/requirements.txt
+
+# Alternative: Install dependencies step by step if encountering issues
+# pip install django djangorestframework channels paho-mqtt
+# pip install psycopg2-binary python-dotenv django-crispy-forms crispy-bootstrap5  
+# pip install django-widget-tweaks django-filters whitenoise geopy
+# pip install openpyxl pandas django-extensions django-cors-headers
+# pip install daphne channels-redis cryptography django-encrypted-model-fields
 ```
 
 ### Database Management
@@ -151,6 +165,81 @@ PostgreSQL database with:
 - Admin interface restricted to `/ceradmin/` path
 - CSRF protection enabled
 - User role-based access control (ADMIN, MEMBER, VIEWER)
+
+## Troubleshooting Installation Issues
+
+### Common Problems and Solutions
+
+1. **"Couldn't import Django" error:**
+   ```bash
+   # Reinstall Django specifically
+   pip uninstall django -y
+   pip install Django==5.0
+   ```
+
+2. **"No module named 'rest_framework'" error:**
+   ```bash
+   # Install Django REST Framework
+   pip install djangorestframework
+   ```
+
+3. **"No module named 'paho'" error:**
+   ```bash
+   # Install MQTT client
+   pip install paho-mqtt
+   ```
+
+4. **"No module named 'django_extensions'" error:**
+   ```bash
+   # Install Django Extensions
+   pip install django-extensions
+   ```
+
+5. **Virtual environment issues on WSL/Linux:**
+   ```bash
+   # If getting externally-managed-environment error
+   rm -rf venv
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+6. **Database connection issues:**
+   - Verify PostgreSQL is running
+   - Check database credentials in .env file
+   - Ensure database `cercollettiva_dev` exists
+
+### Quick Setup Script
+```bash
+#!/bin/bash
+# Quick setup script for CerCollettiva
+
+# Remove old venv if exists
+rm -rf venv
+
+# Create new virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Install core dependencies
+pip install Django==5.0 psycopg2-binary python-dotenv
+pip install djangorestframework channels django-crispy-forms crispy-bootstrap5
+pip install django-widget-tweaks django-filter django-extensions paho-mqtt
+
+# Install all dependencies
+pip install -r app/requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Create superuser (optional)
+# python manage.py createsuperuser
+
+# Start development server
+python manage.py runserver
+```
 
 ## Development Workflow
 

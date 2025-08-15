@@ -67,16 +67,26 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Configurazione database - usa SQLite per sviluppo rapido
+# Per PostgreSQL, decommentare la sezione sotto e installare/configurare PostgreSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cercollettiva_dev',  # verifica che questo nome sia corretto
-        'USER': 'cercollettiva_user',    # verifica le tue credenziali
-        'PASSWORD': 'sapone1980',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Database PostgreSQL (decommentare quando PostgreSQL è installato e configurato)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'cercollettiva_dev',
+#         'USER': 'cercollettiva_user',
+#         'PASSWORD': 'sapone1980',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 
 # Cache per sviluppo
