@@ -15,6 +15,7 @@ FIELD_ENCRYPTION_KEY = 'DeN2PosBdpf14DwdYqeTgzcT0Ysfk3lfGMqEI9nls9k='
 ENCRYPTED_FIELDS_KEYDIR = None  # Usa la chiave in settings invece di file
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+USE_SSL = os.getenv('USE_SSL', str(not DEBUG)).lower() == 'true'
 
 # Host consentiti di base (vuoto per sicurezza, da sovrascrivere in local/production)
 ALLOWED_HOSTS = []
@@ -159,9 +160,16 @@ os.makedirs(os.path.join(MEDIA_ROOT, 'documents', 'gaudi'), exist_ok=True)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_REFERRER_POLICY = 'same-origin'
+
+# Cookie e redirect sicuri solo se si usa SSL
+CSRF_COOKIE_SECURE = USE_SSL
+SESSION_COOKIE_SECURE = USE_SSL
+SECURE_SSL_REDIRECT = USE_SSL
+SECURE_HSTS_SECONDS = 31536000 if USE_SSL else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = USE_SSL
+SECURE_HSTS_PRELOAD = USE_SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if USE_SSL else None
 
 # Rest Framework
 REST_FRAMEWORK = {

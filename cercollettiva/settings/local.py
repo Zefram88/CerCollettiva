@@ -275,11 +275,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Security settings per development
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
-SECURE_SSL_REDIRECT = False
-
 # CORS settings per development
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
