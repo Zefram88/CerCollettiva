@@ -174,10 +174,10 @@ setup_database() {
     # Genera una password sicura per il database
     local db_password=$(openssl rand -base64 12)
     
-    # Crea utente e database
-    sudo -u postgres psql -c "CREATE USER cercollettiva WITH PASSWORD '${db_password}';"
-    sudo -u postgres psql -c "CREATE DATABASE cercollettiva OWNER cercollettiva;"
-    sudo -u postgres psql -c "ALTER USER cercollettiva CREATEDB;"
+    # Crea utente e database (eseguiti da /tmp per evitare warning di permission denied)
+    sudo -u postgres bash -c "cd /tmp && psql -c \"CREATE USER cercollettiva WITH PASSWORD '${db_password}';\""
+    sudo -u postgres bash -c "cd /tmp && psql -c \"CREATE DATABASE cercollettiva OWNER cercollettiva;\""
+    sudo -u postgres bash -c "cd /tmp && psql -c \"ALTER USER cercollettiva CREATEDB;\""
     
     # Salva la password in un file separato per uso successivo
     echo "DB_PASSWORD=${db_password}" > "$APP_PATH/.env"
@@ -551,15 +551,21 @@ setup_mqtt() {
     source "$APP_PATH/.env"
     local mqtt_user="cercollettiva"
     
-    sudo mosquitto_passwd -c /etc/mosquitto/passwd "$mqtt_user" "$MQTT_PASSWORD"
+    # Crea il file delle password se non esiste, altrimenti aggiorna l'utente
+    if [ ! -f /etc/mosquitto/passwd ]; then
+        sudo mosquitto_passwd -c -b /etc/mosquitto/passwd "$mqtt_user" "$MQTT_PASSWORD"
+    else
+        sudo mosquitto_passwd -b /etc/mosquitto/passwd "$mqtt_user" "$MQTT_PASSWORD"
+    fi
+    sudo chown root:mosquitto /etc/mosquitto/passwd
+    sudo chmod 640 /etc/mosquitto/passwd
     
     sudo tee /etc/mosquitto/conf.d/default.conf > /dev/null << EOL
-listener 1883 localhost
+listener 1883 127.0.0.1
 allow_anonymous false
 password_file /etc/mosquitto/passwd
 
-# Logging
-log_dest file /var/log/mosquitto/mosquitto.log
+# Logging: rely on global log_dest in /etc/mosquitto/mosquitto.conf
 connection_messages true
 log_timestamp true
 EOL
