@@ -28,7 +28,7 @@ PROJECT_PATH="" # Sarà impostato in setup_user
 # Variabili aggiuntive per la configurazione di rete e sicurezza
 PUBLIC_DOMAIN=""
 PUBLIC_IP=""
-USE_SSL=false
+USE_SSL=False
 WSL_MODE=true  # Modalità WSL attivata
 
 # Funzione di logging
@@ -121,7 +121,7 @@ collect_network_info() {
         # Chiedi se configurare SSL/HTTPS
         read -p "Vuoi configurare SSL/HTTPS per una connessione sicura? (s/n): " configure_ssl
         if [[ "$configure_ssl" =~ ^[Ss]$ ]]; then
-            USE_SSL=true
+            USE_SSL=True
             log "${RED}NOTA: Per SSL in WSL potrebbero essere necessarie configurazioni aggiuntive sul sistema Windows host.${NC}"
         fi
     fi
