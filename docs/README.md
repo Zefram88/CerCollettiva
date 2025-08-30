@@ -19,6 +19,32 @@ Questa directory contiene tutta la documentazione del progetto CerCollettiva.
 - [README.md](../README.md) - Documentazione principale del progetto
 - [overview.md](overview.md) - Riepilogo tecnico e mappa del codice
 
+### Decisioni (ADR)
+- [ADR-001: Stack MQTT](decisions/ADR-001-mqtt-stack.md)
+- [ADR-002: Credenziali per-dispositivo](decisions/ADR-002-credentials-per-device.md)
+
+### Operatività
+- [Ambiente e variabili](operations/environment.md)
+- [Migrazioni](operations/migrations.md)
+- [Logging e Monitoring](operations/logging-monitoring.md)
+
+### Energia / MQTT
+- [Specifiche Topic MQTT](../docs/energy/mqtt-topics.md)
+- [Payload Shelly](../docs/energy/payloads-shelly.md)
+
+### API
+- [Panoramica API](api/index.md)
+- [Core Endpoints](api/endpoints-core.md)
+- [Energy Endpoints](api/endpoints-energy.md)
+
+### Sicurezza & GDPR
+- [Sicurezza e GDPR](security-gdpr.md)
+
+### Processi
+- [Contributing](contributing.md)
+- [Testing](testing.md)
+- [Roadmap](roadmap.md)
+
 ### Per l'installazione
 - **Sviluppo locale**: Usa lo script `install_dev.sh` nella root del progetto
 - **Produzione**: Usa lo script `install/install_updated.sh`
