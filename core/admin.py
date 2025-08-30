@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
-from .models import CERConfiguration, CERMembership, Plant, PlantMeasurement, PlantDocument, Alert, MembershipCard, MemberRegistry
+from .models import CERConfiguration, CERMembership, Plant, PlantMeasurement, PlantDocument, Alert, MembershipCard, MemberRegistry, CERDistributionConfiguration, GSEIncomeTracking
 from .views import CerDashboardView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
@@ -452,6 +452,185 @@ class MemberRegistryAdmin(admin.ModelAdmin):
         else:
             return format_html('<span style="color: red;">✗</span>')
     has_card.short_description = 'Tessera'
+
+@admin.register(CERDistributionConfiguration, site=admin_site)
+class CERDistributionConfigurationAdmin(admin.ModelAdmin):
+    list_display = [
+        'cer_configuration', 'producer_percentage', 'consumer_percentage', 
+        'management_percentage', 'investment_fund_percentage', 'solidarity_fund_percentage',
+        'total_percentage_display', 'is_active', 'updated_at'
+    ]
+    list_filter = ['is_active', 'created_at', 'updated_at']
+    search_fields = ['cer_configuration__name', 'cer_configuration__code']
+    readonly_fields = ['created_at', 'updated_at', 'total_percentage']
+    
+    fieldsets = (
+        ('CER di Riferimento', {
+            'fields': ('cer_configuration', 'is_active')
+        }),
+        ('Percentuali di Ripartizione', {
+            'fields': (
+                ('producer_percentage', 'consumer_percentage'),
+                ('management_percentage', 'investment_fund_percentage', 'solidarity_fund_percentage'),
+                'total_percentage'
+            ),
+            'description': 'La somma delle percentuali deve essere esattamente 100%'
+        }),
+        ('Descrizioni e Note', {
+            'fields': ('management_description', 'investment_description', 'solidarity_description'),
+            'classes': ['collapse']
+        }),
+        ('Informazioni Sistema', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse']
+        })
+    )
+    
+    def total_percentage_display(self, obj):
+        total = obj.total_percentage
+        if abs(total - 100) > 0.01:
+            return format_html('<span style="color: red; font-weight: bold;">{}%</span>', total)
+        return format_html('<span style="color: green;">{}%</span>', total)
+    total_percentage_display.short_description = 'Totale %'
+    
+    def save_model(self, request, obj, form, change):
+        try:
+            obj.full_clean()
+            super().save_model(request, obj, form, change)
+            messages.success(request, 'Configurazione ripartizione salvata con successo.')
+        except ValidationError as e:
+            messages.error(request, f'Errore di validazione: {e}')
+    
+    actions = ['duplicate_configuration']
+    
+    def duplicate_configuration(self, request, queryset):
+        for config in queryset:
+            config.pk = None
+            config.is_active = False
+            config.save()
+        self.message_user(request, f"{queryset.count()} configurazioni duplicate (impostate come non attive).")
+    duplicate_configuration.short_description = "Duplica configurazioni selezionate"
+
+@admin.register(GSEIncomeTracking, site=admin_site)  
+class GSEIncomeTrackingAdmin(admin.ModelAdmin):
+    list_display = [
+        'cer_configuration', 'payment_type_display', 'reference_period', 
+        'gross_amount', 'net_amount', 'payment_status', 'payment_status_display',
+        'expected_payment_date', 'actual_payment_date', 'days_overdue_display'
+    ]
+    list_filter = [
+        'payment_type', 'payment_status', 'reference_year', 'reference_month',
+        'expected_payment_date', 'actual_payment_date'
+    ]
+    search_fields = [
+        'cer_configuration__name', 'cer_configuration__code', 
+        'gse_practice_number', 'notes'
+    ]
+    date_hierarchy = 'reference_month'
+    readonly_fields = ['created_at', 'updated_at', 'is_overdue', 'days_overdue']
+    
+    fieldsets = (
+        ('Informazioni Base', {
+            'fields': (
+                'cer_configuration', 'payment_type', 
+                ('reference_month', 'reference_year'),
+                'gse_practice_number'
+            )
+        }),
+        ('Importi', {
+            'fields': (
+                ('gross_amount', 'taxes_amount', 'net_amount'),
+            )
+        }),
+        ('Date e Stato', {
+            'fields': (
+                'payment_status',
+                ('expected_payment_date', 'actual_payment_date'),
+                ('is_overdue', 'days_overdue')
+            )
+        }),
+        ('Dettagli Tecnici', {
+            'fields': (
+                ('shared_energy_kwh', 'energy_tariff'),
+                'notes'
+            ),
+            'classes': ['collapse']
+        }),
+        ('Allegati', {
+            'fields': ('gse_communication',),
+            'classes': ['collapse']
+        }),
+        ('Informazioni Sistema', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse']
+        })
+    )
+    
+    def payment_type_display(self, obj):
+        colors = {
+            'ADVANCE': 'primary',
+            'SETTLEMENT': 'success', 
+            'ADJUSTMENT': 'warning'
+        }
+        color = colors.get(obj.payment_type, 'secondary')
+        return format_html(
+            '<span class="badge bg-{}">{}</span>', 
+            color, obj.get_payment_type_display()
+        )
+    payment_type_display.short_description = 'Tipo'
+    
+    def reference_period(self, obj):
+        return f"{obj.reference_month.strftime('%m/%Y')}"
+    reference_period.short_description = 'Periodo'
+    
+    def payment_status_display(self, obj):
+        colors = {
+            'EXPECTED': 'secondary',
+            'RECEIVED': 'success',
+            'DELAYED': 'warning',
+            'DISPUTED': 'danger'
+        }
+        color = colors.get(obj.payment_status, 'secondary')
+        return format_html(
+            '<span class="badge bg-{}">{}</span>', 
+            color, obj.get_payment_status_display()
+        )
+    payment_status_display.short_description = 'Stato'
+    
+    def days_overdue_display(self, obj):
+        if obj.is_overdue:
+            return format_html('<span style="color: red; font-weight: bold;">+{} giorni</span>', obj.days_overdue)
+        return '-'
+    days_overdue_display.short_description = 'Ritardo'
+    
+    actions = ['mark_as_received', 'calculate_distributions', 'export_to_excel']
+    
+    def mark_as_received(self, request, queryset):
+        updated = 0
+        for payment in queryset.filter(payment_status__in=['EXPECTED', 'DELAYED']):
+            payment.mark_as_received()
+            updated += 1
+        self.message_user(request, f"{updated} pagamenti segnati come ricevuti.")
+    mark_as_received.short_description = "Segna come ricevuti"
+    
+    def calculate_distributions(self, request, queryset):
+        results = []
+        for payment in queryset.filter(payment_status='RECEIVED'):
+            distribution = payment.calculate_distribution()
+            if distribution:
+                results.append(f"{payment}: €{distribution['total']:.2f}")
+        
+        if results:
+            message = "Ripartizioni calcolate:\n" + "\n".join(results)
+            self.message_user(request, message)
+        else:
+            self.message_user(request, "Nessuna ripartizione calcolabile per i pagamenti selezionati.")
+    calculate_distributions.short_description = "Calcola ripartizioni"
+    
+    def export_to_excel(self, request, queryset):
+        # Qui si potrebbe implementare l'export Excel
+        self.message_user(request, f"Export Excel di {queryset.count()} record (funzionalità da implementare)")
+    export_to_excel.short_description = "Esporta in Excel"
 
 admin_site.register(CERConfiguration, CERConfigurationAdmin)
 admin_site.register(CERMembership, CERMembershipAdmin)

@@ -43,6 +43,288 @@ class CERConfiguration(models.Model):
     def __str__(self):
         return f"{self.name} ({self.code})"
 
+class CERDistributionConfiguration(models.Model):
+    """Configurazione della ripartizione economica della CER"""
+    cer_configuration = models.OneToOneField(
+        CERConfiguration,
+        on_delete=models.CASCADE,
+        related_name='distribution_config',
+        verbose_name="Configurazione CER"
+    )
+    
+    # Percentuali di ripartizione
+    producer_percentage = models.DecimalField(
+        "Percentuale Produttori (%)",
+        max_digits=5,
+        decimal_places=2,
+        default=45.00,
+        help_text="Percentuale destinata ai produttori"
+    )
+    consumer_percentage = models.DecimalField(
+        "Percentuale Consumatori (%)", 
+        max_digits=5,
+        decimal_places=2,
+        default=30.00,
+        help_text="Percentuale destinata ai consumatori"
+    )
+    management_percentage = models.DecimalField(
+        "Percentuale Gestione (%)",
+        max_digits=5,
+        decimal_places=2,
+        default=20.00,
+        help_text="Percentuale per spese di gestione (commercialista, spese vive, bancarie, legali, marketing)"
+    )
+    investment_fund_percentage = models.DecimalField(
+        "Percentuale Fondo Investimento (%)",
+        max_digits=5,
+        decimal_places=2,
+        default=3.00,
+        help_text="Percentuale per fondo investimenti"
+    )
+    solidarity_fund_percentage = models.DecimalField(
+        "Percentuale Fondo Solidarietà (%)",
+        max_digits=5,
+        decimal_places=2,
+        default=2.00,
+        help_text="Percentuale per fondo di solidarietà"
+    )
+    
+    # Metadati
+    created_at = models.DateTimeField("Creato il", auto_now_add=True)
+    updated_at = models.DateTimeField("Aggiornato il", auto_now=True)
+    is_active = models.BooleanField("Configurazione Attiva", default=True)
+    
+    # Note descrittive per trasparenza
+    management_description = models.TextField(
+        "Descrizione Spese Gestione",
+        blank=True,
+        help_text="Dettaglio delle spese coperte dalla percentuale di gestione"
+    )
+    investment_description = models.TextField(
+        "Descrizione Fondo Investimento",
+        blank=True,
+        help_text="Descrizione degli investimenti pianificati"
+    )
+    solidarity_description = models.TextField(
+        "Descrizione Fondo Solidarietà", 
+        blank=True,
+        help_text="Criteri e finalità del fondo di solidarietà"
+    )
+    
+    def clean(self):
+        """Validazione che la somma delle percentuali sia 100%"""
+        total_percentage = (
+            self.producer_percentage + 
+            self.consumer_percentage +
+            self.management_percentage +
+            self.investment_fund_percentage +
+            self.solidarity_fund_percentage
+        )
+        
+        if abs(total_percentage - 100) > 0.01:  # Tolleranza per arrotondamenti
+            raise ValidationError(
+                f"La somma delle percentuali deve essere 100%. Attuale: {total_percentage}%"
+            )
+    
+    def get_distribution_breakdown(self, total_amount):
+        """Calcola la ripartizione dell'importo totale secondo le percentuali configurate"""
+        return {
+            'producers': round(total_amount * (self.producer_percentage / 100), 2),
+            'consumers': round(total_amount * (self.consumer_percentage / 100), 2),
+            'management': round(total_amount * (self.management_percentage / 100), 2),
+            'investment_fund': round(total_amount * (self.investment_fund_percentage / 100), 2),
+            'solidarity_fund': round(total_amount * (self.solidarity_fund_percentage / 100), 2),
+            'total': total_amount
+        }
+    
+    @property 
+    def total_percentage(self):
+        """Calcola la percentuale totale configurata"""
+        return (
+            self.producer_percentage + 
+            self.consumer_percentage +
+            self.management_percentage +
+            self.investment_fund_percentage +
+            self.solidarity_fund_percentage
+        )
+    
+    class Meta:
+        verbose_name = "Configurazione Ripartizione Economica CER"
+        verbose_name_plural = "Configurazioni Ripartizione Economica CER"
+    
+    def __str__(self):
+        return f"Ripartizione {self.cer_configuration.name} - P:{self.producer_percentage}% C:{self.consumer_percentage}% G:{self.management_percentage}%"
+
+class GSEIncomeTracking(models.Model):
+    """Tracciamento degli incassi GSE per una CER"""
+    
+    PAYMENT_TYPES = [
+        ('ADVANCE', 'Acconto Mensile'),
+        ('SETTLEMENT', 'Conguaglio Finale'),
+        ('ADJUSTMENT', 'Rettifica'),
+    ]
+    
+    PAYMENT_STATUS = [
+        ('EXPECTED', 'Atteso'),
+        ('RECEIVED', 'Ricevuto'),
+        ('DELAYED', 'In Ritardo'), 
+        ('DISPUTED', 'Contestato'),
+    ]
+    
+    cer_configuration = models.ForeignKey(
+        CERConfiguration,
+        on_delete=models.CASCADE,
+        related_name='gse_incomes',
+        verbose_name="Configurazione CER"
+    )
+    
+    # Informazioni pagamento
+    payment_type = models.CharField(
+        "Tipo Pagamento",
+        max_length=20,
+        choices=PAYMENT_TYPES
+    )
+    reference_month = models.DateField(
+        "Mese di Riferimento",
+        help_text="Mese a cui si riferisce il pagamento"
+    )
+    reference_year = models.IntegerField(
+        "Anno di Riferimento",
+        help_text="Anno a cui si riferisce il pagamento"
+    )
+    
+    # Importi
+    gross_amount = models.DecimalField(
+        "Importo Lordo GSE (€)",
+        max_digits=12,
+        decimal_places=2,
+        help_text="Importo lordo ricevuto dal GSE"
+    )
+    net_amount = models.DecimalField(
+        "Importo Netto (€)",
+        max_digits=12,
+        decimal_places=2,
+        help_text="Importo netto dopo detrazioni"
+    )
+    taxes_amount = models.DecimalField(
+        "Imposte e Detrazioni (€)",
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Imposte, contributi e altre detrazioni"
+    )
+    
+    # Date e stato
+    expected_payment_date = models.DateField(
+        "Data Attesa Pagamento",
+        null=True,
+        blank=True
+    )
+    actual_payment_date = models.DateField(
+        "Data Pagamento Effettivo",
+        null=True,
+        blank=True
+    )
+    payment_status = models.CharField(
+        "Stato Pagamento",
+        max_length=20,
+        choices=PAYMENT_STATUS,
+        default='EXPECTED'
+    )
+    
+    # Dettagli tecnici GSE
+    gse_practice_number = models.CharField(
+        "Numero Pratica GSE",
+        max_length=50,
+        blank=True,
+        help_text="Numero identificativo della pratica GSE"
+    )
+    shared_energy_kwh = models.DecimalField(
+        "Energia Condivisa (kWh)",
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="kWh di energia condivisa nel periodo"
+    )
+    energy_tariff = models.DecimalField(
+        "Tariffa Energia (€/kWh)", 
+        max_digits=8,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        help_text="Tariffa applicata per l'energia condivisa"
+    )
+    
+    # Note e allegati
+    notes = models.TextField(
+        "Note",
+        blank=True,
+        help_text="Note aggiuntive sul pagamento"
+    )
+    gse_communication = models.FileField(
+        "Comunicazione GSE",
+        upload_to='gse/communications/%Y/%m/',
+        null=True,
+        blank=True,
+        help_text="File della comunicazione GSE"
+    )
+    
+    # Metadati
+    created_at = models.DateTimeField("Creato il", auto_now_add=True)
+    updated_at = models.DateTimeField("Aggiornato il", auto_now=True)
+    
+    def clean(self):
+        """Validazioni custom per il modello"""
+        if self.gross_amount and self.net_amount and self.taxes_amount:
+            calculated_net = self.gross_amount - self.taxes_amount
+            if abs(calculated_net - self.net_amount) > 0.01:
+                raise ValidationError(
+                    f"L'importo netto ({self.net_amount}) non corrisponde al calcolo "
+                    f"lordo - imposte ({calculated_net})"
+                )
+    
+    def calculate_distribution(self):
+        """Calcola la ripartizione secondo la configurazione della CER"""
+        try:
+            distribution_config = self.cer_configuration.distribution_config
+            return distribution_config.get_distribution_breakdown(float(self.net_amount))
+        except CERDistributionConfiguration.DoesNotExist:
+            return None
+    
+    @property
+    def is_overdue(self):
+        """Verifica se il pagamento è in ritardo"""
+        if not self.expected_payment_date or self.payment_status == 'RECEIVED':
+            return False
+        return timezone.now().date() > self.expected_payment_date
+    
+    @property
+    def days_overdue(self):
+        """Calcola i giorni di ritardo"""
+        if not self.is_overdue:
+            return 0
+        return (timezone.now().date() - self.expected_payment_date).days
+    
+    def mark_as_received(self, actual_date=None):
+        """Marca il pagamento come ricevuto"""
+        self.payment_status = 'RECEIVED'
+        self.actual_payment_date = actual_date or timezone.now().date()
+        self.save(update_fields=['payment_status', 'actual_payment_date', 'updated_at'])
+    
+    class Meta:
+        verbose_name = "Tracciamento Incassi GSE"
+        verbose_name_plural = "Tracciamento Incassi GSE"
+        unique_together = ['cer_configuration', 'payment_type', 'reference_month', 'reference_year']
+        ordering = ['-reference_year', '-reference_month', '-created_at']
+        indexes = [
+            models.Index(fields=['cer_configuration', '-reference_year', '-reference_month']),
+            models.Index(fields=['payment_status', 'expected_payment_date']),
+        ]
+    
+    def __str__(self):
+        return f"{self.cer_configuration.name} - {self.get_payment_type_display()} {self.reference_month.strftime('%m/%Y')} - €{self.net_amount}"
+
 class CERMembership(models.Model):
     """Associazione tra Utente e CER con gestione documenti GDPR"""
     ROLE_CHOICES = [

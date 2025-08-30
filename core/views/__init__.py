@@ -24,6 +24,13 @@ from .document import (
 )
 from .gaudi import NewPlantFromGaudiView, PlantGaudiUpdateView
 from .mqtt import mqtt_reconnect_view
+from .economic import (
+    EconomicDashboardView,
+    CERDistributionDetailView,
+    GSEPaymentsListView,
+    EconomicReportsView,
+    distribution_simulation_ajax
+)
 
 __all__ = [
     'DashboardView',
@@ -51,5 +58,10 @@ __all__ = [
     'PlantDocumentDeleteView',
     'NewPlantFromGaudiView',
     'PlantGaudiUpdateView',
-    'mqtt_reconnect_view'
+    'mqtt_reconnect_view',
+    'EconomicDashboardView',
+    'CERDistributionDetailView',
+    'GSEPaymentsListView',
+    'EconomicReportsView',
+    'distribution_simulation_ajax'
 ]
