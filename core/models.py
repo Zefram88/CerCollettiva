@@ -50,6 +50,12 @@ class CERMembership(models.Model):
         ('MEMBER', 'Membro'),
         ('TECHNICAL', 'Tecnico'),
     ]
+    
+    MEMBER_TYPE_CHOICES = [
+        ('PRODUCER', 'Produttore'),
+        ('CONSUMER', 'Solo Consumatore'),
+        ('PROSUMER', 'Prosumer'),
+    ]
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -66,6 +72,13 @@ class CERMembership(models.Model):
         max_length=20,
         choices=ROLE_CHOICES,
         default='MEMBER'
+    )
+    member_type = models.CharField(
+        "Tipologia Membro",
+        max_length=20,
+        choices=MEMBER_TYPE_CHOICES,
+        default='CONSUMER',
+        help_text="Tipo di partecipazione nella CER"
     )
     joined_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField("Attivo", default=True)
@@ -112,13 +125,37 @@ class CERMembership(models.Model):
         related_name='verified_memberships'
     )
 
+    @property
+    def is_producer(self):
+        """Verifica se il membro è un produttore"""
+        return self.member_type in ['PRODUCER', 'PROSUMER']
+    
+    @property 
+    def is_consumer(self):
+        """Verifica se il membro è un consumatore"""
+        return self.member_type in ['CONSUMER', 'PROSUMER']
+    
+    @property
+    def requires_production_documents(self):
+        """Verifica se il membro richiede documenti di produzione"""
+        return self.member_type in ['PRODUCER', 'PROSUMER']
+    
+    def auto_approve_consumer(self):
+        """Approvazione automatica per soli consumatori"""
+        if self.member_type == 'CONSUMER':
+            self.document_verified = True
+            self.document_verified_at = timezone.now()
+            self.save(update_fields=['document_verified', 'document_verified_at'])
+            return True
+        return False
+
     class Meta:
         verbose_name = "Membership CER"
         verbose_name_plural = "Membership CER"
         unique_together = ['user', 'cer_configuration']
 
     def __str__(self):
-        return f"{self.user.username} - {self.cer_configuration.name}"
+        return f"{self.user.username} - {self.cer_configuration.name} ({self.get_member_type_display()})"
 
 class Plant(models.Model):
     """Impianto energetico con supporto MQTT"""
