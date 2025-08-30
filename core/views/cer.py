@@ -69,6 +69,10 @@ class CERDetailView(BaseCERView):
         )
 
     def get_context_data(self, **kwargs):
+        # Ensure object is set before calling super()
+        if 'object' not in kwargs:
+            kwargs['object'] = self.get_object()
+        
         context = super().get_context_data(**kwargs)
         cer = self.get_object()
         
@@ -87,13 +91,16 @@ class CERDetailView(BaseCERView):
         energy_stats = self._calculate_cer_energy_stats(cer, time_threshold)
         
         context.update({
-            'user_membership': user_membership,
+            'cer': cer,  # Explicitly add cer to context
+            'object': cer,  # Ensure object is also set
+            'membership': user_membership,  # Change key name to match template
             'energy_stats': energy_stats,
             'members': cer.memberships.filter(is_active=True).select_related('user'),
             'plants': self._get_filtered_plants(cer),
             'is_admin': self.request.user.is_staff or 
                        (user_membership and user_membership.role == 'ADMIN')
         })
+        
         return context
         
     def _calculate_cer_energy_stats(self, cer, time_threshold):
