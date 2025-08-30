@@ -8,6 +8,7 @@ from django.utils import timezone
 from .manager import DeviceManager
 from ..models import MQTTBroker, MQTTAuditLog
 from .core import get_mqtt_service, MQTTMessage
+from django.conf import settings
 import time
 import json
 from queue import Queue
@@ -592,10 +593,69 @@ def init_mqtt_connection():
 # Singleton instance
 _mqtt_client = None
 
-def get_mqtt_client() -> EnergyMQTTClient:
+
+class NewMQTTAdapter:
+    """Compat adapter that exposes legacy client API over the new MQTTService."""
+
+    def __init__(self):
+        self._svc = get_mqtt_service()
+
+    @property
+    def is_connected(self) -> bool:
+        return bool(getattr(self._svc, "is_connected", False))
+
+    def configure(self, host: str, port: int, username: str = None, password: str = None, use_tls: bool = False):
+        self._svc.configure(host=host, port=port, username=username, password=password, use_tls=use_tls)
+        return True
+
+    def start(self):
+        # The service connects during configure; keep for compatibility
+        return self.is_connected
+
+    def stop(self):
+        self._svc.stop()
+
+    def connect(self):
+        # Load active broker and (re)configure
+        broker = MQTTBroker.objects.filter(is_active=True).first()
+        if not broker:
+            return False
+        self.configure(
+            host=broker.host,
+            port=broker.port,
+            username=broker.username,
+            password=broker.password,
+            use_tls=broker.use_tls,
+        )
+        return self.is_connected
+
+    def disconnect(self):
+        self.stop()
+
+    def refresh_configurations(self):
+        try:
+            # Rebuild topics via DeviceManager
+            dm = DeviceManager()
+            dm.refresh_configurations()
+            return True
+        except Exception:
+            return False
+
+
+def get_mqtt_client():
+    """Return legacy client or adapter to new service based on flag."""
+    use_new = getattr(settings, "USE_NEW_MQTT", True)
+    if use_new:
+        # Singleton adapter
+        global _mqtt_client
+        if not isinstance(_mqtt_client, NewMQTTAdapter):
+            _mqtt_client = NewMQTTAdapter()
+        return _mqtt_client
+
+    # Legacy client fallback
     global _mqtt_client
-    if _mqtt_client is None:
+    if not isinstance(_mqtt_client, EnergyMQTTClient):
         with threading.Lock():
-            if _mqtt_client is None:
+            if not isinstance(_mqtt_client, EnergyMQTTClient):
                 _mqtt_client = EnergyMQTTClient()
     return _mqtt_client

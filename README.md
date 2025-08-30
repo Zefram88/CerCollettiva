@@ -126,6 +126,7 @@ CerCollettiva/
 - [CLAUDE.md](CLAUDE.md) - Guida per lo sviluppo con Claude AI
 - [CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md) - Codice di condotta
 - [LICENSE](LICENSE) - Licenza MIT
+- Documentazione tecnica estesa: vedi `docs/overview.md` e l’indice in `docs/README.md`
 
 ## Script di utilità
 
