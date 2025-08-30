@@ -1,50 +1,95 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% block title %}CER - CerCollettiva{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container">
+   <!-- Header Section -->
+   <div class="text-center mb-5">
+       <div class="d-inline-flex align-items-center justify-content-center bg-gradient-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+           <i class="fas fa-users text-white" style="font-size: 2rem;"></i>
+       </div>
+       <h2 class="fw-bold mb-3">
+           <span class="text-gradient">Comunità Energetiche</span>
+       </h2>
+       <p class="lead text-muted">
+           Esplora e aderisci alle comunità energetiche rinnovabili disponibili nella tua area.
+       </p>
+   </div>
+
+   <!-- Breadcrumb -->
    <nav aria-label="breadcrumb" class="mb-4">
-       <ol class="breadcrumb">
-           <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
-           <li class="breadcrumb-item active">CER</li>
+       <ol class="breadcrumb bg-light rounded-cer p-3">
+           <li class="breadcrumb-item">
+               <a href="{% url 'core:dashboard' %}" class="text-decoration-none">
+                   <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+               </a>
+           </li>
+           <li class="breadcrumb-item active text-energy">
+               <i class="fas fa-users me-2"></i>CER
+           </li>
        </ol>
    </nav>
 
-   <div class="card data-card mb-4">
-       <div class="card-header d-flex justify-content-between align-items-center">
-           <h5 class="mb-0">Comunità Energetiche Disponibili</h5>
+   <div class="cer-card animate-fade-in-up mb-4">
+       <div class="cer-card-header text-center">
+           <h4 class="mb-0 fw-bold">
+               <i class="fas fa-solar-panel me-2"></i>
+               Comunità Energetiche Disponibili
+           </h4>
        </div>
-       <div class="card-body">
+       <div class="p-4">
            {% if available_cers %}
-           <div class="row">
+           <div class="row g-4">
                {% for cer in available_cers %}
-               <div class="col-md-6 mb-4">
-                   <div class="card h-100 data-card">
-                       <div class="card-header">
-                           <h6 class="mb-0">{{ cer.name }}</h6>
+               <div class="col-lg-6 col-xl-4">
+                   <div class="cer-card h-100 animate-fade-in-up">
+                       <div class="cer-card-header">
+                           <h5 class="mb-0 fw-bold">
+                               <i class="fas fa-leaf me-2"></i>{{ cer.name }}
+                           </h5>
                        </div>
-                       <div class="card-body">
-                           <dl class="row mb-0">
-                               <dt class="col-sm-5">Codice</dt>
-                               <dd class="col-sm-7">{{ cer.code }}</dd>
+                       <div class="p-4">
+                           <div class="row g-3 mb-4">
+                               <div class="col-12">
+                                   <div class="d-flex align-items-center">
+                                       <i class="fas fa-code text-energy me-2"></i>
+                                       <strong class="text-muted me-2">Codice:</strong>
+                                       <span class="fw-semibold">{{ cer.code }}</span>
+                                   </div>
+                               </div>
 
-                               <dt class="col-sm-5">Cabina Primaria</dt>
-                               <dd class="col-sm-7">{{ cer.primary_substation }}</dd>
+                               <div class="col-12">
+                                   <div class="d-flex align-items-center">
+                                       <i class="fas fa-plug text-energy me-2"></i>
+                                       <strong class="text-muted me-2">Cabina Primaria:</strong>
+                                       <span class="fw-semibold">{{ cer.primary_substation }}</span>
+                                   </div>
+                               </div>
 
-                               <dt class="col-sm-5">Membri</dt>
-                               <dd class="col-sm-7">
-                                   <span class="badge bg-info">{{ cer.members_count }}</span>
-                               </dd>
-                           </dl>
+                               <div class="col-12">
+                                   <div class="d-flex align-items-center">
+                                       <i class="fas fa-users text-energy me-2"></i>
+                                       <strong class="text-muted me-2">Membri:</strong>
+                                       <span class="status-badge status-active">
+                                           <i class="fas fa-users"></i>
+                                           {{ cer.members_count }}
+                                       </span>
+                                   </div>
+                               </div>
+                           </div>
 
-                           <div class="d-flex justify-content-end mt-3 gap-2">
-                               <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-sm btn-primary">
-                                   <i class="fas fa-info-circle"></i> Dettagli
+                           <div class="d-flex gap-2 flex-wrap">
+                               <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-outline-primary flex-grow-1">
+                                   <i class="fas fa-info-circle me-2"></i>Dettagli
                                </a>
                                {% if cer not in user_memberships %}
-                               <a href="{% url 'core:cer_join' cer.pk %}" class="btn btn-sm btn-outline-success">
-                                   <i class="fas fa-user-plus"></i> Aderisci
+                               <a href="{% url 'core:cer_join' cer.pk %}" class="btn btn-cer-primary flex-grow-1">
+                                   <i class="fas fa-user-plus me-2"></i>Aderisci
                                </a>
+                               {% else %}
+                               <span class="btn btn-success flex-grow-1 disabled">
+                                   <i class="fas fa-check me-2"></i>Membro
+                               </span>
                                {% endif %}
                            </div>
                        </div>
@@ -53,34 +98,20 @@
                {% endfor %}
            </div>
            {% else %}
-           <div class="text-center py-4">
-               <i class="fas fa-users fa-3x mb-3"></i>
-               <p class="text-muted mb-0">Nessuna CER disponibile al momento</p>
+           <div class="text-center py-5">
+               <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 100px; height: 100px;">
+                   <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
+               </div>
+               <h4 class="text-muted mb-3">Nessuna CER Disponibile</h4>
+               <p class="text-muted mb-0">Al momento non ci sono comunità energetiche disponibili nella tua area.</p>
+               <div class="mt-4">
+                   <a href="{% url 'core:dashboard' %}" class="btn btn-cer-primary">
+                       <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+                   </a>
+               </div>
            </div>
            {% endif %}
        </div>
    </div>
 </div>
-
-{% block extra_css %}
-<style>
-.data-card {
-   transition: transform 0.2s ease;
-   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.data-card:hover {
-   transform: translateY(-2px);
-}
-
-.badge {
-   font-size: 0.8rem;
-   padding: 0.25rem 0.5rem;
-}
-
-.gap-2 { 
-   gap: 0.5rem;
-}
-</style>
-{% endblock %}
 {% endblock %}

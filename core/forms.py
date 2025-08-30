@@ -241,8 +241,7 @@ class InitialSuperUserForm(UserCreationForm):
                         name=cer_name,
                         code=cer_code,
                         primary_substation="Substation Demo",
-                        is_active=True,
-                        description=f"CER di esempio creata durante il setup iniziale"
+                        is_active=True
                     )
                     
                     # Crea membership per l'admin

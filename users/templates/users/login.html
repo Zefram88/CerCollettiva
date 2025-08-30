@@ -1,12 +1,20 @@
-{% extends 'core/base.html' %}
+{% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
 {% block title %}Accedi - CerCollettiva{% endblock %}
 
+{% block extra_head %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('hide-navbar');
+        });
+    </script>
+{% endblock %}
+
 {% block extra_css %}
 <style>
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--energy-gradient);
         min-height: 100vh;
     }
     
@@ -19,61 +27,49 @@
     }
     
     .login-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border: none;
-        border-radius: 2rem;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        background: var(--cer-white);
+        border: 1px solid var(--cer-gray-200);
+        border-radius: var(--cer-border-radius);
+        box-shadow: var(--cer-shadow-xl);
         overflow: hidden;
         max-width: 450px;
         width: 100%;
     }
     
     .login-header {
-        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-        backdrop-filter: blur(10px);
+        background: var(--energy-gradient);
         border: none;
         padding: 3rem 2rem 2rem;
         text-align: center;
         position: relative;
     }
     
-    .login-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-    }
-    
     .brand-logo {
         width: 80px;
         height: 80px;
-        background: linear-gradient(145deg, #667eea, #764ba2);
+        background: var(--cer-white);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 1.5rem;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        box-shadow: var(--cer-shadow-lg);
     }
     
     .brand-logo i {
         font-size: 2rem;
-        color: white;
+        color: var(--cer-primary);
     }
     
     .login-title {
-        color: #2d3748;
+        color: var(--cer-white);
         font-weight: 700;
         font-size: 1.8rem;
         margin-bottom: 0.5rem;
     }
     
     .login-subtitle {
-        color: #718096;
+        color: rgba(255, 255, 255, 0.9);
         font-size: 1rem;
         margin-bottom: 0;
     }
@@ -95,9 +91,9 @@
     }
     
     .form-floating > .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
-        background: rgba(255, 255, 255, 1);
+        border-color: var(--cer-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        background: var(--cer-white);
     }
     
     .form-floating > label {
@@ -107,14 +103,13 @@
     }
     
     .btn-login {
-        background: linear-gradient(145deg, #667eea, #764ba2);
+        background: var(--energy-gradient);
         border: none;
-        border-radius: 1rem;
+        border-radius: var(--cer-border-radius-sm);
         padding: 1rem;
         font-weight: 600;
         font-size: 1.1rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        color: var(--cer-white);
         width: 100%;
         position: relative;
         overflow: hidden;
@@ -139,7 +134,8 @@
     
     .btn-login:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        box-shadow: var(--cer-shadow-lg);
+        color: var(--cer-white);
     }
     
     .login-footer {
@@ -150,14 +146,14 @@
     }
     
     .login-footer a {
-        color: #667eea;
+        color: var(--cer-primary);
         text-decoration: none;
         font-weight: 600;
         transition: all 0.3s ease;
     }
     
     .login-footer a:hover {
-        color: #764ba2;
+        color: var(--cer-primary-dark);
         text-decoration: underline;
     }
     
@@ -280,7 +276,7 @@
         <!-- Header con logo -->
         <div class="login-header">
             <div class="brand-logo">
-                <i class="bi bi-lightning-charge-fill"></i>
+                <i class="fas fa-solar-panel"></i>
             </div>
             <h1 class="login-title">Bentornato</h1>
             <p class="login-subtitle">Accedi alla tua Comunità Energetica</p>

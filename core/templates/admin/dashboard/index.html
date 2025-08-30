@@ -4,100 +4,278 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'admin/css/dashboard.css' %}">
+<style>
+/* Dashboard CerCollettiva Styles */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--cer-white);
+    border: 1px solid var(--cer-gray-200);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.primary {
+    border-left: 4px solid var(--cer-primary);
+}
+
+.stat-card.success {
+    border-left: 4px solid var(--cer-success);
+}
+
+.stat-card.info {
+    border-left: 4px solid var(--cer-info);
+}
+
+.stat-card.warning {
+    border-left: 4px solid var(--cer-warning);
+}
+
+.stat-card-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 2.5rem;
+    color: var(--cer-gray-300);
+    opacity: 0.5;
+}
+
+.stat-card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cer-gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cer-gray-800);
+    margin-bottom: 0.25rem;
+}
+
+.stat-card-subtitle {
+    font-size: 0.875rem;
+    color: var(--cer-gray-500);
+}
+
+.chart-container {
+    background: var(--cer-white);
+    border: 1px solid var(--cer-gray-200);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--cer-gray-200);
+}
+
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--cer-gray-800);
+    margin: 0;
+}
+
+.measurements-table {
+    background: var(--cer-white);
+    border: 1px solid var(--cer-gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.measurements-table-header {
+    background: var(--energy-gradient);
+    color: var(--cer-white);
+    padding: 1.5rem;
+}
+
+.measurements-table h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.measurements-table .table {
+    margin-bottom: 0;
+}
+
+.measurements-table .table th {
+    background: var(--cer-gray-50);
+    color: var(--cer-gray-700);
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+}
+
+.measurements-table .table td {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-bottom: 1px solid var(--cer-gray-100);
+}
+
+.measurements-table .table tbody tr:hover {
+    background: var(--cer-gray-50);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .chart-container, .measurements-table {
+        margin: 0.5rem;
+    }
+}
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+}
+
+.badge-inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #991b1b;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <!-- Statistiche principali -->
-    <div class="row">
+    <div class="dashboard-stats">
         <!-- CER Stats -->
-        <div class="col-md-6 col-xl-3 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                CER Totali
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ total_cer }} ({{ active_cer }} attive)
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-solar-panel fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="stat-card primary">
+            <div class="stat-card-icon">
+                <i class="fas fa-solar-panel"></i>
+            </div>
+            <div class="stat-card-title">CER Totali</div>
+            <div class="stat-card-value">{{ total_cer }}</div>
+            <div class="stat-card-subtitle">
+                <span class="badge-active">{{ active_cer }} attive</span>
             </div>
         </div>
 
         <!-- Impianti Stats -->
-        <div class="col-md-6 col-xl-3 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Impianti Totali
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ total_plants }} ({{ active_plants }} attivi)
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-plug fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="stat-card success">
+            <div class="stat-card-icon">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="stat-card-title">Impianti Totali</div>
+            <div class="stat-card-value">{{ total_plants }}</div>
+            <div class="stat-card-subtitle">
+                <span class="badge-active">{{ active_plants }} attivi</span>
             </div>
         </div>
     </div>
 
-    <!-- Ultime Misurazioni e Grafici -->
-    <div class="row">
+    <!-- Grafici e Misurazioni -->
+    <div class="dashboard-grid">
         <!-- Grafico Energia -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Andamento Energia</h6>
-                </div>
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="energyChart"></canvas>
-                    </div>
-                </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Andamento Energia
+                </h3>
+            </div>
+            <div class="chart-area" style="position: relative; height: 300px;">
+                <canvas id="energyChart"></canvas>
             </div>
         </div>
 
         <!-- Ultime Misurazioni -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Ultime Misurazioni</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Ora</th>
-                                    <th>Tipo</th>
-                                    <th>Valore</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for measurement in latest_measurements %}
-                                <tr>
-                                    <td>{{ measurement.timestamp|date:"H:i" }}</td>
-                                    <td>{{ measurement.get_measurement_type_display }}</td>
-                                    <td>{{ measurement.value }} {{ measurement.unit }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="measurements-table">
+            <div class="measurements-table-header">
+                <h3>
+                    <i class="fas fa-list me-2"></i>
+                    Ultime Misurazioni
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Ora</th>
+                            <th>Tipo</th>
+                            <th>Valore</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for measurement in latest_measurements %}
+                        <tr>
+                            <td>
+                                <strong>{{ measurement.timestamp|date:"H:i" }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">
+                                    {{ measurement.get_measurement_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong>{{ measurement.value }} {{ measurement.unit }}</strong>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Nessuna misurazione disponibile
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

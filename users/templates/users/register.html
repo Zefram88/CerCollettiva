@@ -1,138 +1,340 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
 {% block title %}Registrazione - CerCollettiva{% endblock %}
 
+{% block meta_description %}Registrati gratuitamente su CerCollettiva e inizia a gestire la tua Comunità Energetica Rinnovabile{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Registrazione</h4>
+        <div class="col-lg-8 col-xl-6">
+            <div class="text-center mb-5">
+                <div class="d-inline-flex align-items-center justify-content-center bg-gradient-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+                    <i class="fas fa-user-plus text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h2 class="fw-bold mb-3">
+                    <span class="text-gradient">Registrazione</span>
+                </h2>
+                <p class="lead text-muted">
+                    Unisciti alla rivoluzione energetica. Crea il tuo account gratuito.
+                </p>
+            </div>
+
+            <div class="cer-card animate-fade-in-up">
+                <div class="cer-card-header text-center">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="fas fa-solar-panel me-2"></i>
+                        Nuovo Account
+                    </h4>
                 </div>
                 
-                <div class="card-body">
-                    <form method="POST">
+                <div class="p-4">
+                    <form method="POST" novalidate>
                         {% csrf_token %}
                         
-                        {% if form.errors %}
-                            <div class="alert alert-danger">
-                                {{ form.errors }}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-cer mb-4">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {{ form.non_field_errors.0 }}
                             </div>
                         {% endif %}
 
-                        {{ form|crispy }}
+                        <div class="row g-3">
+                            <!-- Username e Email -->
+                            <div class="col-md-6">
+                                <label for="{{ form.username.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-user me-2"></i>{{ form.username.label }}
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.username.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.email.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
 
-                        <div class="d-grid gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary">Registrati</button>
+                            <!-- Nome e Cognome -->
+                            <div class="col-md-6">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-id-badge me-2"></i>{{ form.first_name.label }}
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.first_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-id-badge me-2"></i>{{ form.last_name.label }}
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.last_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-lock me-2"></i>{{ form.password1.label }}
+                                </label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.password1.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.password1.help_text %}
+                                    <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-lock me-2"></i>{{ form.password2.label }}
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.password2.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Tipo Legale -->
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <h6 class="text-energy mb-3">
+                                    <i class="fas fa-building me-2"></i>Informazioni Legali
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.legal_type.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-user-tie me-2"></i>{{ form.legal_type.label }}
+                                </label>
+                                {{ form.legal_type }}
+                                {% if form.legal_type.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.legal_type.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6" id="profit-type-field">
+                                <label for="{{ form.profit_type.id_for_label }}" class="form-label">
+                                    <i class="fas fa-chart-line me-2"></i>{{ form.profit_type.label }}
+                                </label>
+                                {{ form.profit_type }}
+                                {% if form.profit_type.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.profit_type.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Altri campi nascosti inizialmente -->
+                            <div id="additional-fields" style="display: none;">
+                                <!-- Codice fiscale per privati -->
+                                <div class="col-12" id="fiscal-code-field">
+                                    <label for="{{ form.fiscal_code.id_for_label }}" class="form-label">
+                                        <i class="fas fa-id-card me-2"></i>{{ form.fiscal_code.label }}
+                                    </label>
+                                    {{ form.fiscal_code }}
+                                    {% if form.fiscal_code.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.fiscal_code.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Campi business -->
+                                <div class="business-fields" style="display: none;">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.legal_name.id_for_label }}" class="form-label">
+                                            <i class="fas fa-building me-2"></i>{{ form.legal_name.label }}
+                                        </label>
+                                        {{ form.legal_name }}
+                                        {% if form.legal_name.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.legal_name.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="{{ form.vat_number.id_for_label }}" class="form-label">
+                                            <i class="fas fa-receipt me-2"></i>{{ form.vat_number.label }}
+                                        </label>
+                                        {{ form.vat_number }}
+                                        {% if form.vat_number.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.vat_number.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <label for="{{ form.pec.id_for_label }}" class="form-label">
+                                            <i class="fas fa-at me-2"></i>{{ form.pec.label }}
+                                        </label>
+                                        {{ form.pec }}
+                                        {% if form.pec.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.pec.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-cer-primary btn-lg">
+                                <i class="fas fa-rocket me-2"></i>Crea Account
+                            </button>
                         </div>
                     </form>
                 </div>
 
-                <div class="card-footer text-center">
-                    Hai già un account? <a href="{% url 'users:login' %}">Accedi qui</a>
+                <div class="bg-light text-center p-3 rounded-bottom">
+                    <p class="mb-0">
+                        Hai già un account? 
+                        <a href="{% url 'users:login' %}" class="text-decoration-none fw-semibold">
+                            <i class="fas fa-sign-in-alt me-1"></i>Accedi qui
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+{% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const legalTypeSelect = document.getElementById('id_legal_type');
-    const profitTypeSelect = document.getElementById('id_profit_type');
-    
-    // Lista dei campi da nascondere per utenti privati
-    const fieldsToHideForPrivate = [
-        'legal_name',
-        'vat_number',
-        'pec',
-        'sdi_code',
-        'registration_number',
-        'statute_date',
-        'religious_entity_code'
-    ];
-
-    // Lista dei campi da nascondere per aziende
-    const fieldsToHideForBusiness = [
-        'registration_number',
-        'statute_date',
-        'religious_entity_code'
-    ];
+    const profitTypeField = document.getElementById('profit-type-field');
+    const additionalFields = document.getElementById('additional-fields');
+    const fiscalCodeField = document.getElementById('fiscal-code-field');
+    const businessFields = document.querySelectorAll('.business-fields');
     
     function updateFormFields() {
         const selectedType = legalTypeSelect.value;
         
-        // Aggiorna help text del codice fiscale
-        const fiscalCodeHelp = document.querySelector('#div_id_fiscal_code .form-text');
-        if (fiscalCodeHelp) {
-            if (selectedType === 'PRIVATE') {
-                fiscalCodeHelp.textContent = 'Codice fiscale persona fisica (16 caratteri)';
-            } else if (['BUSINESS', 'ASSOCIATION', 'PUBLIC'].includes(selectedType)) {
-                fiscalCodeHelp.textContent = 'Codice fiscale/Partita IVA (11 caratteri numerici)';
-            } else {
-                fiscalCodeHelp.textContent = 'Codice fiscale';
-            }
-        }
+        // Reset all fields visibility
+        additionalFields.style.display = 'none';
+        fiscalCodeField.style.display = 'none';
+        businessFields.forEach(field => field.style.display = 'none');
         
-        // Resto del codice per la gestione dei campi...
+        // Handle profit type based on legal type
+        const profitTypeSelect = document.getElementById('id_profit_type');
+        const profitTypeInfo = document.getElementById('profit-type-info');
         
-        // Gestione profit_type
+        // Remove existing info
+        if (profitTypeInfo) profitTypeInfo.remove();
+        
         if (selectedType === 'PRIVATE') {
+            // For private users
             profitTypeSelect.value = 'NON_PROFIT';
             profitTypeSelect.disabled = true;
-            if (!document.getElementById('profit-type-info')) {
-                const infoDiv = document.createElement('div');
-                infoDiv.id = 'profit-type-info';
-                infoDiv.className = 'alert alert-info mt-2';
-                infoDiv.textContent = 'Per i soggetti privati la finalità è automaticamente impostata a "Senza scopo di lucro"';
-                profitTypeSelect.parentNode.appendChild(infoDiv);
+            profitTypeField.style.display = 'none';
+            
+            // Show fiscal code field
+            additionalFields.style.display = 'block';
+            fiscalCodeField.style.display = 'block';
+            
+        } else if (['BUSINESS', 'ASSOCIATION', 'PUBLIC', 'CHURCH'].includes(selectedType)) {
+            // For business entities
+            if (selectedType === 'BUSINESS') {
+                profitTypeSelect.value = 'PROFIT';
+                profitTypeSelect.disabled = true;
+            } else {
+                profitTypeSelect.disabled = false;
             }
-        } else if (selectedType === 'BUSINESS') {
-            profitTypeSelect.value = 'PROFIT';
-            profitTypeSelect.disabled = true;
-            if (!document.getElementById('profit-type-info')) {
-                const infoDiv = document.createElement('div');
-                infoDiv.id = 'profit-type-info';
-                infoDiv.className = 'alert alert-info mt-2';
-                infoDiv.textContent = 'Per le aziende la finalità è automaticamente impostata a "Con scopo di lucro"';
-                profitTypeSelect.parentNode.appendChild(infoDiv);
-            }
-        } else {
-            profitTypeSelect.disabled = false;
-            const infoDiv = document.getElementById('profit-type-info');
-            if (infoDiv) {
-                infoDiv.remove();
-            }
+            
+            profitTypeField.style.display = 'block';
+            additionalFields.style.display = 'block';
+            businessFields.forEach(field => field.style.display = 'block');
         }
         
-        // Gestione visibilità campi
-        const allFieldsToHandle = [...new Set([...fieldsToHideForPrivate, ...fieldsToHideForBusiness])];
-        
-        allFieldsToHandle.forEach(fieldName => {
-            const fieldDiv = document.getElementById('div_id_' + fieldName);
-            if (fieldDiv) {
-                if (selectedType === 'PRIVATE' && fieldsToHideForPrivate.includes(fieldName)) {
-                    fieldDiv.style.display = 'none';
-                    const input = document.getElementById('id_' + fieldName);
-                    if (input) input.value = '';
-                } else if (selectedType === 'BUSINESS' && fieldsToHideForBusiness.includes(fieldName)) {
-                    fieldDiv.style.display = 'none';
-                    const input = document.getElementById('id_' + fieldName);
-                    if (input) input.value = '';
-                } else {
-                    fieldDiv.style.display = 'block';
-                }
-            }
-        });
+        // Add visual feedback
+        legalTypeSelect.classList.add('is-valid');
+        setTimeout(() => legalTypeSelect.classList.remove('is-valid'), 2000);
     }
     
+    // Initialize form state
     legalTypeSelect.addEventListener('change', updateFormFields);
-    updateFormFields(); // Esegui al caricamento della pagina
+    updateFormFields();
+    
+    // Add form validation feedback
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.focus();
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
 });
 </script>
-{% endblock %}
 
+<style>
+.required:after {
+    content: " *";
+    color: #ef4444;
+}
+
+.form-control.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-control.is-valid {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.invalid-feedback {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+#additional-fields {
+    transition: all 0.3s ease;
+}
+</style>
 {% endblock %}

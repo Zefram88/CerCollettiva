@@ -1,54 +1,80 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% block title %}Dashboard - CerCollettiva{% endblock %}
 {% load i18n %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Header with breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active">Dashboard</li>
-        </ol>
-    </nav>
+<div class="container">
+    <!-- Header Section -->
+    <div class="text-center mb-5">
+        <div class="d-inline-flex align-items-center justify-content-center bg-gradient-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+            <i class="fas fa-tachometer-alt text-white" style="font-size: 2rem;"></i>
+        </div>
+        <h2 class="fw-bold mb-3">
+            <span class="text-gradient">Dashboard</span>
+        </h2>
+        <p class="lead text-muted">
+            Monitora i tuoi impianti e le comunità energetiche rinnovabili.
+        </p>
+    </div>
 
-    <div class="row">
+    <div class="row g-4">
         <!-- Impianti Card -->
-        <div class="col-md-6 mb-4">
-            <div class="card data-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{% if user.is_staff %}Tutti gli Impianti{% else %}I Tuoi Impianti{% endif %}</h5>
-                    <div class="btn-group">
+        <div class="col-md-6">
+            <div class="cer-card animate-fade-in-up">
+                <div class="cer-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-leaf me-2"></i>
+                        {% if user.is_staff %}Tutti gli Impianti{% else %}I Tuoi Impianti{% endif %}
+                    </h5>
+                    <div class="d-flex gap-2">
                         {% if user.is_staff %}
-                            <a href="{% url 'core:plant_list' %}" class="btn btn-sm btn-info me-2">
-                                <i class="bi bi-list"></i> Vista Completa
+                            <a href="{% url 'core:plant_list' %}" class="btn btn-sm btn-outline-light">
+                                <i class="fas fa-list me-1"></i> Vista Completa
                             </a>
                         {% endif %}
-                        <a href="{% url 'core:plant_create' %}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-plus"></i> Nuovo Impianto
+                        <a href="{% url 'core:plant_create' %}" class="btn btn-sm btn-light">
+                            <i class="fas fa-plus me-1"></i> Nuovo
                         </a>
                     </div>
                 </div>
 
                 <!-- Lista degli impianti -->
-                <div class="list-group list-group-flush">
+                <div class="p-0">
                     {% for plant in plants %}
-                    <a href="{% url 'core:plant_detail' plant.pk %}" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <h6 class="mb-1" style="color: #b89d17">{{ plant.name }}</h6>
-                            <span class="badge bg-primary">{{ plant.get_plant_type_display }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <div>
-                                <small class="text-muted" style="color: #17a2b8">POD: {{ plant.pod_code }}</small>
-                                {% if user.is_staff and plant.owner != user %}
-                                    <small class="text-muted ms-2">
-                                        <i class="bi bi-person"></i> {{ plant.owner.get_full_name|default:plant.owner.username }}
-                                    </small>
-                                {% endif %}
+                    <div class="border-bottom p-3 hover-bg-light">
+                        <a href="{% url 'core:plant_detail' plant.pk %}" class="text-decoration-none">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h6 class="mb-1 text-energy fw-bold">
+                                    <i class="fas fa-solar-panel me-2"></i>{{ plant.name }}
+                                </h6>
+                                <span class="status-badge status-active">
+                                    {{ plant.get_plant_type_display }}
+                                </span>
                             </div>
-                            <small class="text-muted">{{ plant.nominal_power }} kW</small>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-barcode me-1"></i>POD: {{ plant.pod_code }}
+                                    </small>
+                                    {% if user.is_staff and plant.owner != user %}
+                                        <small class="text-muted ms-2">
+                                            <i class="fas fa-user me-1"></i>{{ plant.owner.get_full_name|default:plant.owner.username }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <small class="fw-bold text-primary">
+                                    <i class="fas fa-bolt me-1"></i>{{ plant.nominal_power }} kW
+                                </small>
+                            </div>
+                        </a>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-leaf text-muted" style="font-size: 1.5rem;"></i>
                         </div>
-                    </a>
+                        <p class="text-muted mb-0">Nessun impianto disponibile</p>
+                    </div>
                     {% endfor %}
                 </div>
 
@@ -97,37 +123,45 @@
         </div>
 
         <!-- CER Card -->
-        <div class="col-md-6 mb-4">
-            <div class="card data-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Le Tue CER</h5>
-                    <a href="{% url 'core:cer_list' %}" class="btn btn-sm btn-secondary">
-                        Elenco Completo
+        <div class="col-md-6">
+            <div class="cer-card animate-fade-in-up">
+                <div class="cer-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-users me-2"></i>Le Tue CER
+                    </h5>
+                    <a href="{% url 'core:cer_list' %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-list me-1"></i>Elenco Completo
                     </a>
                 </div>
-                <div class="card-body">
+                <div class="p-0">
                     {% if memberships %}
-                        <div class="list-group">
-                            {% for membership in memberships %}
-                            <a href="{% url 'core:cer_detail' membership.cer_configuration.pk %}" class="list-group-item list-group-item-action">
+                        {% for membership in memberships %}
+                        <div class="border-bottom p-3 hover-bg-light">
+                            <a href="{% url 'core:cer_detail' membership.cer_configuration.pk %}" class="text-decoration-none">
                                 <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <h6 class="mb-1">{{ membership.cer_configuration.name }}</h6>
-                                    <span class="badge bg-info">{{ membership.get_role_display }}</span>
+                                    <h6 class="mb-1 text-energy fw-bold">
+                                        <i class="fas fa-leaf me-2"></i>{{ membership.cer_configuration.name }}
+                                    </h6>
+                                    <span class="status-badge status-active">{{ membership.get_role_display }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <small class="text-muted">{{ membership.cer_configuration.primary_substation }}</small>
-                                    <div class="power-metrics" data-cer-id="{{ membership.cer_configuration.id }}">
-                                        <small class="producer-power text-success me-2">P: -- kW</small>
-                                        <small class="consumer-power text-danger me-2">C: -- kW</small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-plug me-1"></i>{{ membership.cer_configuration.primary_substation }}
+                                    </small>
+                                    <div class="power-metrics d-flex gap-2" data-cer-id="{{ membership.cer_configuration.id }}">
+                                        <small class="producer-power text-success">P: -- kW</small>
+                                        <small class="consumer-power text-danger">C: -- kW</small>
                                         <small class="net-power text-primary">N: -- kW</small>
                                     </div>
                                 </div>
                             </a>
-                            {% endfor %}
                         </div>
+                        {% endfor %}
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-users fa-3x mb-3"></i>
+                        <div class="text-center py-5">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-users text-muted" style="font-size: 1.5rem;"></i>
+                            </div>
                             <p class="text-muted mb-0">Non sei membro di alcuna CER</p>
                         </div>
                     {% endif %}
@@ -137,24 +171,34 @@
     </div>
 
     <!-- Notifiche Card -->
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card data-card">
-                <div class="card-header">
-                    <h5 class="mb-0">Notifiche</h5>
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="cer-card animate-fade-in-up">
+                <div class="cer-card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-bell me-2"></i>Notifiche
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="p-4">
                     {% if notifications %}
-                    <ul class="list-group">
-                        {% for notification in notifications %}
-                        <li class="list-group-item">
-                            <strong>{{ notification.title }}</strong>
-                            <p class="mb-0 text-muted">{{ notification.body }}</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                    {% for notification in notifications %}
+                    <div class="alert alert-cer alert-info">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle me-3"></i>
+                            <div>
+                                <strong>{{ notification.title }}</strong>
+                                <p class="mb-0 text-muted">{{ notification.body }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% else %}
-                    <p class="text-center text-muted">Nessuna notifica al momento</p>
+                    <div class="text-center py-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-bell text-muted" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <p class="text-muted mb-0">Nessuna notifica al momento</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -163,14 +207,16 @@
 
     <!-- Map Card -->
     {% if plants %}
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card data-card">
-                <div class="card-header">
-                    <h5 class="mb-0">Mappa Impianti</h5>
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="cer-card animate-fade-in-up">
+                <div class="cer-card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-map-marked-alt me-2"></i>Mappa Impianti
+                    </h5>
                 </div>
-                <div class="card-body p-0">
-                    <div id="plantsMap" style="height: 400px;"></div>
+                <div class="p-0">
+                    <div id="plantsMap" style="height: 400px; border-radius: 0 0 12px 12px;"></div>
                 </div>
             </div>
         </div>
@@ -186,26 +232,12 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
 <style>
-    .data-card {
-        transition: transform 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .hover-bg-light {
+        transition: background-color 0.3s ease;
     }
-
-    .data-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .badge {
-        font-size: 0.8rem;
-        padding: 0.25rem 0.5rem;
-    }
-
-    .list-group-item {
-        transition: all 0.2s ease;
-    }
-
-    .list-group-item:hover {
-        background-color: rgba(0,0,0,0.03);
+    
+    .hover-bg-light:hover {
+        background-color: var(--cer-gray-50) !important;
     }
 
     .leaflet-popup-content {
@@ -213,8 +245,9 @@
     }
 
     .leaflet-popup-content h6 {
-        color: #b89d17;
+        color: var(--cer-primary);
         margin-bottom: 8px;
+        font-weight: 700;
     }
 </style>
 {% endblock %}

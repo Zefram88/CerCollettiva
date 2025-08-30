@@ -1,9 +1,272 @@
 
 {% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+/* Integrazione del design CerCollettiva nell'admin Django */
+:root {
+    /* Brand Colors from CerCollettiva */
+    --cer-primary: #2563eb;
+    --cer-primary-dark: #1d4ed8;
+    --cer-primary-light: #3b82f6;
+    --cer-secondary: #64748b;
+    --cer-success: #10b981;
+    --cer-warning: #f59e0b;
+    --cer-danger: #ef4444;
+    --cer-info: #06b6d4;
+    
+    /* Neutral Colors */
+    --cer-white: #ffffff;
+    --cer-gray-50: #f8fafc;
+    --cer-gray-100: #f1f5f9;
+    --cer-gray-200: #e2e8f0;
+    --cer-gray-300: #cbd5e1;
+    --cer-gray-400: #94a3b8;
+    --cer-gray-500: #64748b;
+    --cer-gray-600: #475569;
+    --cer-gray-700: #334155;
+    --cer-gray-800: #1e293b;
+    --cer-gray-900: #0f172a;
+    
+    /* Energy Theme */
+    --energy-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --solar-gradient: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+    --green-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+}
+
+/* Header personalizzazione */
+#header {
+    background: var(--energy-gradient) !important;
+    color: var(--cer-white) !important;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: var(--cer-white) !important;
+    font-weight: 700;
+}
+
+#branding h1:before {
+    content: "🌱 ";
+    margin-right: 0.5rem;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    background: var(--cer-gray-100) !important;
+    border-bottom: 1px solid var(--cer-gray-200);
+}
+
+.breadcrumbs a {
+    color: var(--cer-primary) !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumbs a:hover {
+    color: var(--cer-primary-dark) !important;
+    text-decoration: underline;
+}
+
+/* Navigation */
+#nav-sidebar {
+    background: var(--cer-white) !important;
+    border-right: 1px solid var(--cer-gray-200) !important;
+}
+
+#nav-sidebar .current-app {
+    background: var(--cer-gray-50) !important;
+}
+
+#nav-sidebar a {
+    color: var(--cer-gray-700) !important;
+    border-radius: 6px;
+    margin: 2px 8px;
+    transition: all 0.3s ease;
+}
+
+#nav-sidebar a:hover {
+    background: var(--cer-primary) !important;
+    color: var(--cer-white) !important;
+}
+
+#nav-sidebar .current a {
+    background: var(--energy-gradient) !important;
+    color: var(--cer-white) !important;
+    font-weight: 600;
+}
+
+/* Main content area */
+.main {
+    background: var(--cer-gray-50) !important;
+}
+
+.content {
+    background: var(--cer-white) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin: 1rem;
+    padding: 2rem;
+}
+
+/* Buttons */
+.default, input[type=submit], .submit-row input, .button {
+    background: var(--energy-gradient) !important;
+    border: none !important;
+    color: var(--cer-white) !important;
+    font-weight: 600 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    text-transform: none !important;
+}
+
+.default:hover, input[type=submit]:hover, .submit-row input:hover, .button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Tables */
+.results table {
+    background: var(--cer-white) !important;
+    border: 1px solid var(--cer-gray-200) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.results th {
+    background: var(--cer-gray-100) !important;
+    color: var(--cer-gray-700) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid var(--cer-gray-200) !important;
+}
+
+.results tr:nth-child(even) {
+    background: var(--cer-gray-50) !important;
+}
+
+/* Forms */
+.form-row {
+    margin-bottom: 1.5rem;
+}
+
+.form-row label {
+    color: var(--cer-gray-700) !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem;
+}
+
+input, select, textarea {
+    border: 2px solid var(--cer-gray-200) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--cer-primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
+}
+
+/* Cards/Modules */
+.module {
+    background: var(--cer-white) !important;
+    border: 1px solid var(--cer-gray-200) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 2rem !important;
+}
+
+.module h2, .module caption {
+    background: var(--energy-gradient) !important;
+    color: var(--cer-white) !important;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1.5rem !important;
+    font-weight: 700 !important;
+    border-bottom: none !important;
+}
+
+/* Dashboard tiles */
+.dashboard .module table th a {
+    color: var(--cer-primary) !important;
+    font-weight: 600 !important;
+}
+
+.dashboard .module table th a:hover {
+    color: var(--cer-primary-dark) !important;
+}
+
+/* Messages */
+.messagelist .info {
+    background: rgba(6, 182, 212, 0.1) !important;
+    border-left: 4px solid var(--cer-info) !important;
+    color: #0c4a6e !important;
+}
+
+.messagelist .success {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-left: 4px solid var(--cer-success) !important;
+    color: #065f46 !important;
+}
+
+.messagelist .warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-left: 4px solid var(--cer-warning) !important;
+    color: #92400e !important;
+}
+
+.messagelist .error {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-left: 4px solid var(--cer-danger) !important;
+    color: #991b1b !important;
+}
+
+/* User tools */
+#user-tools {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+}
+
+#user-tools a {
+    color: var(--cer-white) !important;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-left: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+#user-tools a:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .content {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
 
 {% block usertools %}
     {{ block.super }}
     {% if request.user.is_staff %}
-        <a href="{% url 'admin_dashboard' %}" class="viewsitelink">Dashboard</a>
+        <a href="{% url 'core:dashboard' %}" class="viewsitelink">
+            <i class="fas fa-tachometer-alt"></i> Dashboard CER
+        </a>
     {% endif %}
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        CerCollettiva Admin
+    </a>
+</h1>
 {% endblock %}

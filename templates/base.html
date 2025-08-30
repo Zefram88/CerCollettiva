@@ -1,81 +1,511 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-bs-theme="{% block theme %}auto{% endblock %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CerCollettiva{% endblock %}</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="{% block meta_description %}CerCollettiva - Piattaforma per la gestione delle Comunità Energetiche Rinnovabili{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}energia rinnovabile, CER, comunità energetiche, sostenibilità{% endblock %}">
+    <meta name="author" content="CerCollettiva Team">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            /* Brand Colors */
+            --cer-primary: #2563eb;
+            --cer-primary-dark: #1d4ed8;
+            --cer-primary-light: #3b82f6;
+            --cer-secondary: #64748b;
+            --cer-success: #10b981;
+            --cer-warning: #f59e0b;
+            --cer-danger: #ef4444;
+            --cer-info: #06b6d4;
+            
+            /* Neutral Colors */
+            --cer-white: #ffffff;
+            --cer-gray-50: #f8fafc;
+            --cer-gray-100: #f1f5f9;
+            --cer-gray-200: #e2e8f0;
+            --cer-gray-300: #cbd5e1;
+            --cer-gray-400: #94a3b8;
+            --cer-gray-500: #64748b;
+            --cer-gray-600: #475569;
+            --cer-gray-700: #334155;
+            --cer-gray-800: #1e293b;
+            --cer-gray-900: #0f172a;
+            
+            /* Spacing */
+            --cer-header-height: 70px;
+            --cer-sidebar-width: 280px;
+            --cer-border-radius: 12px;
+            --cer-border-radius-sm: 8px;
+            --cer-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --cer-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --cer-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Energy Theme */
+            --energy-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --solar-gradient: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            --green-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        }
+        
+        /* Global Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--cer-gray-800);
+            background-color: var(--cer-gray-50);
+        }
+        
+        /* Typography */
+        .text-gradient {
+            background: var(--energy-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .text-energy {
+            color: var(--cer-primary);
+            font-weight: 600;
+        }
+        
+        /* Cards */
+        .cer-card {
+            background: var(--cer-white);
+            border: 1px solid var(--cer-gray-200);
+            border-radius: var(--cer-border-radius);
+            box-shadow: var(--cer-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .cer-card:hover {
+            box-shadow: var(--cer-shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        .cer-card-header {
+            background: var(--energy-gradient);
+            color: var(--cer-white);
+            border-radius: var(--cer-border-radius) var(--cer-border-radius) 0 0;
+            padding: 1.5rem;
+            border-bottom: none;
+        }
+        
+        /* Buttons */
+        .btn-cer-primary {
+            background: var(--energy-gradient);
+            border: none;
+            color: var(--cer-white);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+        
+        .btn-cer-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--cer-shadow-lg);
+            color: var(--cer-white);
+        }
+        
+        /* Navbar */
+        .cer-navbar {
+            background: var(--cer-white) !important;
+            box-shadow: var(--cer-shadow);
+            border-bottom: 1px solid var(--cer-gray-200);
+            padding: 0.75rem 0;
+            min-height: var(--cer-header-height);
+        }
+        
+        .cer-navbar .navbar-brand {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--energy-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .cer-navbar .nav-link {
+            color: var(--cer-gray-700) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .cer-navbar .nav-link:hover {
+            background-color: var(--cer-gray-100);
+            color: var(--cer-primary) !important;
+        }
+        
+        .cer-navbar .nav-link.active {
+            background: var(--energy-gradient);
+            color: var(--cer-white) !important;
+        }
+        
+        /* Alerts */
+        .alert-cer {
+            border: none;
+            border-radius: var(--cer-border-radius);
+            box-shadow: var(--cer-shadow);
+            border-left: 4px solid;
+        }
+        
+        .alert-success.alert-cer {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--cer-success);
+            color: #065f46;
+        }
+        
+        .alert-info.alert-cer {
+            background-color: rgba(6, 182, 212, 0.1);
+            border-left-color: var(--cer-info);
+            color: #0c4a6e;
+        }
+        
+        .alert-warning.alert-cer {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-left-color: var(--cer-warning);
+            color: #92400e;
+        }
+        
+        .alert-danger.alert-cer {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--cer-danger);
+            color: #991b1b;
+        }
+        
+        /* Forms */
+        .form-control, .form-select {
+            border: 2px solid var(--cer-gray-200);
+            border-radius: var(--cer-border-radius-sm);
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--cer-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--cer-gray-700);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Utilities */
+        .bg-gradient-primary {
+            background: var(--energy-gradient) !important;
+        }
+        
+        .bg-gradient-solar {
+            background: var(--solar-gradient) !important;
+        }
+        
+        .bg-gradient-green {
+            background: var(--green-gradient) !important;
+        }
+        
+        .rounded-cer {
+            border-radius: var(--cer-border-radius) !important;
+        }
+        
+        .shadow-cer {
+            box-shadow: var(--cer-shadow) !important;
+        }
+        
+        .shadow-cer-lg {
+            box-shadow: var(--cer-shadow-lg) !important;
+        }
+        
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - var(--cer-header-height));
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        /* Footer */
+        .cer-footer {
+            background: var(--cer-gray-800);
+            color: var(--cer-gray-300);
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cer-navbar .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                padding-top: 1rem;
+            }
+        }
+        
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+        }
+        
+        .status-badge.status-inactive {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+        }
+        
+        .status-badge.status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #92400e;
+        }
+        
+        /* Show navbar by default, hide only when explicitly disabled */
+        .cer-navbar {
+            display: block;
+        }
+        
+        .hide-navbar .cer-navbar {
+            display: none;
+        }
+    </style>
+    
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if not show_navbar %}hide-navbar{% endif %}">`
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    {% if show_navbar != False %}
+    <nav class="navbar navbar-expand-lg cer-navbar">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'core:dashboard' %}">CerCollettiva</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}">
+                <i class="fas fa-solar-panel me-2"></i>
+                CerCollettiva
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:cer_list' %}">CER</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:plant_list' %}">Impianti</a>
-                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'cer' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'core:cer_list' %}">
+                                <i class="fas fa-users me-2"></i>CER
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'plant' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'core:plant_list' %}">
+                                <i class="fas fa-leaf me-2"></i>Impianti
+                            </a>
+                        </li>
+                        {% if user.is_staff %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/ceradmin/" target="_blank">
+                                <i class="fas fa-cogs me-2"></i>Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
                 </ul>
                 
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profilo</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="post" action="{% url 'users:logout' %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                            <i class="fas fa-user text-white" style="font-size: 14px;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-none d-md-block">
+                                        <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
+                                        <small class="text-muted">{{ user.get_legal_type_display }}</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-cer border-0" style="min-width: 220px;">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </li>
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">
+                                    <i class="fas fa-user-circle me-2"></i>Il mio profilo
+                                </a></li>
+                                {% if user.is_staff %}
+                                <li><a class="dropdown-item" href="/ceradmin/">
+                                    <i class="fas fa-cogs me-2"></i>Pannello Admin
+                                </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'users:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:register' %}">Registrati</a>
-                    </li>
+                        <li class="nav-item me-2">
+                            <a class="nav-link" href="{% url 'users:login' %}">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-cer-primary" href="{% url 'users:register' %}">
+                                <i class="fas fa-user-plus me-2"></i>Registrati
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+    {% endif %}
 
-    <!-- Messages -->
-    <div class="container mt-4">
+    <!-- Main Content Container -->
+    <main class="main-content">
+        <!-- Messages -->
         {% if messages %}
+        <div class="container mb-4">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
+            <div class="alert alert-{{ message.tags }} alert-cer alert-dismissible fade show animate-fade-in-up" role="alert">
+                <div class="d-flex align-items-center">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle me-3 text-success"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fas fa-exclamation-circle me-3 text-danger"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle me-3 text-warning"></i>
+                    {% elif message.tags == 'info' %}
+                        <i class="fas fa-info-circle me-3 text-info"></i>
+                    {% endif %}
+                    <div>{{ message }}</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% endfor %}
+        </div>
         {% endif %}
 
-        <!-- Main Content -->
+        <!-- Page Content -->
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer -->
+    {% if show_navbar != False %}
+    <footer class="cer-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-solar-panel me-2 text-gradient" style="font-size: 1.5rem;"></i>
+                        <h5 class="mb-0">CerCollettiva</h5>
+                    </div>
+                    <p class="mb-2">Piattaforma per la gestione delle Comunità Energetiche Rinnovabili</p>
+                    <p class="mb-0"><small>&copy; {% now "Y" %} CerCollettiva. Tutti i diritti riservati.</small></p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-3">
+                        <a href="#" class="text-decoration-none me-3">
+                            <i class="fab fa-github me-1"></i>GitHub
+                        </a>
+                        <a href="#" class="text-decoration-none">
+                            <i class="fas fa-book me-1"></i>Documentazione
+                        </a>
+                    </div>
+                    <p class="mb-0"><small>Energia sostenibile per tutti</small></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+        
+        // Add active class to current page nav items
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            
+            navLinks.forEach(function(link) {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,133 +1,195 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
+{% block title %}CerCollettiva - Gestione Comunità Energetiche Rinnovabili{% endblock %}
+
+{% block meta_description %}CerCollettiva è la piattaforma open source per la gestione delle Comunità Energetiche Rinnovabili. Facilita la collaborazione e la condivisione di energia sostenibile.{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <!-- Hero Section -->
-    <div class="text-center p-5 rounded shadow-sm border border-secondary bg-dark">
-        <h1 class="display-4 mb-4">
-            <span class="text-gradient">Benvenuto in CerCollettiva</span>
-            <i class="bi bi-sun-fill text-warning"></i>
-        </h1>
-        
-        <p class="lead mb-4 text-secondary">
-            Il software open source per la gestione delle comunità energetiche
-        </p>
-        
-        <hr class="my-4 border-secondary">
-        
-        <p class="text-secondary mb-4">
-            Facilitiamo la collaborazione e la condivisione di energia rinnovabile 
-            all'interno della tua comunità.
-        </p>
-
-        {% if user.is_authenticated %}
-            <a href="{% url 'core:dashboard' %}" class="btn btn-primary btn-lg">
-                <i class="bi bi-graph-up me-2"></i>Vai alla Dashboard
-            </a>
-        {% else %}
-            <div class="d-flex justify-content-center gap-3">
-                <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Accedi
-                </a>
-                <a href="{% url 'users:register' %}" class="btn btn-outline-primary btn-lg">
-                    <i class="bi bi-person-plus me-2"></i>Registrati
-                </a>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Features Section -->
-    <div class="p-5 rounded shadow-sm border border-secondary bg-dark mt-5">
-        <h2 class="display-5 text-center mb-4">
-            Unisciti alla Rivoluzione Energetica
-        </h2>
-        
-        <p class="text-secondary text-center mb-5">
-            CerCollettiva supporta la gestione delle risorse energetiche condivise,
-            permettendo una visione d'insieme sui consumi, la produzione e la
-            distribuzione di energia rinnovabile all'interno delle comunità.
-        </p>
-
-        <div class="row text-center mt-4 g-4">
-            <!-- Sustainability Card -->
-            <div class="col-md-4">
-                <div class="card h-100 bg-dark border-secondary">
-                    <div class="card-body">
-                        <div class="display-6 mb-3 text-success">
-                            <i class="bi bi-globe-americas"></i>
+    <section class="py-5">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6">
+                <div class="animate-fade-in-up">
+                    <h1 class="display-4 fw-bold mb-4">
+                        <span class="text-gradient">Benvenuto in CerCollettiva</span>
+                        <div class="mt-2">
+                            <i class="fas fa-solar-panel text-warning" style="font-size: 3rem;"></i>
                         </div>
-                        <h5 class="card-title mb-3">Sostenibilità</h5>
-                        <p class="card-text text-secondary">
-                            Aiutiamo le comunità a ridurre le emissioni e a 
-                            raggiungere l'indipendenza energetica.
-                        </p>
-                    </div>
+                    </h1>
+                    
+                    <p class="lead mb-4 text-muted">
+                        La piattaforma open source per la gestione delle 
+                        <strong class="text-energy">Comunità Energetiche Rinnovabili</strong>
+                    </p>
+                    
+                    <p class="mb-5">
+                        Facilitiamo la collaborazione e la condivisione di energia rinnovabile 
+                        all'interno della tua comunità. Un futuro sostenibile inizia oggi.
+                    </p>
+
+                    {% if user.is_authenticated %}
+                        <div class="d-flex flex-column flex-sm-row gap-3">
+                            <a href="{% url 'core:dashboard' %}" class="btn btn-cer-primary btn-lg">
+                                <i class="fas fa-tachometer-alt me-2"></i>Vai alla Dashboard
+                            </a>
+                            <a href="{% url 'core:cer_list' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-users me-2"></i>Le tue CER
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="d-flex flex-column flex-sm-row gap-3">
+                            <a href="{% url 'users:login' %}" class="btn btn-cer-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Accedi
+                            </a>
+                            <a href="{% url 'users:register' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Registrati Gratis
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-
-            <!-- Sharing Card -->
-            <div class="col-md-4">
-                <div class="card h-100 bg-dark border-secondary">
-                    <div class="card-body">
-                        <div class="display-6 mb-3 text-primary">
-                            <i class="bi bi-people-fill"></i>
+            <div class="col-lg-6">
+                <div class="text-center animate-fade-in-up">
+                    <div class="cer-card p-4 text-center">
+                        <div class="bg-gradient-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px;">
+                            <i class="fas fa-leaf text-white" style="font-size: 3rem;"></i>
                         </div>
-                        <h5 class="card-title mb-3">Condivisione</h5>
-                        <p class="card-text text-secondary">
-                            Promuoviamo la collaborazione e la condivisione di 
-                            risorse tra i membri della comunità.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Monitoring Card -->
-            <div class="col-md-4">
-                <div class="card h-100 bg-dark border-secondary">
-                    <div class="card-body">
-                        <div class="display-6 mb-3 text-info">
-                            <i class="bi bi-graph-up"></i>
-                        </div>
-                        <h5 class="card-title mb-3">Monitoraggio</h5>
-                        <p class="card-text text-secondary">
-                            Offriamo strumenti avanzati per monitorare 
-                            produzione e consumo di energia.
+                        <h4 class="mb-3">Energia Sostenibile per Tutti</h4>
+                        <p class="text-muted">
+                            Unisciti alla rivoluzione energetica e contribuisci a un futuro più verde e sostenibile.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Optional: Add some custom styles for the dark theme -->
-<style>
-    .text-gradient {
-        background: linear-gradient(45deg, #3b82f6, #10b981);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .card {
-        transition: transform 0.2s ease-in-out;
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .bg-dark {
-        background-color: #1f2937 !important;
-    }
-    
-    .border-secondary {
-        border-color: #374151 !important;
-    }
-    
-    .text-secondary {
-        color: #9ca3af !important;
-    }
-</style>
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-4">
+                <span class="text-gradient">Funzionalità Principali</span>
+            </h2>
+            <p class="lead text-muted">
+                CerCollettiva supporta la gestione delle risorse energetiche condivise,
+                permettendo una visione d'insieme sui consumi, la produzione e la
+                distribuzione di energia rinnovabile.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Gestione CER -->
+            <div class="col-md-4">
+                <div class="cer-card h-100 text-center p-4">
+                    <div class="bg-gradient-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-users text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Gestione CER</h4>
+                    <p class="text-muted">
+                        Amministra facilmente le Comunità Energetiche Rinnovabili, 
+                        gestisci i membri e monitora le performance energetiche.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Monitoraggio Impianti -->
+            <div class="col-md-4">
+                <div class="cer-card h-100 text-center p-4">
+                    <div class="bg-gradient-green rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-leaf text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Monitoraggio Impianti</h4>
+                    <p class="text-muted">
+                        Tieni sotto controllo la produzione e il consumo di energia 
+                        degli impianti fotovoltaici con dashboard in tempo reale.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- MQTT Integration -->
+            <div class="col-md-4">
+                <div class="cer-card h-100 text-center p-4">
+                    <div class="bg-gradient-solar rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-wifi text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Integrazione IoT</h4>
+                    <p class="text-muted">
+                        Connetti dispositivi IoT tramite protocollo MQTT per 
+                        raccogliere dati energetici in modo automatico e sicuro.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Gestione Documenti -->
+            <div class="col-md-4">
+                <div class="cer-card h-100 text-center p-4">
+                    <div class="bg-gradient-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-file-alt text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Gestione Documenti</h4>
+                    <p class="text-muted">
+                        Elabora automaticamente i documenti GAUDI e gestisci 
+                        tutta la documentazione energetica in modo centralizzato.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Conformità GSE -->
+            <div class="col-md-4">
+                <div class="cer-card h-100 text-center p-4">
+                    <div class="bg-gradient-green rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-shield-alt text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Conformità GSE</h4>
+                    <p class="text-muted">
+                        Rispetta tutti i requisiti normativi e di sicurezza 
+                        per la gestione delle comunità energetiche in Italia.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Open Source -->
+            <div class="col-md-4">
+                <div class="cer-card h-100 text-center p-4">
+                    <div class="bg-gradient-solar rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fab fa-github text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Open Source</h4>
+                    <p class="text-muted">
+                        Codice aperto, trasparente e personalizzabile. 
+                        Contribuisci al futuro dell'energia sostenibile.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="py-5">
+        <div class="cer-card text-center p-5">
+            <div class="cer-card-header mb-4">
+                <h3 class="mb-0 fw-bold">Pronto a Iniziare?</h3>
+            </div>
+            <p class="lead mb-4">
+                Unisciti alla rivoluzione energetica e crea la tua Comunità Energetica Rinnovabile oggi stesso.
+            </p>
+            {% if not user.is_authenticated %}
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    <a href="{% url 'users:register' %}" class="btn btn-cer-primary btn-lg">
+                        <i class="fas fa-rocket me-2"></i>Inizia Gratis
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-book me-2"></i>Scopri di Più
+                    </a>
+                </div>
+            {% else %}
+                <a href="{% url 'core:cer_list' %}" class="btn btn-cer-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>Crea una CER
+                </a>
+            {% endif %}
+        </div>
+    </section>
+</div>
 {% endblock %}
