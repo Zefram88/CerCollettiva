@@ -16,7 +16,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem 1rem;
+        padding: 3rem 2rem;
     }
     
     .setup-card {
@@ -25,18 +25,40 @@
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         border: none;
         border-radius: 15px;
+        margin: 2rem auto;
+    }
+    
+    /* Responsive margins */
+    @media (max-width: 768px) {
+        .setup-container {
+            padding: 2rem 1rem;
+        }
+        
+        .setup-card {
+            margin: 1rem auto;
+        }
+    }
+    
+    @media (min-width: 992px) {
+        .setup-container {
+            padding: 4rem 3rem;
+        }
+        
+        .setup-card {
+            margin: 3rem auto;
+        }
     }
     
     .setup-header {
         background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         border-radius: 15px 15px 0 0 !important;
-        padding: 2rem;
+        padding: 3rem 2.5rem;
         text-align: center;
     }
     
     .setup-logo {
         font-size: 3rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         color: #fff;
     }
     
@@ -50,35 +72,57 @@
     .setup-subtitle {
         color: rgba(255, 255, 255, 0.8);
         font-size: 1rem;
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
     }
     
     .setup-body {
-        padding: 2.5rem;
+        padding: 3rem 2.5rem;
         background: #fff;
     }
     
     .setup-footer {
         background: #f8f9fa;
         border-radius: 0 0 15px 15px;
-        padding: 1.5rem 2.5rem;
+        padding: 2rem 2.5rem;
+    }
+    
+    /* Responsive padding adjustments */
+    @media (max-width: 768px) {
+        .setup-header {
+            padding: 2rem 1.5rem;
+        }
+        
+        .setup-body {
+            padding: 2rem 1.5rem;
+        }
+        
+        .setup-footer {
+            padding: 1.5rem 1.5rem;
+        }
     }
     
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
     
     .form-control {
         border-radius: 8px;
         border: 2px solid #e9ecef;
-        padding: 0.75rem 1rem;
+        padding: 1rem 1.25rem;
         font-size: 1rem;
         transition: all 0.3s ease;
+        min-height: 48px;
     }
     
     .form-control:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .form-label {
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #334155;
     }
     
     .btn-setup {
@@ -106,9 +150,10 @@
     
     .cer-toggle {
         background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin: 1.5rem 0;
+        padding: 2rem 1.75rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        border: 1px solid #e2e8f0;
     }
     
     .form-check-input:checked {
@@ -120,7 +165,19 @@
         border: 0;
         height: 2px;
         background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
-        margin: 2rem 0;
+        margin: 3rem 0;
+    }
+    
+    /* Section titles with more spacing */
+    h5 {
+        margin-bottom: 2rem !important;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    /* Alert with better spacing */
+    .alert-setup {
+        margin-bottom: 2.5rem;
     }
     
     .icon-gradient {
