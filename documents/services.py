@@ -1,6 +1,7 @@
 # documents/services.py
 from .models import Document
 from django.core.files import File
+from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils import timezone
 import pdfkit
@@ -17,8 +18,12 @@ class SystemDocumentService:
         # Genera il contenuto HTML dal template
         html_content = render_to_string(f'documents/system/{document_type}.html', context)
         
-        # Converti HTML in PDF
-        pdf_file = pdfkit.from_string(html_content, False)
+        # Converti HTML in PDF (fallback a HTML se conversione non disponibile)
+        pdf_bytes = None
+        try:
+            pdf_bytes = pdfkit.from_string(html_content, False)
+        except Exception:
+            pdf_bytes = None
         
         # Crea il documento nel sistema
         doc = Document.objects.create(
@@ -35,7 +40,12 @@ class SystemDocumentService:
         filename = f"{document_type}_{plant.id}_{doc.uploaded_at.strftime('%Y%m%d')}.pdf"
         
         # Salva il file e genera checksum
-        doc.file.save(filename, File(open(pdf_file, 'rb')))
+        if pdf_bytes:
+            doc.file.save(filename, ContentFile(pdf_bytes))
+        else:
+            # Fallback: salva l'HTML come file .html
+            html_name = filename.replace('.pdf', '.html')
+            doc.file.save(html_name, ContentFile(html_content.encode('utf-8')))
         doc.generate_checksum()
         
         # Imposta retention date

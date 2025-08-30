@@ -1,27 +1,29 @@
-# energy/mqtt/acl.py
 from typing import Dict, Any
-from ..models import MQTTCredential, Plant
+from ..models import MQTTConfiguration
+
 
 class MQTTAccessControl:
     @staticmethod
     def check_acl(username: str, topic: str, access_type: str) -> bool:
         """
-        Verifica i permessi di accesso per un topic MQTT
+        Verifica i permessi di accesso per un topic MQTT (per-device).
+        Consente l'accesso ai topic che iniziano col template del device.
         access_type: 'subscribe' o 'publish'
         """
         try:
-            cred = MQTTCredential.objects.select_related('user').get(
+            cfg = MQTTConfiguration.objects.select_related('device', 'device__plant').get(
                 mqtt_username=username,
-                is_active=True
+                is_active=True,
             )
-            
-            # Verifica se il topic appartiene a un impianto dell'utente
-            user_plants = Plant.objects.filter(owner=cred.user)
-            for plant in user_plants:
-                if topic.startswith(f"cercollettiva/{plant.pod}/"):
-                    return True
-            
+            base = (cfg.device.mqtt_topic_template or '').split('/status')[0]
+            if base and topic.startswith(base):
+                return True
+
+            # Fallback: consentire se il topic contiene il POD dell'impianto
+            pod = getattr(cfg.device.plant, 'pod_code', None)
+            if pod and pod in topic:
+                return True
+
             return False
-            
-        except MQTTCredential.DoesNotExist:
+        except MQTTConfiguration.DoesNotExist:
             return False
