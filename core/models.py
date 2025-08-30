@@ -128,12 +128,16 @@ class CERDistributionConfiguration(models.Model):
     
     def get_distribution_breakdown(self, total_amount):
         """Calcola la ripartizione dell'importo totale secondo le percentuali configurate"""
+        from decimal import Decimal
+        if isinstance(total_amount, (int, float)):
+            total_amount = Decimal(str(total_amount))
+        
         return {
-            'producers': round(total_amount * (self.producer_percentage / 100), 2),
-            'consumers': round(total_amount * (self.consumer_percentage / 100), 2),
-            'management': round(total_amount * (self.management_percentage / 100), 2),
-            'investment_fund': round(total_amount * (self.investment_fund_percentage / 100), 2),
-            'solidarity_fund': round(total_amount * (self.solidarity_fund_percentage / 100), 2),
+            'producers': round(total_amount * (self.producer_percentage / Decimal('100')), 2),
+            'consumers': round(total_amount * (self.consumer_percentage / Decimal('100')), 2),
+            'management': round(total_amount * (self.management_percentage / Decimal('100')), 2),
+            'investment_fund': round(total_amount * (self.investment_fund_percentage / Decimal('100')), 2),
+            'solidarity_fund': round(total_amount * (self.solidarity_fund_percentage / Decimal('100')), 2),
             'total': total_amount
         }
     
@@ -288,7 +292,7 @@ class GSEIncomeTracking(models.Model):
         """Calcola la ripartizione secondo la configurazione della CER"""
         try:
             distribution_config = self.cer_configuration.distribution_config
-            return distribution_config.get_distribution_breakdown(float(self.net_amount))
+            return distribution_config.get_distribution_breakdown(self.net_amount)
         except CERDistributionConfiguration.DoesNotExist:
             return None
     
