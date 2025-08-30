@@ -18,6 +18,9 @@ urlpatterns = [
     path('api/energy/', include('energy.urls', namespace='energy-api')),  # API URLs sotto /api/energy/
     path('users/', include('users.urls')),
     path('documents/', include('documents.urls')),
+    
+    # Monitoring and health checks
+    path('monitoring/', include('monitoring.urls')),
 
     # Authentication
     path('accounts/login/', lambda request: redirect('users:login')),
