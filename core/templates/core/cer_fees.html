@@ -21,7 +21,7 @@
             <p class="text-muted mb-0">{{ cer.name }}</p>
         </div>
         <div>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bulkFeeModal">
+            <button class="btn btn-cer-primary" data-bs-toggle="modal" data-bs-target="#bulkFeeModal">
                 <i class="fas fa-cog"></i> Imposta Quote Multiple
             </button>
         </div>
@@ -111,7 +111,7 @@
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-cer-primary">
                             <i class="fas fa-search"></i> Filtra
                         </button>
                     </div>
@@ -156,17 +156,14 @@
                                 <small class="text-muted">{{ card.membership.user.username }}</small>
                             </td>
                             <td>
-                                <span class="badge 
-                                    {% if card.membership.member_type == 'CONSUMER' %}bg-info
-                                    {% elif card.membership.member_type == 'PRODUCER' %}bg-success
-                                    {% else %}bg-warning{% endif %}">
+                                <span class="badge-cer badge-cer-{% if card.membership.member_type == 'CONSUMER' %}info{% elif card.membership.member_type == 'PRODUCER' %}success{% else %}warning{% endif %}">
                                     {{ card.membership.get_member_type_display }}
                                 </span>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <span id="amount-{{ card.id }}">€{{ card.fee_amount|floatformat:2 }}</span>
-                                    <button class="btn btn-sm btn-outline-primary ms-2" 
+                                    <button class="btn btn-sm btn-cer-primary ms-2" 
                                             onclick="editAmount({{ card.id }}, {{ card.fee_amount }})">
                                         <i class="fas fa-edit"></i>
                                     </button>
@@ -174,9 +171,9 @@
                             </td>
                             <td>
                                 {% if card.membership_fee_paid %}
-                                    <span class="badge bg-success">✓ Pagata</span>
+                                    <span class="badge-cer badge-cer-success">✓ Pagata</span>
                                 {% else %}
-                                    <span class="badge bg-warning">⏳ In attesa</span>
+                                    <span class="badge-cer badge-cer-warning">⏳ In attesa</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -196,12 +193,12 @@
                             <td>
                                 <div class="btn-group" role="group">
                                     {% if not card.membership_fee_paid %}
-                                    <button class="btn btn-sm btn-success" 
+                                    <button class="btn btn-sm btn-cer-success" 
                                             onclick="markAsPaid({{ card.id }}, '{{ card.card_number }}')">
                                         <i class="fas fa-check"></i> Segna Pagata
                                     </button>
                                     {% else %}
-                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                    <button class="btn btn-sm btn-cer-secondary" disabled>
                                         <i class="fas fa-check-circle"></i> Pagata
                                     </button>
                                     {% endif %}
@@ -287,8 +284,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                <button type="button" class="btn btn-primary" onclick="setBulkFees()">Imposta Quote</button>
+                <button type="button" class="btn btn-cer-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-cer-primary" onclick="setBulkFees()">Imposta Quote</button>
             </div>
         </div>
     </div>

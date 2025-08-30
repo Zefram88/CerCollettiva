@@ -1,4 +1,4 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% block title %}{{ document.get_type_display }}{% endblock %}
 
 {% block content %}
@@ -9,16 +9,16 @@
                 <h5 class="mb-0">{{ document.get_type_display }}</h5>
                 <div class="btn-group">
                     {% if document.file %}
-                    <a href="{{ document.file.url }}" class="btn btn-sm btn-primary" target="_blank">
+                    <a href="{{ document.file.url }}" class="btn btn-sm btn-cer-primary" target="_blank">
                         <i class="fas fa-download me-2"></i>Scarica
                     </a>
                     {% endif %}
                     {% if document.plant %}
-                    <a href="{% url 'core:plant_detail' document.plant.pk %}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{% url 'core:plant_detail' document.plant.pk %}" class="btn btn-sm btn-cer-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Torna all'impianto
                     </a>
                     {% else %}
-                    <a href="{% url 'documents:list' %}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{% url 'documents:list' %}" class="btn btn-sm btn-cer-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Torna alla lista
                     </a>
                     {% endif %}
@@ -37,7 +37,7 @@
                             
                             <dt class="col-sm-4">Classificazione</dt>
                             <dd class="col-sm-8">
-                                <span class="badge bg-{% if document.data_classification == 'PUBLIC' %}success{% elif document.data_classification == 'INTERNAL' %}info{% elif document.data_classification == 'CONFIDENTIAL' %}warning{% else %}danger{% endif %}">
+                                <span class="badge-cer badge-cer-{% if document.data_classification == 'PUBLIC' %}success{% elif document.data_classification == 'INTERNAL' %}info{% elif document.data_classification == 'CONFIDENTIAL' %}warning{% else %}danger{% endif %}">
                                     {{ document.get_data_classification_display }}
                                 </span>
                             </dd>
@@ -54,7 +54,7 @@
                                 {% if document.retention_date %}
                                     {{ document.retention_date|date:"d/m/Y" }}
                                     {% if document.is_expired %}
-                                        <span class="badge bg-danger">Scaduto</span>
+                                        <span class="badge-cer badge-cer-danger">Scaduto</span>
                                     {% endif %}
                                 {% else %}
                                     -
@@ -108,18 +108,18 @@
                     <dt class="col-sm-4">Crittografia</dt>
                     <dd class="col-sm-8">
                         {% if document.encryption_status %}
-                            <span class="badge bg-success">Attiva</span>
+                            <span class="badge-cer badge-cer-success">Attiva</span>
                         {% else %}
-                            <span class="badge bg-warning">Non attiva</span>
+                            <span class="badge-cer badge-cer-warning">Non attiva</span>
                         {% endif %}
                     </dd>
                     
                     <dt class="col-sm-4">GDPR</dt>
                     <dd class="col-sm-8">
                         {% if document.gdpr_consent %}
-                            <span class="badge bg-success">Consenso ottenuto</span>
+                            <span class="badge-cer badge-cer-success">Consenso ottenuto</span>
                         {% else %}
-                            <span class="badge bg-danger">Consenso non presente</span>
+                            <span class="badge-cer badge-cer-danger">Consenso non presente</span>
                         {% endif %}
                     </dd>
                 </dl>

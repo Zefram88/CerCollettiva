@@ -15,7 +15,7 @@
        <!-- Main Column -->
        <div class="col-md-8">
            <!-- Profile Card -->
-           <div class="card data-card mb-4">
+           <div class="card cer-card mb-4">
                <div class="card-header d-flex justify-content-between align-items-center">
                    <h5 class="mb-0">
                        {% if user.is_business %}Profilo Aziendale
@@ -76,7 +76,7 @@
            </div>
 
            <!-- Edit Form -->
-           <div class="card data-card mb-4">
+           <div class="card cer-card mb-4">
                <div class="card-header">
                    <h5 class="mb-0">Modifica Dati</h5>
                </div>
@@ -130,7 +130,7 @@
        <!-- Sidebar -->
        <div class="col-md-4">
            <!-- Account Status -->
-           <div class="card data-card mb-4">
+           <div class="card cer-card mb-4">
                <div class="card-header">
                    <h5 class="mb-0">Stato Account</h5>
                </div>
@@ -145,7 +145,7 @@
            </div>
 
            <!-- Privacy -->
-           <div class="card data-card mb-4">
+           <div class="card cer-card mb-4">
                <div class="card-header">
                    <h5 class="mb-0">Privacy e GDPR</h5>
                </div>
@@ -166,7 +166,7 @@
            </div>
 
            <!-- Activity -->
-           <div class="card data-card">
+           <div class="card cer-card">
                <div class="card-header">
                    <h5 class="mb-0">Attività</h5>
                </div>
@@ -187,12 +187,12 @@
 
 {% block extra_css %}
 <style>
-.data-card {
+.cer-card {
    transition: transform 0.2s ease;
    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.data-card:hover {
+.cer-card:hover {
    transform: translateY(-2px);
 }
 

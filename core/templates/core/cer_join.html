@@ -30,8 +30,8 @@
             {% csrf_token %}
             {{ form|crispy }}
             <div class="text-end mt-3">
-                <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-secondary">Annulla</a>
-                <button type="submit" class="btn btn-primary">Invia Richiesta</button>
+                <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-cer-secondary">Annulla</a>
+                <button type="submit" class="btn btn-cer-primary">Invia Richiesta</button>
             </div>
         </form>
     </div>
