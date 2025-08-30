@@ -93,6 +93,11 @@ install_dependencies() {
     if [ -f "app/requirements.txt" ]; then
         pip install -r app/requirements.txt
     fi
+
+    # Se esiste requirements.txt nella root, installalo
+    if [ -f "requirements.txt" ]; then
+        pip install -r requirements.txt
+    fi
 }
 
 # Setup database SQLite per sviluppo
