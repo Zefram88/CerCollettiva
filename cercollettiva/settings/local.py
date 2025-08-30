@@ -63,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Setup middleware - deve essere dopo AuthenticationMiddleware
+    'core.middleware.FirstInstallationMiddleware',
 ]
 
 # Configurazione database - usa SQLite per sviluppo rapido

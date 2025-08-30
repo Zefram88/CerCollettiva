@@ -2,6 +2,27 @@
 
 ## Problemi Segnalati dagli Utenti e Soluzioni
 
+### 0. Setup Iniziale Automatico (NUOVO!)
+
+**Novità**: CerCollettiva ora include un sistema di setup automatico!
+
+**Come funziona**:
+1. Al primo accesso, se non esiste alcun superuser, il sistema reindirizza automaticamente alla pagina di setup
+2. Il form di setup permette di creare:
+   - Il primo account amministratore
+   - Una CER di esempio (opzionale)
+   - Configurazione iniziale del sistema
+
+**Accesso al setup**:
+- URL diretto: `http://localhost:8000/setup/`
+- Redirect automatico dalla homepage se non ci sono admin
+
+**Vantaggi**:
+- ✅ Niente più errori "utente non esiste" 
+- ✅ Setup guidato con interfaccia user-friendly
+- ✅ Creazione automatica CER demo per test
+- ✅ Login automatico dopo la creazione
+
 ### 1. Errore "CSRF verification failed" nei Form
 
 **Problema**: 
@@ -94,7 +115,7 @@ L'interfaccia admin è **volutamente** configurata su `/ceradmin/` per maggiore 
 
 ### 5. Problemi di Installazione - Setup Completo
 
-**Script di Setup Rapido**:
+**Script di Setup Rapido (AGGIORNATO)**:
 ```bash
 #!/bin/bash
 # File: quick_setup.sh
@@ -150,15 +171,18 @@ DJANGO_SETTINGS_MODULE=cercollettiva.settings.local python manage.py migrate
 echo "Raccolta file statici..."
 DJANGO_SETTINGS_MODULE=cercollettiva.settings.local python manage.py collectstatic --noinput
 
-# 11. Crea superuser (interattivo)
-echo "Creazione superuser..."
-DJANGO_SETTINGS_MODULE=cercollettiva.settings.local python manage.py createsuperuser
+# 11. NUOVO: Non serve più creare manualmente il superuser!
+echo "=== SETUP AUTOMATICO ABILITATO ==="
+echo "Il superuser verrà creato automaticamente al primo accesso!"
 
 echo ""
 echo "=== SETUP COMPLETATO ==="
 echo ""
 echo "Per avviare il server:"
 echo "DJANGO_SETTINGS_MODULE=cercollettiva.settings.local python manage.py runserver"
+echo ""
+echo "🚀 NUOVO: Vai su http://localhost:8000/ per il setup automatico!"
+echo "   Il sistema ti guiderà nella creazione dell'amministratore"
 echo ""
 echo "Admin panel disponibile su: http://localhost:8000/ceradmin/"
 echo ""

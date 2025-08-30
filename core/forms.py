@@ -2,7 +2,261 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm
 from .models import CERConfiguration, CERMembership, Plant, PlantDocument
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit, Row, Column, Field, HTML, Div
+from crispy_forms.bootstrap import FormActions
+
+User = get_user_model()
+
+
+class InitialSuperUserForm(UserCreationForm):
+    """
+    Form per creare il primo superuser durante il setup iniziale
+    """
+    username = forms.CharField(
+        label="Nome utente",
+        max_length=150,
+        help_text="Username per l'accesso amministrativo",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'admin',
+            'class': 'form-control'
+        })
+    )
+    
+    first_name = forms.CharField(
+        label="Nome",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Mario',
+            'class': 'form-control'
+        })
+    )
+    
+    last_name = forms.CharField(
+        label="Cognome",
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Rossi',
+            'class': 'form-control'
+        })
+    )
+    
+    email = forms.EmailField(
+        label="Email",
+        required=True,
+        help_text="Email per recupero password e notifiche",
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'admin@example.com',
+            'class': 'form-control'
+        })
+    )
+    
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Password sicura',
+            'class': 'form-control'
+        }),
+        help_text="La password deve essere lunga almeno 8 caratteri"
+    )
+    
+    password2 = forms.CharField(
+        label="Conferma password",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Ripeti la password',
+            'class': 'form-control'
+        })
+    )
+    
+    # Campo per il nome della CER iniziale
+    cer_name = forms.CharField(
+        label="Nome CER",
+        max_length=255,
+        required=True,
+        help_text="Nome della Comunità Energetica Rinnovabile",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'CER Demo',
+            'class': 'form-control'
+        })
+    )
+    
+    cer_code = forms.CharField(
+        label="Codice CER",
+        max_length=50,
+        required=True,
+        help_text="Codice identificativo della CER",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'CER001',
+            'class': 'form-control'
+        })
+    )
+    
+    create_demo_cer = forms.BooleanField(
+        label="Crea CER di esempio",
+        required=False,
+        initial=True,
+        help_text="Crea automaticamente una CER di esempio per iniziare",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'needs-validation'
+        self.helper.attrs = {'novalidate': ''}
+        
+        self.helper.layout = Layout(
+            HTML("""
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-shield me-2"></i>
+                            Setup Iniziale - Amministratore Sistema
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Benvenuto! Per iniziare a usare CerCollettiva, crea il primo account amministratore.
+                        </div>
+            """),
+            Row(
+                Column(Field('username'), css_class='col-md-6'),
+                Column(Field('email'), css_class='col-md-6'),
+            ),
+            Row(
+                Column(Field('first_name'), css_class='col-md-6'),
+                Column(Field('last_name'), css_class='col-md-6'),
+            ),
+            Row(
+                Column(Field('password1'), css_class='col-md-6'),
+                Column(Field('password2'), css_class='col-md-6'),
+            ),
+            HTML("""
+                        <hr class="my-4">
+                        <h5><i class="fas fa-solar-panel me-2"></i>Configurazione CER Iniziale</h5>
+            """),
+            Field('create_demo_cer'),
+            Div(
+                Row(
+                    Column(Field('cer_name'), css_class='col-md-6'),
+                    Column(Field('cer_code'), css_class='col-md-6'),
+                ),
+                css_id='cer-fields',
+                css_class='mt-3'
+            ),
+            HTML("""
+                    </div>
+                    <div class="card-footer">
+            """),
+            FormActions(
+                Submit(
+                    'submit', 
+                    'Crea Amministratore e Avvia Sistema',
+                    css_class='btn btn-primary btn-lg w-100'
+                )
+            ),
+            HTML("""
+                    </div>
+                </div>
+                
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const createCerCheckbox = document.getElementById('id_create_demo_cer');
+                    const cerFields = document.getElementById('cer-fields');
+                    
+                    function toggleCerFields() {
+                        if (createCerCheckbox.checked) {
+                            cerFields.style.display = 'block';
+                        } else {
+                            cerFields.style.display = 'none';
+                        }
+                    }
+                    
+                    createCerCheckbox.addEventListener('change', toggleCerFields);
+                    toggleCerFields(); // Inizializza lo stato
+                });
+                </script>
+            """)
+        )
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Un utente con questa email esiste già.")
+        return email
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("Un utente con questo nome utente esiste già.")
+        return username
+    
+    def clean_cer_code(self):
+        """Valida il codice CER solo se la creazione CER è abilitata"""
+        cer_code = self.cleaned_data.get('cer_code')
+        create_demo_cer = self.cleaned_data.get('create_demo_cer')
+        
+        if create_demo_cer and cer_code:
+            if CERConfiguration.objects.filter(code=cer_code).exists():
+                raise ValidationError("Una CER con questo codice esiste già.")
+        
+        return cer_code
+    
+    def save(self, commit=True):
+        """Salva l'utente e crea la CER se richiesto"""
+        user = super().save(commit=False)
+        
+        # Imposta come superuser e staff
+        user.is_superuser = True
+        user.is_staff = True
+        user.is_active = True
+        
+        # Imposta i campi del CustomUser
+        user.legal_type = 'PRIVATE'
+        user.profit_type = 'NON_PROFIT'
+        
+        if commit:
+            user.save()
+            
+            # Crea CER demo se richiesto
+            if self.cleaned_data.get('create_demo_cer'):
+                cer_name = self.cleaned_data.get('cer_name')
+                cer_code = self.cleaned_data.get('cer_code')
+                
+                if cer_name and cer_code:
+                    cer = CERConfiguration.objects.create(
+                        name=cer_name,
+                        code=cer_code,
+                        primary_substation="Substation Demo",
+                        is_active=True,
+                        description=f"CER di esempio creata durante il setup iniziale"
+                    )
+                    
+                    # Crea membership per l'admin
+                    CERMembership.objects.create(
+                        user=user,
+                        cer_configuration=cer,
+                        role='ADMIN',
+                        is_active=True,
+                        document_verified=True,
+                        document_verified_by=user
+                    )
+        
+        return user
+
 
 class PlantDocumentForm(forms.ModelForm):
     class Meta:

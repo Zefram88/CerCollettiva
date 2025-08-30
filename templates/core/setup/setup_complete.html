@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Setup Completato - CerCollettiva{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h3>Setup Completato con Successo!</h3>
+                </div>
+                <div class="card-body p-5 text-center">
+                    <h4 class="text-success mb-4">
+                        Benvenuto in CerCollettiva, {{ user.first_name }}!
+                    </h4>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Il sistema è ora configurato e pronto per l'uso.
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <i class="fas fa-cog fa-2x text-primary mb-3"></i>
+                                    <h5>Pannello Admin</h5>
+                                    <p>Gestisci utenti, CER e impianti</p>
+                                    <a href="/ceradmin/" class="btn btn-primary">
+                                        Accedi Admin
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <i class="fas fa-tachometer-alt fa-2x text-success mb-3"></i>
+                                    <h5>Dashboard</h5>
+                                    <p>Visualizza statistiche e dati</p>
+                                    <a href="{% url 'core:dashboard' %}" class="btn btn-success">
+                                        Vai alla Dashboard
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

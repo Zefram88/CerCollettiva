@@ -5,6 +5,7 @@ from .views.gaudi import PlantCreateFromGaudiView
 from .views.dashboard import HomeView, DashboardView, CerDashboardView
 from .views.cer import CERListView, CERDetailView, CERJoinView, MembershipCardView, MemberRegistryView
 from .views.fees import CERFeesManagementView, MembershipFeeDetailView, set_membership_fee, mark_fee_paid, bulk_set_fees
+from .views.setup import InitialSetupView, setup_complete_view, setup_check_view
 from .views.plant import (
     PlantListView,
     PlantDetailView,
@@ -30,6 +31,11 @@ from .views.api import (
 app_name = 'core'
 
 urlpatterns = [
+    # Setup iniziale
+    path('setup/', InitialSetupView.as_view(), name='initial_setup'),
+    path('setup/complete/', setup_complete_view, name='setup_complete'),
+    path('setup/check/', setup_check_view, name='setup_check'),
+    
     # Home e Dashboard
     path('', HomeView.as_view(), name='home'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
