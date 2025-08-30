@@ -11,10 +11,10 @@
     }
     
     .membership-card {
-        background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+        background: var(--energy-gradient);
         border: none;
-        border-radius: 1.5rem;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        border-radius: var(--cer-border-radius);
+        box-shadow: var(--cer-shadow-xl);
         overflow: hidden;
         position: relative;
         transition: transform 0.3s ease;
@@ -47,8 +47,8 @@
     }
     
     .card-body-modern {
-        background: rgba(255,255,255,0.95);
-        color: #2d3748;
+        background: var(--cer-white);
+        color: var(--cer-gray-800);
         padding: 2rem;
         position: relative;
     }
@@ -87,7 +87,7 @@
     }
     
     .info-label {
-        color: #667eea;
+        color: var(--cer-primary);
         font-weight: 600;
         font-size: 0.85rem;
         text-transform: uppercase;
@@ -96,7 +96,7 @@
     }
     
     .info-value {
-        color: #2d3748;
+        color: var(--cer-gray-800);
         font-weight: 500;
         font-size: 1rem;
     }

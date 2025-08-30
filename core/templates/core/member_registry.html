@@ -21,10 +21,10 @@
             <p class="text-muted mb-0">{{ cer.name }} - Totale membri: {{ total_members }}</p>
         </div>
         <div>
-            <button class="btn btn-success" onclick="exportRegistry('excel')">
+            <button class="btn btn-cer-success" onclick="exportRegistry('excel')">
                 <i class="fas fa-file-excel"></i> Esporta Excel
             </button>
-            <button class="btn btn-danger ms-2" onclick="exportRegistry('pdf')">
+            <button class="btn btn-cer-danger ms-2" onclick="exportRegistry('pdf')">
                 <i class="fas fa-file-pdf"></i> Esporta PDF
             </button>
         </div>
@@ -90,7 +90,7 @@
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-cer-primary">
                             <i class="fas fa-search"></i> Filtra
                         </button>
                     </div>
@@ -181,13 +181,13 @@
                                 <div class="btn-group" role="group">
                                     {% if entry.membership.card %}
                                     <a href="{% url 'core:membership_card' cer_pk=cer.pk %}" 
-                                       class="btn btn-sm btn-outline-primary" 
+                                       class="btn btn-sm btn-cer-outline-primary" 
                                        title="Vedi Tessera">
                                         <i class="fas fa-id-card"></i>
                                     </a>
                                     {% endif %}
                                     <a href="{% url 'users:user_detail' entry.membership.user.pk %}" 
-                                       class="btn btn-sm btn-outline-info" 
+                                       class="btn btn-sm btn-cer-secondary" 
                                        title="Dettagli Utente">
                                         <i class="fas fa-user"></i>
                                     </a>
