@@ -6,6 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CerCollettiva is a Django-based Energy Community Management System (Comunità Energetica Rinnovabile - CER) with IoT device integration via MQTT. The system manages renewable energy communities, energy plants, IoT devices, and document processing including GAUDI (Italian grid integration) documents.
 
+## Project Structure
+
+```
+CerCollettiva/
+├── cercollettiva/       # Django project settings and configuration
+├── core/                # Main CER management application
+├── energy/              # IoT devices and energy measurements
+├── documents/           # Document management with GAUDI processor
+├── users/               # User authentication and profiles
+├── templates/           # Django templates
+├── static/              # Static files (CSS, JS, images)
+├── media/               # User uploaded files
+├── scripts/             # Server management scripts
+├── utilities/           # Python utilities
+├── docs/                # Documentation
+│   └── install/         # Installation scripts
+├── venv/                # Python virtual environment
+├── manage.py            # Django management script
+└── .env                 # Environment configuration
+
+```
+
+Note: The old `app/` directory structure has been flattened to the project root for simpler management.
+
 ## Development Commands
 
 ### Virtual Environment and Dependencies
@@ -228,8 +252,10 @@ pip install Django==5.0 psycopg2-binary python-dotenv
 pip install djangorestframework channels django-crispy-forms crispy-bootstrap5
 pip install django-widget-tweaks django-filter django-extensions paho-mqtt
 
-# Install all dependencies
-pip install -r app/requirements.txt
+# Install all dependencies (if requirements.txt exists)
+if [ -f "app/requirements.txt" ]; then
+    pip install -r app/requirements.txt
+fi
 
 # Run migrations
 python manage.py migrate

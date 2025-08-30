@@ -28,6 +28,8 @@ db.sqlite3-journal
 app/access_logs.log
 app/logs/
 logs/
+access_logs.log
+strutturamentale.txt
 
 # Media files
 media/

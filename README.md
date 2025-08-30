@@ -25,19 +25,137 @@ CerCollettiva è un software open source progettato per semplificare la creazion
 
 ## Tecnologie utilizzate
 
-- Linguaggio di programmazione: Python
-- Framework: Django
-- Database: MySQL o PostgreSQL
-- Broker MQTT: Mosquitto
+- **Linguaggio**: Python 3.11+
+- **Framework**: Django 5.0
+- **Database**: PostgreSQL (produzione) / SQLite (sviluppo)
+- **Broker MQTT**: Mosquitto per IoT
+- **WebSocket**: Django Channels
+- **Cache**: Redis
+- **Frontend**: Bootstrap 5, Chart.js
+
+## Requisiti di sistema
+
+- Python 3.11 o superiore
+- PostgreSQL 14+ (per produzione)
+- Redis (opzionale, per cache e WebSocket)
+- Mosquitto MQTT broker (opzionale, per dispositivi IoT)
 
 ## Installazione
 
-Le istruzioni per l'installazione e la configurazione del software saranno disponibili a breve nella documentazione del progetto.
+### Sviluppo locale (Quick Start)
+
+```bash
+# Clona il repository
+git clone https://github.com/atomozero/CerCollettiva.git
+cd CerCollettiva
+
+# Esegui lo script di installazione per sviluppo
+chmod +x install_dev.sh
+./install_dev.sh
+
+# Avvia il server di sviluppo
+./runserver.sh
+```
+
+Accedi a:
+- Applicazione: http://127.0.0.1:8000/
+- Admin: http://127.0.0.1:8000/ceradmin/
+
+### Installazione in produzione
+
+Per l'installazione in ambiente di produzione con Nginx, Gunicorn e PostgreSQL:
+
+```bash
+cd docs/install
+chmod +x install_updated.sh
+./install_updated.sh
+```
+
+Lo script guiderà attraverso la configurazione di:
+- Database PostgreSQL
+- Server web Nginx
+- WSGI server Gunicorn
+- SSL/HTTPS con Certbot
+- Firewall e sicurezza
+
+### Installazione manuale
+
+Se preferisci installare manualmente:
+
+```bash
+# Crea ambiente virtuale
+python3 -m venv venv
+source venv/bin/activate
+
+# Installa dipendenze
+pip install -r app/requirements.txt
+
+# Configura il database
+python manage.py migrate
+
+# Crea superuser
+python manage.py createsuperuser
+
+# Avvia il server
+python manage.py runserver
+```
+
+## Struttura del progetto
+
+```
+CerCollettiva/
+├── cercollettiva/       # Configurazioni Django principali
+├── core/                # App principale CER management
+├── energy/              # Gestione dispositivi IoT e misure energetiche
+├── documents/           # Gestione documenti e GAUDI
+├── users/               # Autenticazione e profili utente
+├── templates/           # Template HTML
+├── static/              # File statici (CSS, JS, immagini)
+├── media/               # File caricati dagli utenti
+├── scripts/             # Script di gestione server
+├── utilities/           # Utility Python
+├── docs/                # Documentazione
+│   └── install/         # Script di installazione
+├── venv/                # Ambiente virtuale Python
+├── manage.py            # Django management script
+└── .env                 # Configurazione ambiente (non versionato)
+```
+
+## Documentazione
+
+- [CLAUDE.md](CLAUDE.md) - Guida per lo sviluppo con Claude AI
+- [CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md) - Codice di condotta
+- [LICENSE](LICENSE) - Licenza MIT
+
+## Script di utilità
+
+Dopo l'installazione, sono disponibili diversi script di utilità:
+
+- `./runserver.sh` - Avvia il server di sviluppo
+- `./migrate.sh` - Esegui le migrazioni del database
+- `./shell.sh` - Apri shell Django interattiva
+- `scripts/logs.sh` - Visualizza i log
+- `scripts/restart.sh` - Riavvia i servizi (produzione)
 
 ## Contributi
 
-CerCollettiva è un progetto open source e accetta contributi da parte della community. Se vuoi contribuire, puoi farlo segnalando bug, proponendo miglioramenti o aggiungendo nuove funzionalità. Puoi trovare il codice sorgente del progetto su GitHub.
+CerCollettiva è un progetto open source e accetta contributi da parte della community. Se vuoi contribuire:
+
+1. Fork il repository
+2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit le tue modifiche (`git commit -m 'Add some AmazingFeature'`)
+4. Push al branch (`git push origin feature/AmazingFeature`)
+5. Apri una Pull Request
+
+Prima di contribuire, leggi il [Codice di Condotta](docs/CODE_OF_CONDUCT.md).
+
+## Supporto
+
+Per problemi o domande:
+- Apri una [Issue su GitHub](https://github.com/atomozero/CerCollettiva/issues)
+- Consulta la [documentazione](docs/)
+- Contatta il team di sviluppo
 
 ## Licenza
 
-CerCollettiva è rilasciato sotto licenza MIT.
+CerCollettiva è rilasciato sotto licenza MIT. Vedi il file [LICENSE](LICENSE) per i dettagli.
