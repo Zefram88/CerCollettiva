@@ -27,10 +27,8 @@ ALLOWED_HOSTS = [
 hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
 ALLOWED_HOSTS.extend([ip for ip in ips])
 
-# Apps installate (senza debug_toolbar)
+# Apps installate
 INSTALLED_APPS = [
-    'users.apps.UsersConfig',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,7 +46,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     # Local apps
-    #'users.apps.UsersConfig',
+    'users.apps.UsersConfig',
     'core.apps.CoreConfig',
     'energy.apps.EnergyConfig',
     'documents.apps.DocumentsConfig',

@@ -3,6 +3,7 @@
 *.log.*
 *.pot
 *.pyc
+*.pyo
 *.py[cod]
 *$py.class
 *.so

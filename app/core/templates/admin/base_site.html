@@ -1,9 +1,0 @@
-
-{% extends "admin/base.html" %}
-
-{% block usertools %}
-    {{ block.super }}
-    {% if request.user.is_staff %}
-        <a href="{% url 'admin_dashboard' %}" class="viewsitelink">Dashboard</a>
-    {% endif %}
-{% endblock %}
