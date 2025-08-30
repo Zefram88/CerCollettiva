@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-4">
    <!-- Breadcrumb -->
-   <nav aria-label="breadcrumb" class="mb-4">
+   <nav class="cer-breadcrumb" aria-label="breadcrumb">
        <ol class="breadcrumb">
            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
            <li class="breadcrumb-item active">{% if form.instance.pk %}Modifica{% else %}Inserisci nuovo{% endif %} impianto</li>
@@ -14,14 +14,14 @@
 
    <div class="row">
        <div class="col-md-8">
-           <div class="card shadow-sm">
-               <div class="card-header d-flex justify-content-between align-items-center">
+           <div class="cer-card">
+               <div class="cer-card-header d-flex justify-content-between align-items-center">
                    <h5 class="mb-0">{{ title|default:"Impianto" }}</h5>
                    <div>
-                       <a href="{% url 'core:plant_new_from_gaudi' %}" class="btn btn-sm btn-success">
+                       <a href="{% url 'core:plant_new_from_gaudi' %}" class="btn btn-sm btn-cer-success">
                            <i class="fas fa-file-upload"></i> {% trans "Da Gaudì" %}
                        </a>
-                       <span class="badge bg-primary ms-2">
+                       <span class="badge-cer badge-cer-primary ms-2">
                            {% if form.instance.pk %}Modifica{% else %}Nuovo{% endif %}
                        </span>
                    </div>
@@ -29,7 +29,7 @@
 
                <div class="card-body">
                    {% if form.errors %}
-                       <div class="alert alert-danger">
+                       <div class="alert alert-danger alert-cer">
                            <i class="bi bi-exclamation-circle me-2"></i>Controlla i campi evidenziati.
                            <ul class="mt-2 mb-0">
                            {% for field in form %}
@@ -43,7 +43,7 @@
 
                    {% if messages %}
                        {% for message in messages %}
-                       <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                       <div class="alert alert-{{ message.tags }} alert-cer alert-dismissible fade show">
                            {{ message }}
                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                        </div>
@@ -52,7 +52,7 @@
 
                    <!-- Form Debug Info -->
                    {% if debug %}
-                   <div class="alert alert-info">
+                   <div class="alert alert-info alert-cer">
                        <h6>Debug Info:</h6>
                        <pre>{{ form.fields }}</pre>
                    </div>
@@ -120,10 +120,10 @@
                        </div>
 
                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                           <a href="{% url 'core:plant_list' %}" class="btn btn-light me-2">
+                           <a href="{% url 'core:plant_list' %}" class="btn btn-cer-secondary me-2">
                                <i class="bi bi-x-lg"></i> Annulla
                            </a>
-                           <button type="submit" class="btn btn-primary">
+                           <button type="submit" class="btn btn-cer-primary">
                                <i class="bi bi-save"></i> 
                                {% if form.instance.pk %}Aggiorna{% else %}Crea{% endif %}
                            </button>
@@ -134,8 +134,8 @@
        </div>
 
        <div class="col-md-4">
-           <div class="card shadow-sm mb-4">
-               <div class="card-header">
+           <div class="cer-card mb-4">
+               <div class="cer-card-header">
                    <h5 class="mb-0">Informazioni</h5>
                </div>
                <div class="card-body">

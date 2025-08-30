@@ -46,7 +46,7 @@ canvas {
 {% block content %}
 <div class="container mt-4">
     <!-- Header con breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+    <nav class="cer-breadcrumb" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
             <li class="breadcrumb-item active">{{ plant.name }}</li>
@@ -57,8 +57,8 @@ canvas {
         <!-- Colonna principale -->
         <div class="col-md-8">
             <!-- Card Stato Attuale -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header">
+            <div class="cer-card mb-4">
+                <div class="cer-card-header">
                     <h5 class="mb-0">Stato Attuale</h5>
                 </div>
                 <div class="card-body">
@@ -78,17 +78,17 @@ canvas {
             </div>
 
             <!-- Card Grafico -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="cer-card mb-4">
+                <div class="cer-card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Andamento Potenza</h5>
                     <div class="d-flex align-items-center">
                         <div class="btn-group btn-group-sm me-3">
-                            <button type="button" class="btn btn-outline-primary" data-range="5m">5m</button>
-                            <button type="button" class="btn btn-outline-primary" data-range="1h">1h</button>
-                            <button type="button" class="btn btn-outline-primary active" data-range="24h">24h</button>
-                            <button type="button" class="btn btn-outline-primary" data-range="48h">48h</button>
+                            <button type="button" class="btn btn-cer-outline-primary" data-range="5m">5m</button>
+                            <button type="button" class="btn btn-cer-outline-primary" data-range="1h">1h</button>
+                            <button type="button" class="btn btn-cer-outline-primary active" data-range="24h">24h</button>
+                            <button type="button" class="btn btn-cer-outline-primary" data-range="48h">48h</button>
                         </div>
-                        <button id="downloadData" class="btn btn-sm btn-outline-secondary">
+                        <button id="downloadData" class="btn btn-sm btn-cer-outline-primary">
                             <i class="fas fa-download"></i>
                         </button>
                     </div>
@@ -101,7 +101,7 @@ canvas {
                         <div class="chart-error">
                             <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
                             <p>Si è verificato un errore nel caricamento dei dati</p>
-                            <button class="btn btn-sm btn-primary retry-btn">Riprova</button>
+                            <button class="btn btn-sm btn-cer-primary retry-btn">Riprova</button>
                         </div>
                         <canvas id="powerChart"></canvas>
                     </div>
@@ -114,8 +114,8 @@ canvas {
             </div>
 
             <!-- Card Statistiche -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header">
+            <div class="cer-card mb-4">
+                <div class="cer-card-header">
                     <h5 class="mb-0">Energia Oraria</h5>
                 </div>
                 <div class="card-body">
@@ -129,11 +129,11 @@ canvas {
         <!-- Colonna laterale -->
         <div class="col-md-4">
             <!-- Card Informazioni Impianto -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="cer-card mb-4">
+                <div class="cer-card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Informazioni</h5>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-sm btn-cer-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             Azioni
                         </button>
                         <ul class="dropdown-menu">
@@ -175,7 +175,7 @@ canvas {
                             {% if plant.latitude and plant.longitude %}
                                 <span>{{ plant.latitude|floatformat:6 }}° N</span><br>
                                 <span>{{ plant.longitude|floatformat:6 }}° E</span>
-                                <button class="btn btn-sm btn-outline-secondary mt-2" 
+                                <button class="btn btn-sm btn-cer-outline-primary mt-2" 
                                         onclick="window.open('https://www.google.com/maps?q={{ plant.latitude }},{{ plant.longitude }}')">
                                     <i class="fas fa-map-marker-alt me-1"></i>Visualizza sulla mappa
                                 </button>
@@ -187,7 +187,7 @@ canvas {
                         <dt class="col-sm-4">Attestato Gaudì</dt>
                         <dd class="col-sm-8">
                             {% if plant.gaudi_verified %}
-                                <span class="badge bg-success">
+                                <span class="badge-cer badge-cer-success">
                                     <i class="fas fa-check-circle me-1"></i>Verificato
                                 </span>
                                 {% if plant.gaudi_request_code %}
@@ -211,10 +211,10 @@ canvas {
                                     </small>
                                 {% endif %}
                             {% else %}
-                                <span class="badge bg-warning">
+                                <span class="badge-cer badge-cer-warning">
                                     <i class="fas fa-exclamation-circle me-1"></i>Non verificato
                                 </span>
-                                <button class="btn btn-sm btn-outline-primary mt-2" 
+                                <button class="btn btn-sm btn-cer-outline-primary mt-2" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#gaudiUploadModal">
                                     <i class="fas fa-upload me-1"></i>Carica Attestato
@@ -227,8 +227,8 @@ canvas {
 
             <!-- Card CER (se presente) -->
             {% if plant.cer_configuration %}
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header">
+            <div class="cer-card mb-4">
+                <div class="cer-card-header">
                     <h5 class="mb-0">Comunità Energetica</h5>
                 </div>
                 <div class="card-body">
@@ -248,8 +248,8 @@ canvas {
             {% endif %}
 
             <!-- Card Stato Connessione -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header">
+            <div class="cer-card mb-4">
+                <div class="cer-card-header">
                     <h5 class="mb-0">Stato Connessione</h5>
                 </div>
                 <div class="card-body">
@@ -267,7 +267,7 @@ canvas {
                         <div class="input-group">
                             <input type="text" class="form-control form-control-sm" 
                                    value="{{ device.mqtt_topic_template }}" readonly>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard(this)">
+                            <button class="btn btn-sm btn-cer-outline-primary" onclick="copyToClipboard(this)">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -549,12 +549,12 @@ class PowerChartManager {
             
             const directionEl = document.getElementById('power-direction');
             const isConsumption = data.current_power < 0;
-            directionEl.className = `badge ${isConsumption ? 'bg-warning' : 'bg-success'}`;
+            directionEl.className = `badge-cer ${isConsumption ? 'badge-cer-warning' : 'badge-cer-success'}`;
             directionEl.textContent = isConsumption ? 'Prelievo' : 'Immissione';
         } else {
             document.getElementById('current-power').textContent = '0.00 kW';
             const directionEl = document.getElementById('power-direction');
-            directionEl.className = 'badge bg-secondary';
+            directionEl.className = 'badge-cer badge-cer-secondary';
             directionEl.textContent = 'Dato non disponibile';
             console.warn('Invalid power value received:', data.current_power);
         }
@@ -662,10 +662,10 @@ class PowerChartManager {
             button.addEventListener('click', (e) => {
                 document.querySelectorAll('[data-range]').forEach(btn => {
                     btn.classList.remove('active', 'btn-primary');
-                    btn.classList.add('btn-outline-primary');
+                    btn.classList.add('btn-cer-outline-primary');
                 });
-                e.target.classList.remove('btn-outline-primary');
-                e.target.classList.add('active', 'btn-primary');
+                e.target.classList.remove('btn-cer-outline-primary');
+                e.target.classList.add('active', 'btn-cer-primary');
                 
                 this.selectedRange = e.target.dataset.range;
                 this.updateData();

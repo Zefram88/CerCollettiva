@@ -1,4 +1,4 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% block title %}Documenti{% endblock %}
 
 {% block content %}
@@ -14,10 +14,10 @@
             </div>
             {% if plant %}
             <div>
-                <a href="{% url 'core:plant_detail' plant.pk %}" class="btn btn-outline-secondary me-2">
+                <a href="{% url 'core:plant_detail' plant.pk %}" class="btn btn-cer-outline-primary me-2">
                     <i class="fas fa-arrow-left me-1"></i>Torna all'impianto
                 </a>
-                <a href="{% url 'documents:upload' plant_id=plant.pk %}" class="btn btn-primary">
+                <a href="{% url 'documents:upload' plant_id=plant.pk %}" class="btn btn-cer-primary">
                     <i class="fas fa-upload me-1"></i>Carica Nuovo
                 </a>
             </div>
@@ -26,7 +26,7 @@
 
         <!-- Documenti in scadenza -->
         {% if expiring_documents %}
-        <div class="alert alert-warning">
+        <div class="alert alert-warning alert-cer">
             <h5 class="alert-heading d-flex align-items-center">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Documenti in scadenza
@@ -46,8 +46,8 @@
 
         <!-- Documenti raggruppati -->
         {% for group_name, docs in document_groups.items %}
-        <div class="card mb-4">
-            <div class="card-header">
+        <div class="cer-card mb-4">
+            <div class="cer-card-header">
                 <h5 class="mb-0">
                     {% if group_name == 'identity' %}
                         <i class="fas fa-id-card me-2"></i>Documenti di Identità
@@ -83,7 +83,7 @@
                                 </td>
                                 <td>{{ doc.get_type_display }}</td>
                                 <td>
-                                    <span class="badge bg-{% if doc.data_classification == 'PUBLIC' %}success{% elif doc.data_classification == 'INTERNAL' %}info{% elif doc.data_classification == 'CONFIDENTIAL' %}warning{% else %}danger{% endif %}">
+                                    <span class="badge-cer {% if doc.data_classification == 'PUBLIC' %}badge-cer-success{% elif doc.data_classification == 'INTERNAL' %}badge-cer-primary{% elif doc.data_classification == 'CONFIDENTIAL' %}badge-cer-warning{% else %}badge-cer-danger{% endif %}">
                                         {{ doc.get_data_classification_display }}
                                     </span>
                                 </td>
@@ -92,7 +92,7 @@
                                     {% if doc.retention_date %}
                                         {{ doc.retention_date|date:"d/m/Y" }}
                                         {% if doc.is_expired %}
-                                            <span class="badge bg-danger">Scaduto</span>
+                                            <span class="badge-cer badge-cer-danger">Scaduto</span>
                                         {% endif %}
                                     {% else %}
                                         -
@@ -100,12 +100,12 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{% url 'documents:detail' doc.pk %}" class="btn btn-sm btn-outline-primary" 
+                                        <a href="{% url 'documents:detail' doc.pk %}" class="btn btn-sm btn-cer-outline-primary" 
                                            data-bs-toggle="tooltip" title="Visualizza dettagli">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         {% if doc.file %}
-                                        <a href="{{ doc.file.url }}" class="btn btn-sm btn-outline-success" 
+                                        <a href="{{ doc.file.url }}" class="btn btn-sm btn-cer-success" 
                                            target="_blank" data-bs-toggle="tooltip" title="Scarica documento"
                                            {% if doc.data_classification == 'CONFIDENTIAL' %}
                                            data-confidential="true"

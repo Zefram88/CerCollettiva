@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h2>Dispositivi</h2>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'energy:device-create' %}" class="btn btn-sm btn-primary">
+        <a href="{% url 'energy:device-create' %}" class="btn btn-sm btn-cer-primary">
             <span data-feather="plus"></span> Nuovo Dispositivo
         </a>
     </div>
@@ -13,7 +13,7 @@
 
 <div class="row">
     <div class="col-12">
-        <div class="card shadow-sm">
+        <div class="cer-card">
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -42,22 +42,22 @@
                                 <td>
                                     {% if device.is_active %}
                                         {% if device.is_online %}
-                                            <span class="badge bg-success">Online</span>
+                                            <span class="badge-cer badge-cer-success">Online</span>
                                         {% else %}
-                                            <span class="badge bg-warning">Offline</span>
+                                            <span class="badge-cer badge-cer-warning">Offline</span>
                                         {% endif %}
                                     {% else %}
-                                        <span class="badge bg-danger">Disattivato</span>
+                                        <span class="badge-cer badge-cer-danger">Disattivato</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ device.last_seen|default:"-" }}</td>
                                 <td>
                                     <a href="{% url 'energy:device-detail' device.id %}" 
-                                       class="btn btn-sm btn-info" 
+                                       class="btn btn-sm btn-cer-primary" 
                                        title="Dettagli">
                                         <span data-feather="eye"></span>
                                     </a>
-                                    <button class="btn btn-sm btn-danger" title="Elimina" 
+                                    <button class="btn btn-sm btn-cer-danger" title="Elimina" 
                                     onclick="confirmDelete('{{ device.id }}', '{{ device.device_id }}')"
                                     {% if not device.is_active %}disabled{% endif %}>
                                 <i data-feather="trash-2"></i>

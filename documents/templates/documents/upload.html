@@ -1,19 +1,19 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
 {% block title %}Carica Documento - {{ plant.name }}{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+<div class="cer-card">
+    <div class="cer-card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Carica Documento per {{ plant.name }}</h5>
-        <a href="{% url 'core:plant_detail' plant.pk %}" class="btn btn-sm btn-outline-secondary">
+        <a href="{% url 'core:plant_detail' plant.pk %}" class="btn btn-sm btn-cer-outline-primary">
             <i class="fas fa-arrow-left"></i> Torna all'impianto
         </a>
     </div>
 
     <div class="card-body">
-        <div class="alert alert-info">
+        <div class="alert alert-info alert-cer">
             <i class="fas fa-info-circle me-2"></i>
             <strong>Informazioni importanti:</strong>
             <ul class="mb-0 mt-2">
@@ -29,10 +29,10 @@
             {{ form|crispy }}
 
             <div class="text-end mt-4">
-                <a href="{% url 'core:plant_detail' plant.pk %}" class="btn btn-secondary me-2">
+                <a href="{% url 'core:plant_detail' plant.pk %}" class="btn btn-cer-secondary me-2">
                     Annulla
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-cer-primary">
                     <i class="fas fa-upload me-2"></i>Carica Documento
                 </button>
             </div>

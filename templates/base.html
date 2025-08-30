@@ -307,6 +307,178 @@
             color: #92400e;
         }
         
+        /* Additional Button Variants */
+        .btn-cer-secondary {
+            background: var(--cer-gray-600);
+            border: none;
+            color: var(--cer-white);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cer-secondary:hover {
+            background: var(--cer-gray-700);
+            transform: translateY(-2px);
+            box-shadow: var(--cer-shadow-lg);
+            color: var(--cer-white);
+        }
+        
+        .btn-cer-success {
+            background: var(--cer-success);
+            border: none;
+            color: var(--cer-white);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cer-success:hover {
+            background: #0d9488;
+            transform: translateY(-2px);
+            box-shadow: var(--cer-shadow-lg);
+            color: var(--cer-white);
+        }
+        
+        .btn-cer-warning {
+            background: var(--cer-warning);
+            border: none;
+            color: var(--cer-white);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cer-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: var(--cer-shadow-lg);
+            color: var(--cer-white);
+        }
+        
+        .btn-cer-danger {
+            background: var(--cer-danger);
+            border: none;
+            color: var(--cer-white);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cer-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: var(--cer-shadow-lg);
+            color: var(--cer-white);
+        }
+        
+        .btn-cer-outline-primary {
+            background: transparent;
+            border: 2px solid var(--cer-primary);
+            color: var(--cer-primary);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--cer-border-radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cer-outline-primary:hover {
+            background: var(--cer-primary);
+            color: var(--cer-white);
+            transform: translateY(-2px);
+            box-shadow: var(--cer-shadow-lg);
+        }
+        
+        /* Legacy Support - Redirect old classes to new ones */
+        .data-card {
+            background: var(--cer-white);
+            border: 1px solid var(--cer-gray-200);
+            border-radius: var(--cer-border-radius);
+            box-shadow: var(--cer-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .data-card:hover {
+            box-shadow: var(--cer-shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        /* Enhanced Form Components */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--cer-gray-700);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Enhanced Badges */
+        .badge-cer {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .badge-cer-primary {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--cer-primary);
+        }
+        
+        .badge-cer-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+        }
+        
+        .badge-cer-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #92400e;
+        }
+        
+        .badge-cer-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+        }
+        
+        /* Enhanced Breadcrumb */
+        .cer-breadcrumb {
+            background: var(--cer-gray-100);
+            border-radius: var(--cer-border-radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cer-breadcrumb .breadcrumb {
+            margin-bottom: 0;
+            background: transparent;
+            padding: 0;
+        }
+        
+        .cer-breadcrumb .breadcrumb-item a {
+            color: var(--cer-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .cer-breadcrumb .breadcrumb-item a:hover {
+            color: var(--cer-primary-dark);
+            text-decoration: underline;
+        }
+        
+        .cer-breadcrumb .breadcrumb-item.active {
+            color: var(--cer-gray-700);
+            font-weight: 600;
+        }
+        
         /* Show navbar by default, hide only when explicitly disabled */
         .cer-navbar {
             display: block;

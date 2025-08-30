@@ -1,10 +1,10 @@
-{% extends 'core/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 <div class="container mt-4">
    <!-- Breadcrumb -->
-   <nav aria-label="breadcrumb" class="mb-4">
+   <nav class="cer-breadcrumb" aria-label="breadcrumb">
        <ol class="breadcrumb">
            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
            <li class="breadcrumb-item active">Profilo</li>
@@ -24,14 +24,14 @@
                        {% elif user.is_church %}Profilo Ente Religioso
                        {% else %}Profilo Utente{% endif %}
                    </h5>
-                   <span class="badge bg-primary">{{ user.get_legal_type_display }}</span>
+                   <span class="badge-cer badge-cer-primary">{{ user.get_legal_type_display }}</span>
                </div>
 
                <div class="card-body">
                    {% if messages %}
                    <div class="messages mb-4">
                        {% for message in messages %}
-                       <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                       <div class="alert alert-{{ message.tags }} alert-cer">{{ message }}</div>
                        {% endfor %}
                    </div>
                    {% endif %}
@@ -116,7 +116,7 @@
                        {% endif %}
                        
                        <div class="col-12 text-end">
-                           <button type="submit" class="btn btn-primary">
+                           <button type="submit" class="btn btn-cer-primary">
                                <i class="fas fa-save me-2"></i>Salva Modifiche
                            </button>
                        </div>
@@ -153,7 +153,7 @@
                    <dl class="mb-0">
                        <dt>Privacy:</dt>
                        <dd>
-                           <span class="badge {% if user.privacy_accepted %}bg-success{% else %}bg-danger{% endif %}">
+                           <span class="badge-cer {% if user.privacy_accepted %}badge-cer-success{% else %}badge-cer-danger{% endif %}">
                                {% if user.privacy_accepted %}Accettata{% else %}Non Accettata{% endif %}
                            </span>
                        </dd>

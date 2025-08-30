@@ -79,7 +79,7 @@
                            </div>
 
                            <div class="d-flex gap-2 flex-wrap">
-                               <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-outline-primary flex-grow-1">
+                               <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-cer-outline-primary flex-grow-1">
                                    <i class="fas fa-info-circle me-2"></i>Dettagli
                                </a>
                                {% if cer not in user_memberships %}
@@ -87,7 +87,7 @@
                                    <i class="fas fa-user-plus me-2"></i>Aderisci
                                </a>
                                {% else %}
-                               <span class="btn btn-success flex-grow-1 disabled">
+                               <span class="btn btn-cer-success flex-grow-1 disabled">
                                    <i class="fas fa-check me-2"></i>Membro
                                </span>
                                {% endif %}

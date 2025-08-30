@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h2>Dashboard Energia</h2>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" id="periodDropdown">
+        <button type="button" class="btn btn-sm btn-cer-outline-primary dropdown-toggle" id="periodDropdown">
             Periodo
         </button>
     </div>
@@ -15,10 +15,10 @@
 <div class="row g-3 mb-4">
     <!-- Dispositivi Totali -->
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h6 class="text-white">DISPOSITIVI TOTALI</h6>
-                <h2>{{ total_devices }}</h2>
+        <div class="cer-card">
+            <div class="cer-card-header text-center">
+                <h6 class="mb-0 text-white">DISPOSITIVI TOTALI</h6>
+                <h2 class="text-white mb-0">{{ total_devices }}</h2>
                 <span class="badge bg-light text-primary">{{ new_devices }} nuovi</span>
             </div>
         </div>
@@ -26,10 +26,10 @@
 
     <!-- Dispositivi Attivi -->
     <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <h6 class="text-white">DISPOSITIVI ATTIVI</h6>
-                <h2>{{ active_devices }}</h2>
+        <div class="cer-card">
+            <div class="cer-card-header text-center" style="background: var(--cer-success);">
+                <h6 class="mb-0 text-white">DISPOSITIVI ATTIVI</h6>
+                <h2 class="text-white mb-0">{{ active_devices }}</h2>
                 <span class="badge bg-light text-success">{{ online_percentage }}% online</span>
             </div>
         </div>
@@ -37,10 +37,10 @@
 
     <!-- Dispositivi Online -->
     <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <h6 class="text-white">DISPOSITIVI ONLINE</h6>
-                <h2>{{ online_devices }}</h2>
+        <div class="cer-card">
+            <div class="cer-card-header text-center" style="background: var(--cer-info);">
+                <h6 class="mb-0 text-white">DISPOSITIVI ONLINE</h6>
+                <h2 class="text-white mb-0">{{ online_devices }}</h2>
                 <span class="badge bg-light text-info">{{ online_percentage }}%</span>
             </div>
         </div>
@@ -48,11 +48,11 @@
 
     <!-- Messaggi MQTT -->
     <div class="col-md-3">
-        <div class="card bg-warning">
-            <div class="card-body">
-                <h6>MESSAGGI MQTT</h6>
-                <h2>{{ mqtt_stats.messages }}</h2>
-                <span class="badge {% if mqtt_stats.errors > 0 %}bg-danger{% else %}bg-success{% endif %}">
+        <div class="cer-card">
+            <div class="cer-card-header text-center" style="background: var(--cer-warning);">
+                <h6 class="mb-0">MESSAGGI MQTT</h6>
+                <h2 class="mb-0">{{ mqtt_stats.messages }}</h2>
+                <span class="badge-cer {% if mqtt_stats.errors > 0 %}badge-cer-danger{% else %}badge-cer-success{% endif %}">
                     {{ mqtt_stats.errors }} errori
                 </span>
             </div>
@@ -62,9 +62,9 @@
 
 <div class="row">
     <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Dispositivi per Tipo</h5>
+        <div class="cer-card">
+            <div class="cer-card-header">
+                <h5 class="mb-0">Dispositivi per Tipo</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -85,7 +85,7 @@
                                 <td>{{ type.count }}</td>
                                 <td>
                                     <a href="{% url 'energy:devices' %}?vendor={{ type.vendor }}&model={{ type.model }}" 
-                                       class="btn btn-sm btn-outline-primary">Dettagli</a>
+                                       class="btn btn-sm btn-cer-outline-primary">Dettagli</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -97,25 +97,25 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Stato Sistema</h5>
+        <div class="cer-card">
+            <div class="cer-card-header">
+                <h5 class="mb-0">Stato Sistema</h5>
             </div>
             <div class="card-body">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         MQTT Broker
-                        <span class="badge {% if mqtt_stats.status == 'Online' %}bg-success{% else %}bg-danger{% endif %}">
+                        <span class="badge-cer {% if mqtt_stats.status == 'Online' %}badge-cer-success{% else %}badge-cer-danger{% endif %}">
                             {{ mqtt_stats.status }}
                         </span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Database
-                        <span class="badge bg-success">OK</span>
+                        <span class="badge-cer badge-cer-success">OK</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Dispositivi Online
-                        <span class="badge bg-primary">{{ online_percentage }}%</span>
+                        <span class="badge-cer badge-cer-primary">{{ online_percentage }}%</span>
                     </li>
                 </ul>
             </div>

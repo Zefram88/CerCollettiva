@@ -1,12 +1,12 @@
-{% extends 'core/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 <div class="container mt-4">
    <div class="row">
        <div class="col-md-4">
-           <div class="card mb-4">
-               <div class="card-header bg-primary text-white">
+           <div class="cer-card mb-4">
+               <div class="cer-card-header">
                    <h4 class="mb-0">{{ profile_user.get_legal_type_display }}</h4>
                </div>
                <div class="card-body">
@@ -23,8 +23,8 @@
        </div>
        
        <div class="col-md-8">
-           <div class="card">
-               <div class="card-header bg-primary text-white">
+           <div class="cer-card">
+               <div class="cer-card-header">
                    <h4 class="mb-0">Impianti Associati</h4>
                </div>
                <div class="card-body">
@@ -50,13 +50,13 @@
                                        <td>{{ plant.cer_configuration.name|default:"Non associato" }}</td>
                                        <td>
                                            {% if plant.is_active %}
-                                               <span class="badge bg-success">Attivo</span>
+                                               <span class="badge-cer badge-cer-success">Attivo</span>
                                            {% else %}
-                                               <span class="badge bg-danger">Inattivo</span>
+                                               <span class="badge-cer badge-cer-danger">Inattivo</span>
                                            {% endif %}
                                        </td>
                                        <td>
-                                           <a href="{% url 'energy:device-measurements' plant.id %}" class="btn btn-sm btn-primary">
+                                           <a href="{% url 'energy:device-measurements' plant.id %}" class="btn btn-sm btn-cer-primary">
                                                Visualizza
                                            </a>
                                        </td>
