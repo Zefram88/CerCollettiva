@@ -123,16 +123,16 @@
                    <!-- Azioni Membership -->
                    <div class="mt-3 d-grid gap-2">
                        {% if membership.card %}
-                       <a href="{% url 'core:membership_card' cer_pk=cer.pk %}" class="btn btn-cer-primary btn-sm">
+                       <a href="{% url 'core:membership_card' cer_pk=object.pk %}" class="btn btn-cer-primary btn-sm">
                            <i class="fas fa-id-card"></i> Vedi Tessera
                        </a>
                        {% endif %}
                        
                        {% if is_admin %}
-                       <a href="{% url 'core:member_registry' cer_pk=cer.pk %}" class="btn btn-cer-secondary btn-sm">
+                       <a href="{% url 'core:member_registry' cer_pk=object.pk %}" class="btn btn-cer-secondary btn-sm">
                            <i class="fas fa-users"></i> Registro Soci
                        </a>
-                       <a href="{% url 'core:cer_fees' cer_pk=cer.pk %}" class="btn btn-cer-success btn-sm">
+                       <a href="{% url 'core:cer_fees' cer_pk=object.pk %}" class="btn btn-cer-success btn-sm">
                            <i class="fas fa-euro-sign"></i> Gestione Quote
                        </a>
                        {% endif %}
