@@ -34,7 +34,7 @@ def calculate_period_aggregates(
 
         # Ottieni le misurazioni per il periodo
         measurements = DeviceMeasurement.objects.filter(
-            device_id=device_id,
+            device__device_id=device_id,
             timestamp__gte=current_start,
             timestamp__lt=current_end
         )
@@ -50,8 +50,8 @@ def calculate_period_aggregates(
             energy_values = EnergyMeasurement.objects.filter(
                 device_measurement__in=measurements
             ).aggregate(
-                energy_in=Sum('value', filter=models.Q(measurement_type='POWER_IN')),
-                energy_out=Sum('value', filter=models.Q(measurement_type='POWER_DRAW'))
+                energy_in=Sum('value', filter=Q(measurement_type='POWER_IN')),
+                energy_out=Sum('value', filter=Q(measurement_type='POWER_DRAW'))
             )
 
             # Crea o aggiorna l'aggregazione
@@ -80,7 +80,7 @@ def get_latest_measurement(device_id: str) -> Optional[DeviceMeasurement]:
     """
     try:
         return DeviceMeasurement.objects.filter(
-            device_id=device_id
+            device__device_id=device_id
         ).latest('timestamp')
     except DeviceMeasurement.DoesNotExist:
         return None

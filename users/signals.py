@@ -7,25 +7,8 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
-# Configurazione del logger
+# Logger centralizzato (configurato via settings.LOGGING)
 logger = logging.getLogger('access_logger')
-logger.setLevel(logging.INFO)
-
-# Handler per file
-file_handler = logging.FileHandler('access_logs.log')
-file_handler.setLevel(logging.INFO)
-
-# Handler per console (utile in development)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-
-# Formato del log
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-console_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
 
 @receiver(user_logged_in)
 def log_user_login(sender, request, user, **kwargs):

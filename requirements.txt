@@ -25,3 +25,4 @@ openpyxl
 pandas
 django-extensions
 cryptography
+pdfkit==1.0.0

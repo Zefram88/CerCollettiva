@@ -11,7 +11,11 @@ load_dotenv()
 # Configurazioni di base
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-your-secret-key-here')
-FIELD_ENCRYPTION_KEY = 'DeN2PosBdpf14DwdYqeTgzcT0Ysfk3lfGMqEI9nls9k='
+# Leggi la chiave di cifratura dai parametri d'ambiente; fallback solo per sviluppo
+FIELD_ENCRYPTION_KEY = os.getenv(
+    'FIELD_ENCRYPTION_KEY',
+    'DeN2PosBdpf14DwdYqeTgzcT0Ysfk3lfGMqEI9nls9k='
+)
 ENCRYPTED_FIELDS_KEYDIR = None  # Usa la chiave in settings invece di file
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
@@ -237,6 +241,9 @@ MQTT_SETTINGS = {
     'STATUS_TOPIC': 'CerCollettiva/status',
     'ERROR_TOPIC': 'CerCollettiva/errors',
 }
+
+# Feature flags
+USE_NEW_MQTT = os.getenv('USE_NEW_MQTT', 'True') == 'True'
 
 # Logging
 LOGS_DIR = BASE_DIR / 'logs'
