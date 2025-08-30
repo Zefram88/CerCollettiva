@@ -1,6 +1,14 @@
 # core/views/__init__.py
 from .dashboard import DashboardView, HomeView, CerDashboardView
-from .cer import CERListView, CERDetailView, CERJoinView
+from .cer import CERListView, CERDetailView, CERJoinView, MembershipCardView, MemberRegistryView
+from .fees import (
+    CERFeesManagementView,
+    MembershipFeeDetailView,
+    MembershipFeeReportView,
+    set_membership_fee,
+    mark_fee_paid,
+    bulk_set_fees
+)
 from .plant import (
     PlantListView,
     PlantDetailView,
@@ -24,11 +32,20 @@ __all__ = [
     'CERListView',
     'CERDetailView',
     'CERJoinView',
+    'MembershipCardView',
+    'MemberRegistryView',
+    'CERFeesManagementView',
+    'MembershipFeeDetailView',
+    'MembershipFeeReportView',
+    'set_membership_fee',
+    'mark_fee_paid',
+    'bulk_set_fees',
     'PlantListView',
     'PlantDetailView',
     'PlantCreateView',
     'PlantUpdateView',
     'PlantMQTTConfigView',
+    'plant_delete',
     'PlantDocumentListView',
     'PlantDocumentUploadView',
     'PlantDocumentDeleteView',

@@ -2,32 +2,23 @@ from django.urls import path
 from django.contrib import admin
 from .admin import admin_site
 from .views.gaudi import PlantCreateFromGaudiView
-from .views import (
-    # Views base
-    HomeView,
-    DashboardView,
-    CerDashboardView,
-    
-    # Views CER
-    CERListView,
-    CERDetailView,
-    CERJoinView,
-    
-    # Views Plant
+from .views.dashboard import HomeView, DashboardView, CerDashboardView
+from .views.cer import CERListView, CERDetailView, CERJoinView, MembershipCardView, MemberRegistryView
+from .views.fees import CERFeesManagementView, MembershipFeeDetailView, set_membership_fee, mark_fee_paid, bulk_set_fees
+from .views.plant import (
     PlantListView,
     PlantDetailView,
     PlantCreateView,
     PlantUpdateView,
     PlantMQTTConfigView,
-    plant_delete,
-
-    # Views Gaudì
+    plant_delete
+)
+from .views.document import (
     PlantDocumentListView,
     PlantDocumentUploadView,
-    PlantDocumentDeleteView,
-    NewPlantFromGaudiView,
-    PlantGaudiUpdateView
+    PlantDocumentDeleteView
 )
+from .views.gaudi import NewPlantFromGaudiView, PlantGaudiUpdateView
 
 from .views.api import (
     get_plant_data,
@@ -47,6 +38,10 @@ urlpatterns = [
     path('cer/', CERListView.as_view(), name='cer_list'),
     path('cer/<int:pk>/', CERDetailView.as_view(), name='cer_detail'),
     path('cer/<int:pk>/join/', CERJoinView.as_view(), name='cer_join'),
+    path('cer/<int:cer_pk>/card/', MembershipCardView.as_view(), name='membership_card'),
+    path('cer/<int:cer_pk>/registry/', MemberRegistryView.as_view(), name='member_registry'),
+    path('cer/<int:cer_pk>/fees/', CERFeesManagementView.as_view(), name='cer_fees'),
+    path('cer/fee/<int:pk>/', MembershipFeeDetailView.as_view(), name='membership_fee_detail'),
     
     # Plant URLs - Base Operations
     path('plants/', PlantListView.as_view(), name='plant_list'),
@@ -74,5 +69,10 @@ urlpatterns = [
     path('api/plants/<int:pk>/data/', get_plant_data, name='api_plant_data'),
     path('api/plants/<int:plant_id>/measurements/', plant_measurements_api, name='plant-measurements-api'),
     path('api/cer-power/', cer_power_api, name='cer-power-api'),
-    path('api/mqtt/status/<int:plant_id>/', mqtt_status_api, name='mqtt-status-api')
+    path('api/mqtt/status/<int:plant_id>/', mqtt_status_api, name='mqtt-status-api'),
+    
+    # API URLs - Fees Management
+    path('api/fees/set/<int:card_id>/', set_membership_fee, name='api_set_fee'),
+    path('api/fees/paid/<int:card_id>/', mark_fee_paid, name='api_mark_fee_paid'),
+    path('api/cer/<int:cer_pk>/bulk-fees/', bulk_set_fees, name='api_bulk_fees')
 ]

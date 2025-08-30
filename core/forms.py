@@ -425,3 +425,84 @@ class PlantGaudiUpdateForm(forms.Form):
             if file.size > 10 * 1024 * 1024:  # 10MB
                 raise forms.ValidationError(_("Il file non può superare i 10MB"))
         return file
+
+class MembershipFeeForm(forms.Form):
+    """Form per la gestione delle quote associative"""
+    
+    fee_amount = forms.DecimalField(
+        label=_("Importo Quota"),
+        max_digits=8,
+        decimal_places=2,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': '0.00',
+            'step': '0.01'
+        }),
+        help_text=_("Importo della quota associativa in euro")
+    )
+    
+    payment_method = forms.ChoiceField(
+        label=_("Metodo Pagamento"),
+        choices=[
+            ('CASH', _('Contanti')),
+            ('BANK_TRANSFER', _('Bonifico')),
+            ('CARD', _('Carta')),
+            ('OTHER', _('Altro'))
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
+    notes = forms.CharField(
+        label=_("Note"),
+        max_length=500,
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Note aggiuntive sul pagamento...'
+        })
+    )
+    
+    def __init__(self, *args, **kwargs):
+        self.card = kwargs.pop('card', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.card:
+            self.fields['fee_amount'].initial = self.card.fee_amount
+
+class BulkFeeForm(forms.Form):
+    """Form per l'impostazione di quote multiple"""
+    
+    fee_amount = forms.DecimalField(
+        label=_("Importo Quota"),
+        max_digits=8,
+        decimal_places=2,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': '0.00',
+            'step': '0.01'
+        }),
+        help_text=_("Importo da applicare a tutti i membri selezionati")
+    )
+    
+    member_type = forms.ChoiceField(
+        label=_("Tipologia Membri"),
+        choices=[
+            ('all', _('Tutti i membri')),
+            ('CONSUMER', _('Solo Consumatori')),
+            ('PRODUCER', _('Solo Produttori')),
+            ('PROSUMER', _('Solo Prosumer'))
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text=_("Seleziona a chi applicare la quota")
+    )
+    
+    apply_to_existing = forms.BooleanField(
+        label=_("Sovrascrivi quote esistenti"),
+        required=False,
+        initial=False,
+        help_text=_("Se selezionato, sovrascrive anche le quote già impostate")
+    )

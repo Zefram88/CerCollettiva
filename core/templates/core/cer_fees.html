@@ -1,0 +1,400 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Gestione Quote - {{ cer.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:cer_detail' cer.pk %}">{{ cer.name }}</a></li>
+            <li class="breadcrumb-item active">Gestione Quote</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>💰 Gestione Quote Associative</h2>
+            <p class="text-muted mb-0">{{ cer.name }}</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bulkFeeModal">
+                <i class="fas fa-cog"></i> Imposta Quote Multiple
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistiche Riepilogative -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.total_cards }}</h4>
+                    <p class="mb-0">Tessere Totali</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.paid_count }}</h4>
+                    <p class="mb-0">Quote Pagate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.pending_count }}</h4>
+                    <p class="mb-0">Quote In Attesa</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>€{{ stats.total_amount|floatformat:2 }}</h4>
+                    <p class="mb-0">Totale Quote</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dettaglio Incassi -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">💚 Incassato</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-success">€{{ stats.paid_amount|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">⏳ Da Incassare</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-warning">€{{ stats.pending_amount|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtri -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Stato Pagamento</label>
+                    <select name="status" class="form-control">
+                        <option value="">Tutti</option>
+                        <option value="paid" {% if current_filter == 'paid' %}selected{% endif %}>Pagate</option>
+                        <option value="pending" {% if current_filter == 'pending' %}selected{% endif %}>In attesa</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tipo Membro</label>
+                    <select name="member_type" class="form-control">
+                        <option value="">Tutti i tipi</option>
+                        <option value="CONSUMER" {% if member_type_filter == 'CONSUMER' %}selected{% endif %}>Consumatori</option>
+                        <option value="PRODUCER" {% if member_type_filter == 'PRODUCER' %}selected{% endif %}>Produttori</option>
+                        <option value="PROSUMER" {% if member_type_filter == 'PROSUMER' %}selected{% endif %}>Prosumer</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filtra
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabella Quote -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tessera</th>
+                            <th>Membro</th>
+                            <th>Tipo</th>
+                            <th>Quota</th>
+                            <th>Stato</th>
+                            <th>Data Pagamento</th>
+                            <th>Metodo</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for card in cards %}
+                        <tr>
+                            <td>
+                                <strong>{{ card.card_number }}</strong>
+                                {% if card.is_expired %}
+                                    <br><small class="text-danger">Scaduta</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if card.membership.user.is_private %}
+                                    {{ card.membership.user.first_name }} {{ card.membership.user.last_name }}
+                                {% else %}
+                                    {{ card.membership.user.legal_name }}
+                                {% endif %}
+                                <br>
+                                <small class="text-muted">{{ card.membership.user.username }}</small>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if card.membership.member_type == 'CONSUMER' %}bg-info
+                                    {% elif card.membership.member_type == 'PRODUCER' %}bg-success
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ card.membership.get_member_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span id="amount-{{ card.id }}">€{{ card.fee_amount|floatformat:2 }}</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2" 
+                                            onclick="editAmount({{ card.id }}, {{ card.fee_amount }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                {% if card.membership_fee_paid %}
+                                    <span class="badge bg-success">✓ Pagata</span>
+                                {% else %}
+                                    <span class="badge bg-warning">⏳ In attesa</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if card.fee_payment_date %}
+                                    {{ card.fee_payment_date|date:"d/m/Y" }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if card.payment_method %}
+                                    {{ card.get_payment_method_display }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if not card.membership_fee_paid %}
+                                    <button class="btn btn-sm btn-success" 
+                                            onclick="markAsPaid({{ card.id }}, '{{ card.card_number }}')">
+                                        <i class="fas fa-check"></i> Segna Pagata
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-check-circle"></i> Pagata
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fas fa-receipt fa-3x mb-3"></i>
+                                <p>Nessuna quota trovata con i filtri selezionati.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginazione -->
+    {% if is_paginated %}
+    <nav aria-label="Paginazione quote" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_filter %}&status={{ current_filter }}{% endif %}{% if member_type_filter %}&member_type={{ member_type_filter }}{% endif %}">
+                        Precedente
+                    </a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if current_filter %}&status={{ current_filter }}{% endif %}{% if member_type_filter %}&member_type={{ member_type_filter }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_filter %}&status={{ current_filter }}{% endif %}{% if member_type_filter %}&member_type={{ member_type_filter }}{% endif %}">
+                        Successiva
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Modal per impostare quote multiple -->
+<div class="modal fade" id="bulkFeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Imposta Quote Multiple</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bulkFeeForm">
+                    <div class="mb-3">
+                        <label class="form-label">Importo Quota (€)</label>
+                        <input type="number" class="form-control" id="bulkAmount" 
+                               step="0.01" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Applica a</label>
+                        <select class="form-control" id="bulkMemberType" required>
+                            <option value="all">Tutti i membri</option>
+                            <option value="CONSUMER">Solo Consumatori</option>
+                            <option value="PRODUCER">Solo Produttori</option>
+                            <option value="PROSUMER">Solo Prosumer</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-primary" onclick="setBulkFees()">Imposta Quote</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URLS = {
+    setBulkFees: '{% url "core:api_bulk_fees" cer_pk=cer.pk %}',
+    setFee: '/core/api/fees/set/',
+    markPaid: '/core/api/fees/paid/'
+};
+
+async function setBulkFees() {
+    const amount = document.getElementById('bulkAmount').value;
+    const memberType = document.getElementById('bulkMemberType').value;
+    
+    try {
+        const response = await fetch(API_URLS.setBulkFees, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                amount: amount,
+                member_type: memberType
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Errore: ' + data.error);
+        }
+    } catch (error) {
+        alert('Errore nella comunicazione con il server');
+    }
+    
+    bootstrap.Modal.getInstance(document.getElementById('bulkFeeModal')).hide();
+}
+
+async function editAmount(cardId, currentAmount) {
+    const newAmount = prompt('Inserisci il nuovo importo della quota:', currentAmount);
+    
+    if (newAmount !== null && !isNaN(newAmount) && newAmount >= 0) {
+        try {
+            const response = await fetch(API_URLS.setFee + cardId + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    amount: newAmount
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('amount-' + cardId).textContent = '€' + parseFloat(newAmount).toFixed(2);
+                alert(data.message);
+            } else {
+                alert('Errore: ' + data.error);
+            }
+        } catch (error) {
+            alert('Errore nella comunicazione con il server');
+        }
+    }
+}
+
+async function markAsPaid(cardId, cardNumber) {
+    const paymentMethod = prompt('Metodo di pagamento:', 'BANK_TRANSFER');
+    
+    if (paymentMethod !== null) {
+        try {
+            const response = await fetch(API_URLS.markPaid + cardId + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    payment_method: paymentMethod
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Errore: ' + data.error);
+            }
+        } catch (error) {
+            alert('Errore nella comunicazione con il server');
+        }
+    }
+}
+
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+</script>
+{% endblock %}

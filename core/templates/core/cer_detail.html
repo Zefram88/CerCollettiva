@@ -88,9 +88,29 @@
                    <dl class="row mb-0">
                        <dt class="col-sm-5">Ruolo</dt>
                        <dd class="col-sm-7">{{ membership.get_role_display }}</dd>
+                       
+                       <dt class="col-sm-5">Tipo Membro</dt>
+                       <dd class="col-sm-7">
+                           <span class="badge 
+                               {% if membership.member_type == 'CONSUMER' %}bg-info
+                               {% elif membership.member_type == 'PRODUCER' %}bg-success
+                               {% else %}bg-warning{% endif %}">
+                               {{ membership.get_member_type_display }}
+                           </span>
+                       </dd>
 
                        <dt class="col-sm-5">Data adesione</dt>
                        <dd class="col-sm-7">{{ membership.joined_at|date }}</dd>
+                       
+                       {% if membership.card %}
+                       <dt class="col-sm-5">N. Tessera</dt>
+                       <dd class="col-sm-7">
+                           <strong>{{ membership.card.card_number }}</strong>
+                           {% if membership.card.is_expired %}
+                               <br><small class="text-danger">Scaduta</small>
+                           {% endif %}
+                       </dd>
+                       {% endif %}
                    </dl>
 
                    {% if not membership.document_verified %}
@@ -99,6 +119,24 @@
                        Documenti in attesa di verifica
                    </div>
                    {% endif %}
+                   
+                   <!-- Azioni Membership -->
+                   <div class="mt-3 d-grid gap-2">
+                       {% if membership.card %}
+                       <a href="{% url 'core:membership_card' cer_pk=cer.pk %}" class="btn btn-primary btn-sm">
+                           <i class="fas fa-id-card"></i> Vedi Tessera
+                       </a>
+                       {% endif %}
+                       
+                       {% if is_admin %}
+                       <a href="{% url 'core:member_registry' cer_pk=cer.pk %}" class="btn btn-outline-secondary btn-sm">
+                           <i class="fas fa-users"></i> Registro Soci
+                       </a>
+                       <a href="{% url 'core:cer_fees' cer_pk=cer.pk %}" class="btn btn-outline-success btn-sm">
+                           <i class="fas fa-euro-sign"></i> Gestione Quote
+                       </a>
+                       {% endif %}
+                   </div>
                </div>
            </div>
 

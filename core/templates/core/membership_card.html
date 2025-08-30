@@ -1,0 +1,181 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Tessera Associativa - {{ cer.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:cer_detail' cer.pk %}">{{ cer.name }}</a></li>
+            <li class="breadcrumb-item active">Tessera</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Tessera Associativa Card -->
+            <div class="card shadow-lg membership-card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">🏛️ TESSERA ASSOCIATIVA</h4>
+                    <small>{{ cer.name }}</small>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Informazioni Tessera -->
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <h5 class="text-primary">N. Tessera</h5>
+                            <h3 class="font-weight-bold">{{ card.card_number }}</h3>
+                        </div>
+                        <div class="col-6 text-end">
+                            <h5 class="text-primary">Tipo Membro</h5>
+                            <span class="badge badge-lg 
+                                {% if membership.member_type == 'CONSUMER' %}bg-info
+                                {% elif membership.member_type == 'PRODUCER' %}bg-success  
+                                {% else %}bg-warning{% endif %}">
+                                {{ membership.get_member_type_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Informazioni Utente -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">Intestatario</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Nome:</strong><br>
+                                    {% if membership.user.is_private %}
+                                        {{ membership.user.first_name }} {{ membership.user.last_name }}
+                                    {% else %}
+                                        {{ membership.user.legal_name }}
+                                    {% endif %}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Codice Fiscale:</strong><br>
+                                    {{ membership.user.fiscal_code }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informazioni Membership -->
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <strong>Data Iscrizione:</strong><br>
+                            {{ membership.joined_at|date:"d/m/Y" }}
+                        </div>
+                        <div class="col-4">
+                            <strong>Scadenza:</strong><br>
+                            <span class="{% if card.is_expired %}text-danger{% else %}text-success{% endif %}">
+                                {{ card.expiry_date|date:"d/m/Y" }}
+                            </span>
+                        </div>
+                        <div class="col-4">
+                            {% if registry_entry %}
+                            <strong>N. Registro:</strong><br>
+                            {{ registry_entry.cer_configuration.code }}-{{ registry_entry.progressive_number|stringformat:"04d" }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Stato Tessera -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert 
+                                {% if card.is_valid %}alert-success
+                                {% else %}alert-danger{% endif %} 
+                                d-flex align-items-center">
+                                <i class="fas 
+                                    {% if card.is_valid %}fa-check-circle
+                                    {% else %}fa-exclamation-triangle{% endif %} 
+                                    me-2"></i>
+                                <strong>
+                                    {% if card.is_valid %}
+                                        ✓ Tessera Valida
+                                    {% else %}
+                                        ✗ Tessera Non Valida
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informazioni Quote -->
+                    {% if card.fee_amount > 0 %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">Quota Associativa</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Importo:</strong> €{{ card.fee_amount }}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Stato:</strong>
+                                    {% if card.membership_fee_paid %}
+                                        <span class="badge bg-success">Pagata il {{ card.fee_payment_date|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">In attesa di pagamento</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer text-center text-muted">
+                    <small>Tessera emessa il {{ card.issue_date|date:"d/m/Y H:i" }}</small>
+                </div>
+            </div>
+
+            <!-- Azioni -->
+            <div class="text-center mt-4">
+                <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Torna alla CER
+                </a>
+                <button class="btn btn-primary ms-2" onclick="window.print()">
+                    <i class="fas fa-print"></i> Stampa Tessera
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .membership-card {
+        width: 85.6mm;
+        height: 54mm;
+        margin: 0 auto;
+        box-shadow: none !important;
+        border: 1px solid #000;
+    }
+    
+    .btn, .breadcrumb, nav {
+        display: none !important;
+    }
+    
+    .card-body {
+        font-size: 10px;
+    }
+    
+    .container {
+        max-width: none;
+    }
+}
+
+.membership-card {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+</style>
+{% endblock %}
