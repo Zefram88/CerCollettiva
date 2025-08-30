@@ -491,7 +491,7 @@
     
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if not show_navbar %}hide-navbar{% endif %}">`
+<body class="{% if show_navbar == False %}hide-navbar{% endif %}">
     <!-- Navbar -->
     {% if show_navbar != False %}
     <nav class="navbar navbar-expand-lg cer-navbar">
