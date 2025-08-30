@@ -145,7 +145,7 @@ flowchart LR
   U[Utente/Browser] -->|HTTP/REST| API[DRF API / Views]
   U -->|WebSocket| CH[Channels]
 
-  subgraph Django[Backend Django]
+  subgraph Django [Backend Django]
     CORE[core]
     ENG[energy]
     DOCS[documents]
@@ -154,16 +154,16 @@ flowchart LR
     CH
   end
 
-  subgraph Infra[Infra]
-    DB[(DB: Postgres/SQLite)]
+  subgraph Infra [Infrastructure]
+    DB[(DB Postgres/SQLite)]
     REDIS[(Redis)]
     FS[(Media/Static)]
   end
 
-  subgraph MQTT[MQTT Stack]
-    DEV[Dispositivi IoT (Shelly,...)]
-    BROKER[(MQTT Broker)]
-    SVC[MQTT Service (core.py + manager.py)]
+  subgraph MQTT [MQTT Stack]
+    DEV[IoT Devices]
+    BRK[(MQTT Broker)]
+    SVC[MQTT Service: core.py + manager.py]
   end
 
   API --> DB
@@ -171,9 +171,9 @@ flowchart LR
   API --> FS
   CH --> REDIS
 
-  DEV -- publish --> BROKER
-  SVC -- subscribe --> BROKER
-  BROKER -- message --> SVC
+  DEV -- publish --> BRK
+  SVC -- subscribe --> BRK
+  BRK -- message --> SVC
   SVC --> ENG
   SVC --> DB
 
