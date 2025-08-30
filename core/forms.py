@@ -41,6 +41,7 @@ class CERMembershipForm(forms.ModelForm):
     class Meta:
         model = CERMembership
         fields = [
+            'member_type',
             'role',
             'conformity_declaration',
             'gse_practice',
@@ -49,6 +50,7 @@ class CERMembershipForm(forms.ModelForm):
             'panels_serial_list'
         ]
         widgets = {
+            'member_type': forms.Select(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-control'}),
             'panels_serial_list': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -57,17 +59,70 @@ class CERMembershipForm(forms.ModelForm):
             }),
         }
         help_texts = {
-            'conformity_declaration': 'Dichiarazione di conformità dell\'impianto (PDF)',
-            'gse_practice': 'Documentazione GSE completa (PDF)',
-            'panels_photo': 'Foto dei pannelli installati (JPG/PNG)',
-            'inverter_photo': 'Foto dell\'inverter installato (JPG/PNG)',
+            'member_type': 'Seleziona il tipo di partecipazione nella CER',
+            'conformity_declaration': 'Dichiarazione di conformità dell\'impianto (PDF) - Solo per produttori',
+            'gse_practice': 'Documentazione GSE completa (PDF) - Solo per produttori',
+            'panels_photo': 'Foto dei pannelli installati (JPG/PNG) - Solo per produttori',
+            'inverter_photo': 'Foto dell\'inverter installato (JPG/PNG) - Solo per produttori',
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Inizialmente nascondi i campi di produzione
+        self.fields['conformity_declaration'].required = False
+        self.fields['gse_practice'].required = False
+        self.fields['panels_photo'].required = False
+        self.fields['inverter_photo'].required = False
+        self.fields['panels_serial_list'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        member_type = cleaned_data.get('member_type')
+        
+        # Se è un produttore o prosumer, richiedi i documenti
+        if member_type in ['PRODUCER', 'PROSUMER']:
+            required_docs = ['conformity_declaration', 'gse_practice', 'panels_photo', 'inverter_photo']
+            
+            for field_name in required_docs:
+                if not cleaned_data.get(field_name):
+                    self.add_error(field_name, f'Questo documento è obbligatorio per {self.fields["member_type"].choices[member_type]}')
+        
+        return cleaned_data
 
     def clean_conformity_declaration(self):
         file = self.cleaned_data.get('conformity_declaration')
         if file and not file.name.endswith('.pdf'):
             raise forms.ValidationError("Il file deve essere in formato PDF")
         return file
+
+class ConsumerMembershipForm(forms.ModelForm):
+    """Form semplificato per consumatori senza impianti di produzione"""
+    
+    class Meta:
+        model = CERMembership
+        fields = ['role']
+        widgets = {
+            'role': forms.Select(attrs={'class': 'form-control'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Imposta automaticamente come consumatore
+        self.fields['role'].initial = 'MEMBER'
+        # Limita le scelte del ruolo per i consumatori
+        self.fields['role'].choices = [
+            ('MEMBER', 'Membro'),
+        ]
+    
+    def save(self, commit=True):
+        membership = super().save(commit=False)
+        # Imposta automaticamente il tipo come consumatore
+        membership.member_type = 'CONSUMER'
+        if commit:
+            membership.save()
+            # Auto-approvazione per consumatori
+            membership.auto_approve_consumer()
+        return membership
 
 class PlantForm(forms.ModelForm):
     """Form per la gestione degli impianti con supporto dati Gaudì"""

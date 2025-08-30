@@ -10,8 +10,13 @@
         <h5 class="mb-0">Adesione a {{ cer.name }}</h5>
     </div>
     <div class="card-body">
-        <div class="alert alert-info">
-            <h6 class="alert-heading">Documenti Richiesti:</h6>
+        <div class="alert alert-info" id="consumer-info" style="display: none;">
+            <h6 class="alert-heading">Consumatore:</h6>
+            <p class="mb-0">Come consumatore, non hai bisogno di caricare documenti di impianti. La tua richiesta verrà approvata automaticamente.</p>
+        </div>
+        
+        <div class="alert alert-info" id="producer-info">
+            <h6 class="alert-heading">Documenti Richiesti per Produttori:</h6>
             <ul class="mb-0">
                 <li>Dichiarazione di conformità</li>
                 <li>Pratica GSE</li>
@@ -31,4 +36,63 @@
         </form>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const memberTypeSelect = document.getElementById('id_member_type');
+    const consumerInfo = document.getElementById('consumer-info');
+    const producerInfo = document.getElementById('producer-info');
+    
+    // Campi documento che devono essere nascosti per i consumatori
+    const documentFields = [
+        'id_conformity_declaration',
+        'id_gse_practice', 
+        'id_panels_photo',
+        'id_inverter_photo',
+        'id_panels_serial_list'
+    ];
+    
+    function toggleFieldsBasedOnMemberType() {
+        const selectedType = memberTypeSelect.value;
+        
+        if (selectedType === 'CONSUMER') {
+            // Mostra info consumatore, nascondi info produttore
+            consumerInfo.style.display = 'block';
+            producerInfo.style.display = 'none';
+            
+            // Nascondi campi documenti
+            documentFields.forEach(fieldId => {
+                const fieldDiv = document.querySelector(`#div_${fieldId}`);
+                if (fieldDiv) {
+                    fieldDiv.style.display = 'none';
+                    // Resetta i valori dei file
+                    const fileInput = document.getElementById(fieldId);
+                    if (fileInput && fileInput.type === 'file') {
+                        fileInput.value = '';
+                    }
+                }
+            });
+        } else {
+            // Mostra info produttore, nascondi info consumatore
+            consumerInfo.style.display = 'none';
+            producerInfo.style.display = 'block';
+            
+            // Mostra campi documenti
+            documentFields.forEach(fieldId => {
+                const fieldDiv = document.querySelector(`#div_${fieldId}`);
+                if (fieldDiv) {
+                    fieldDiv.style.display = 'block';
+                }
+            });
+        }
+    }
+    
+    // Esegui al caricamento e quando cambia la selezione
+    memberTypeSelect.addEventListener('change', toggleFieldsBasedOnMemberType);
+    toggleFieldsBasedOnMemberType(); // Esegui inizialmente
+});
+</script>
+{% endblock %}
+
 {% endblock %}
