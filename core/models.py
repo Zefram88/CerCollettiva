@@ -148,6 +148,34 @@ class CERMembership(models.Model):
             self.save(update_fields=['document_verified', 'document_verified_at'])
             return True
         return False
+    
+    def create_membership_card(self):
+        """Crea la tessera associativa per il membro"""
+        if hasattr(self, 'card'):
+            return self.card  # Tessera già esistente
+            
+        from datetime import timedelta
+        
+        card = MembershipCard(
+            membership=self,
+            expiry_date=timezone.now() + timedelta(days=365)  # 1 anno
+        )
+        card.generate_card_number()
+        card.save()
+        return card
+    
+    def register_in_registry(self):
+        """Registra il membro nel registro soci"""
+        if hasattr(self, 'registry_entry') and self.registry_entry.exists():
+            return self.registry_entry.first()  # Già registrato
+            
+        return MemberRegistry.register_member(self)
+    
+    def complete_membership_setup(self):
+        """Completa la configurazione della membership con tessera e registrazione"""
+        card = self.create_membership_card()
+        registry = self.register_in_registry()
+        return card, registry
 
     class Meta:
         verbose_name = "Membership CER"
@@ -156,6 +184,161 @@ class CERMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.cer_configuration.name} ({self.get_member_type_display()})"
+
+class MembershipCard(models.Model):
+    """Tessera associativa per membri CER"""
+    membership = models.OneToOneField(
+        CERMembership, 
+        on_delete=models.CASCADE, 
+        related_name='card'
+    )
+    card_number = models.CharField(
+        "Numero Tessera",
+        max_length=20, 
+        unique=True,
+        help_text="Numero identificativo univoco della tessera"
+    )
+    issue_date = models.DateTimeField(
+        "Data Emissione",
+        auto_now_add=True
+    )
+    expiry_date = models.DateTimeField(
+        "Data Scadenza",
+        help_text="Data di scadenza della tessera"
+    )
+    is_active = models.BooleanField(
+        "Attiva",
+        default=True
+    )
+    
+    # Campi per gestione quote associative
+    membership_fee_paid = models.BooleanField(
+        "Quota Pagata",
+        default=False
+    )
+    fee_payment_date = models.DateTimeField(
+        "Data Pagamento Quota",
+        null=True, 
+        blank=True
+    )
+    fee_amount = models.DecimalField(
+        "Importo Quota",
+        max_digits=8, 
+        decimal_places=2, 
+        default=0,
+        help_text="Quota associativa in euro"
+    )
+    payment_method = models.CharField(
+        "Metodo Pagamento",
+        max_length=50,
+        choices=[
+            ('CASH', 'Contanti'),
+            ('BANK_TRANSFER', 'Bonifico'),
+            ('CARD', 'Carta'),
+            ('OTHER', 'Altro')
+        ],
+        blank=True
+    )
+    
+    @property
+    def is_expired(self):
+        """Verifica se la tessera è scaduta"""
+        return timezone.now() > self.expiry_date
+    
+    @property
+    def is_valid(self):
+        """Verifica se la tessera è valida"""
+        return self.is_active and not self.is_expired and self.membership.is_active
+    
+    def generate_card_number(self):
+        """Genera automaticamente il numero tessera"""
+        cer_code = self.membership.cer_configuration.code
+        year = timezone.now().year
+        # Conta i membri esistenti per questa CER
+        member_count = MembershipCard.objects.filter(
+            membership__cer_configuration=self.membership.cer_configuration
+        ).count() + 1
+        
+        self.card_number = f"{cer_code}-{year}-{member_count:04d}"
+    
+    def renew(self, months=12):
+        """Rinnova la tessera per il numero di mesi specificato"""
+        from datetime import timedelta
+        self.expiry_date = timezone.now() + timedelta(days=months*30)
+        self.is_active = True
+        self.save()
+    
+    def pay_fee(self, amount, payment_method='BANK_TRANSFER'):
+        """Registra il pagamento della quota associativa"""
+        self.fee_amount = amount
+        self.payment_method = payment_method
+        self.membership_fee_paid = True
+        self.fee_payment_date = timezone.now()
+        self.save()
+
+    class Meta:
+        verbose_name = "Tessera Associativa"
+        verbose_name_plural = "Tessere Associative"
+        ordering = ['-issue_date']
+        indexes = [
+            models.Index(fields=['card_number']),
+            models.Index(fields=['is_active', 'expiry_date']),
+        ]
+
+    def __str__(self):
+        return f"Tessera {self.card_number} - {self.membership.user.username}"
+
+class MemberRegistry(models.Model):
+    """Registro progressivo dei soci per CER"""
+    cer_configuration = models.ForeignKey(
+        CERConfiguration, 
+        on_delete=models.CASCADE,
+        related_name='member_registry'
+    )
+    progressive_number = models.PositiveIntegerField(
+        "Numero Progressivo"
+    )
+    membership = models.ForeignKey(
+        CERMembership, 
+        on_delete=models.CASCADE,
+        related_name='registry_entry'
+    )
+    registration_date = models.DateTimeField(
+        "Data Registrazione",
+        auto_now_add=True
+    )
+    notes = models.TextField(
+        "Note",
+        blank=True,
+        help_text="Note aggiuntive sulla registrazione"
+    )
+    
+    @classmethod
+    def register_member(cls, membership):
+        """Registra un membro nel registro con numero progressivo automatico"""
+        last_entry = cls.objects.filter(
+            cer_configuration=membership.cer_configuration
+        ).order_by('-progressive_number').first()
+        
+        next_number = 1 if not last_entry else last_entry.progressive_number + 1
+        
+        return cls.objects.create(
+            cer_configuration=membership.cer_configuration,
+            membership=membership,
+            progressive_number=next_number
+        )
+
+    class Meta:
+        verbose_name = "Registro Soci"
+        verbose_name_plural = "Registro Soci"
+        unique_together = ['cer_configuration', 'progressive_number']
+        ordering = ['cer_configuration', 'progressive_number']
+        indexes = [
+            models.Index(fields=['cer_configuration', 'progressive_number']),
+        ]
+
+    def __str__(self):
+        return f"{self.cer_configuration.code} - {self.progressive_number:04d} - {self.membership.user.username}"
 
 class Plant(models.Model):
     """Impianto energetico con supporto MQTT"""

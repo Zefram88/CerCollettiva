@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
-from .models import CERConfiguration, CERMembership, Plant, PlantMeasurement, PlantDocument, Alert
+from .models import CERConfiguration, CERMembership, Plant, PlantMeasurement, PlantDocument, Alert, MembershipCard, MemberRegistry
 from .views import CerDashboardView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
@@ -369,6 +369,90 @@ class PlantDocumentAdmin(admin.ModelAdmin):
 admin_site = CERAdminSite(name='ceradmin')
 
 # Registrazione dei modelli con il sito admin personalizzato
+@admin.register(MembershipCard, site=admin_site)
+class MembershipCardAdmin(admin.ModelAdmin):
+    list_display = ['card_number', 'membership_user', 'membership_cer', 'issue_date', 'expiry_date', 'is_valid_status', 'fee_paid_status']
+    list_filter = ['is_active', 'membership_fee_paid', 'issue_date', 'expiry_date']
+    search_fields = ['card_number', 'membership__user__username', 'membership__cer_configuration__name']
+    readonly_fields = ['issue_date']
+    
+    fieldsets = (
+        ('Informazioni Tessera', {
+            'fields': ('card_number', 'membership', 'issue_date', 'expiry_date', 'is_active')
+        }),
+        ('Gestione Quote', {
+            'fields': ('membership_fee_paid', 'fee_amount', 'fee_payment_date', 'payment_method'),
+            'classes': ['collapse']
+        })
+    )
+    
+    def membership_user(self, obj):
+        return obj.membership.user.username
+    membership_user.short_description = 'Utente'
+    
+    def membership_cer(self, obj):
+        return obj.membership.cer_configuration.name
+    membership_cer.short_description = 'CER'
+    
+    def is_valid_status(self, obj):
+        if obj.is_valid:
+            return format_html('<span style="color: green;">✓ Valida</span>')
+        else:
+            return format_html('<span style="color: red;">✗ Non valida</span>')
+    is_valid_status.short_description = 'Stato'
+    
+    def fee_paid_status(self, obj):
+        if obj.membership_fee_paid:
+            return format_html('<span style="color: green;">✓ Pagata</span>')
+        else:
+            return format_html('<span style="color: orange;">⏳ In attesa</span>')
+    fee_paid_status.short_description = 'Quota'
+    
+    actions = ['renew_cards', 'mark_fee_paid']
+    
+    def renew_cards(self, request, queryset):
+        for card in queryset:
+            card.renew()
+        self.message_user(request, f"{queryset.count()} tessere rinnovate con successo.")
+    renew_cards.short_description = "Rinnova tessere selezionate"
+    
+    def mark_fee_paid(self, request, queryset):
+        updated = queryset.update(membership_fee_paid=True)
+        self.message_user(request, f"{updated} quote segnate come pagate.")
+    mark_fee_paid.short_description = "Segna quote come pagate"
+
+@admin.register(MemberRegistry, site=admin_site)  
+class MemberRegistryAdmin(admin.ModelAdmin):
+    list_display = ['progressive_display', 'user_info', 'cer_name', 'member_type_display', 'registration_date', 'has_card']
+    list_filter = ['cer_configuration', 'membership__member_type', 'registration_date']
+    search_fields = ['membership__user__username', 'membership__user__fiscal_code', 'cer_configuration__name']
+    readonly_fields = ['progressive_number', 'registration_date']
+    ordering = ['cer_configuration', 'progressive_number']
+    
+    def progressive_display(self, obj):
+        return f"{obj.cer_configuration.code}-{obj.progressive_number:04d}"
+    progressive_display.short_description = 'N. Registro'
+    
+    def user_info(self, obj):
+        user = obj.membership.user
+        return f"{user.username} ({user.get_legal_type_display()})"
+    user_info.short_description = 'Utente'
+    
+    def cer_name(self, obj):
+        return obj.cer_configuration.name
+    cer_name.short_description = 'CER'
+    
+    def member_type_display(self, obj):
+        return obj.membership.get_member_type_display()
+    member_type_display.short_description = 'Tipo Membro'
+    
+    def has_card(self, obj):
+        if hasattr(obj.membership, 'card'):
+            return format_html('<span style="color: green;">✓</span>')
+        else:
+            return format_html('<span style="color: red;">✗</span>')
+    has_card.short_description = 'Tessera'
+
 admin_site.register(CERConfiguration, CERConfigurationAdmin)
 admin_site.register(CERMembership, CERMembershipAdmin)
 admin_site.register(Plant, PlantAdmin)
