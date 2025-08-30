@@ -82,7 +82,7 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'cercollettiva_dev',
 #         'USER': 'cercollettiva_user',
-#         'PASSWORD': 'sapone1980',
+#         'PASSWORD': 'your_password_here',
 #         'HOST': 'localhost',
 #         'PORT': '5432',
 #     }
@@ -258,7 +258,7 @@ MQTT_SETTINGS = {
     'BROKER_HOST': os.getenv('MQTT_HOST', '195.43.182.22'),
     'BROKER_PORT': int(os.getenv('MQTT_PORT', 2607)),
     'USERNAME': os.getenv('MQTT_USER', 'IoT_01'),
-    'PASSWORD': os.getenv('MQTT_PASS', 'sapone1980'),
+    'PASSWORD': os.getenv('MQTT_PASS', 'mqtt_password_here'),
     'QOS_LEVEL': 1,
     'KEEPALIVE': 60,
     'MAX_RETRIES': 5,
