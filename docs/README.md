@@ -17,6 +17,7 @@ Questa directory contiene tutta la documentazione del progetto CerCollettiva.
 ### Per sviluppatori
 - [CLAUDE.md](../CLAUDE.md) - Guida per lo sviluppo con Claude AI
 - [README.md](../README.md) - Documentazione principale del progetto
+- [overview.md](overview.md) - Riepilogo tecnico e mappa del codice
 
 ### Per l'installazione
 - **Sviluppo locale**: Usa lo script `install_dev.sh` nella root del progetto
