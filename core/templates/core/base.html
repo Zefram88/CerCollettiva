@@ -45,6 +45,8 @@
             padding: 1rem 0;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative; /* ensure its stacking context */
+            z-index: 1080; /* keep navbar and dropdowns above page content */
         }
 
         .navbar-brand {
@@ -80,6 +82,7 @@
             border-radius: 1rem;
             padding: 0.5rem;
             backdrop-filter: blur(10px);
+            z-index: 2000; /* make sure menus appear on top of cards/containers */
         }
 
         .dropdown-item {
@@ -456,12 +459,18 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
+        // Smooth-scroll only for real in-page anchors, not for Bootstrap toggles (dropdown, modal, etc.)
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const href = this.getAttribute('href');
+                const isToggle = this.hasAttribute('data-bs-toggle');
+                // Ignore bare '#' or any Bootstrap toggle triggers
+                if (isToggle || href === '#' || href === '#!') return;
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
     </script>

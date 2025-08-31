@@ -1,16 +1,38 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
 echo "Aggiornamento CerCollettiva..."
-cd /home/atomozero/CerCollettiva/app
-# Attiva ambiente virtuale
-source /home/atomozero/CerCollettiva/venv/bin/activate
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="${SCRIPT_DIR}/.."
+cd "$ROOT_DIR"
+
+# Attiva ambiente virtuale, se presente
+if [ -f "venv/bin/activate" ]; then
+  # shellcheck disable=SC1091
+  source "venv/bin/activate"
+fi
+
 # Pull nuovi cambiamenti (assumendo git)
-git pull
-# Installa nuove dipendenze
-pip install -r requirements.txt
-# Applica migrazioni
+if command -v git >/dev/null 2>&1; then
+  git pull --ff-only || true
+fi
+
+# Installa nuove dipendenze se requirements.txt presente
+if [ -f "requirements.txt" ]; then
+  pip install -r requirements.txt
+fi
+
+# Applica migrazioni e raccoglie statici
 python manage.py migrate
-# Raccolta file statici
 python manage.py collectstatic --noinput
-# Riavvia l'applicazione
-/home/atomozero/CerCollettiva/restart.sh
+
+# Riavvia l'applicazione se disponibile uno script di restart
+if [ -x "${SCRIPT_DIR}/restart.sh" ]; then
+  "${SCRIPT_DIR}/restart.sh"
+else
+  echo "Nessuno script di restart trovato; riavvia manualmente se necessario."
+fi
+
 echo "CerCollettiva aggiornato!"

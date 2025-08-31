@@ -78,12 +78,12 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm">
+                        <table class="table table-sm table-dark">
                             <thead>
                                 <tr>
                                     <th>Ora</th>
                                     <th>Tipo</th>
-                                    <th>Valore</th>
+                                    <th>Energia (kWh)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -91,7 +91,7 @@
                                 <tr>
                                     <td>{{ measurement.timestamp|date:"H:i" }}</td>
                                     <td>{{ measurement.get_measurement_type_display }}</td>
-                                    <td>{{ measurement.value }} {{ measurement.unit }}</td>
+                                    <td>{{ measurement.energy_total|default:0 }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -104,7 +104,7 @@
 </div>
 {% endblock %}
 
-{% block extrajs %}
+{% block extra_js %}
 {{ block.super }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: [{% for m in latest_measurements reversed %}'{{ m.timestamp|date:"H:i" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
             datasets: [{
                 label: 'Energia (kWh)',
-                data: [{% for m in latest_measurements reversed %}{{ m.value }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                data: [{% for m in latest_measurements reversed %}{{ m.energy_total|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
                 borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1
             }]

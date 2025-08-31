@@ -98,6 +98,17 @@ CACHES = {
 # Email backend per sviluppo
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# Sicurezza cookie: in sviluppo disabilita flag Secure e redirect HTTPS
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+# Static files storage: in sviluppo usa lo storage semplice
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 # Configurazione logging
 LOGGING = {
     'version': 1,

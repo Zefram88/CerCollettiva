@@ -65,6 +65,8 @@ class CERAdminSite(admin.AdminSite):
         
         context = {
             'object_list': object_list,
+            'page_obj': object_list,
+            'is_paginated': True if paginator.num_pages > 1 else False,
             'search_query': search_query,
             'status_filter': status_filter,
             'total_count': CERConfiguration.objects.count(),

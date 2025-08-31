@@ -250,9 +250,13 @@ class CerDashboardView(CerBaseView, StaffRequiredMixin):
         ).count()
         
         # Ultime misurazioni
-        context['latest_measurements'] = DeviceMeasurement.objects.select_related(
-            'device', 'device__plant'
-        ).order_by('-timestamp')[:10]
+        # Ultime misurazioni energia (kWh)
+        energy_types = ['DRAWN_ENERGY', 'INJECTED_ENERGY', 'PRODUCTION_ENERGY']
+        context['latest_measurements'] = (
+            DeviceMeasurement.objects.select_related('device', 'device__plant')
+            .filter(measurement_type__in=energy_types)
+            .order_by('-timestamp')[:10]
+        )
         
         # Statistiche settimanali
         seven_days_ago = timezone.now() - timezone.timedelta(days=7)
@@ -262,16 +266,13 @@ class CerDashboardView(CerBaseView, StaffRequiredMixin):
 
     def _calculate_weekly_stats(self, start_date):
         """Calcola le statistiche degli ultimi 7 giorni"""
-        measurements = DeviceMeasurement.objects.filter(
-            timestamp__gte=start_date
-        )
-        
+        measurements = DeviceMeasurement.objects.filter(timestamp__gte=start_date)
+        # Somma energia totale (kWh) per gli ultimi 7 giorni
+        total_energy = measurements.aggregate(total=Sum('energy_total'))['total'] or 0
+        # Conta dispositivi con almeno una misurazione nel periodo (evita import diretto)
+        active_devices = measurements.values('device').distinct().count()
         return {
-            'total_energy': measurements.aggregate(
-                total=Sum('value')
-            )['total'] or 0,
-            'active_devices': DeviceConfiguration.objects.filter(
-                measurements__timestamp__gte=start_date
-            ).distinct().count(),
-            'measurements_count': measurements.count()
+            'total_energy': total_energy,
+            'active_devices': active_devices,
+            'measurements_count': measurements.count(),
         }

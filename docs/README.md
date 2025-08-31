@@ -29,6 +29,26 @@ Questa directory contiene tutta la documentazione del progetto CerCollettiva.
 - [Logging e Monitoring](operations/logging-monitoring.md)
   - Endpoint frontend stato MQTT: `GET /energy/api/mqtt/status/`
 
+### Quick Start (Dev)
+- Prepara `.env` copiando `.env.example` e imposta le variabili chiave.
+- Check + migrazioni:
+  - Unix: `bash scripts/check.sh`
+  - Windows: `pwsh scripts/check.ps1`
+- Avvio server sviluppo:
+  - Unix: `bash scripts/rundev.sh --bind 127.0.0.1 --port 8000`
+  - Windows: `pwsh scripts/rundev.ps1 -BindAddress 127.0.0.1 -Port 8000`
+- MQTT (facoltativo):
+  - Inizializza broker attivo: `python manage.py init_mqtt_broker`
+  - Health rapido: `python manage.py mqtt_client --once`
+  - Run client: `python manage.py mqtt_client`
+  - Credenziali per-device: `python manage.py gen_mqtt_device_creds <device_id> [--acl]`
+  - Seed demo: `python manage.py seed_mqtt_demo [POD] [DEVICE_ID] [--with-creds]`
+  - Publisher demo: `python manage.py publish_mqtt_demo <device_id> [--count N] [--interval S]`
+
+Suggerimento: con `make` puoi usare scorciatoie:
+- `make check`, `make dev`, `make mqtt-init`, `make mqtt-once`, `make mqtt-run`, `make mqtt-creds DEVICE_ID=<id>`
+ - `make seed`, `make mqtt-pub DEVICE_ID=<id> COUNT=3`
+
 ### Energia / MQTT
 - [Specifiche Topic MQTT](../docs/energy/mqtt-topics.md)
 - [Payload Shelly](../docs/energy/payloads-shelly.md)

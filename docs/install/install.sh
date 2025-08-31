@@ -529,7 +529,7 @@ User=$SYSTEM_USER
 Group=www-data
 WorkingDirectory=$PROJECT_PATH
 Environment="PATH=$VENV_PATH/bin"
-Environment="DJANGO_SETTINGS_MODULE=cercollettiva.settings.local"
+Environment="DJANGO_SETTINGS_MODULE=cercollettiva.settings.production"
 ExecStart=$VENV_PATH/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 cercollettiva.wsgi:application
 Restart=on-failure
 RestartSec=5s

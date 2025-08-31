@@ -819,36 +819,26 @@ class Plant(models.Model):
     def get_total_system_power(cls, user=None, time_window_minutes=5):
         """
         Calcola la potenza totale di tutti gli impianti (o di un utente specifico).
-        
-        Args:
-            user (User, optional): Se specificato, calcola solo per gli impianti dell'utente
-            time_window_minutes (int): Finestra temporale in minuti per le misurazioni valide
-            
-        Returns:
-            float: Potenza totale del sistema in kW, arrotondata a 2 decimali
         """
+        # Import locale per evitare l'importazione circolare
+        from energy.models import DeviceMeasurement
+        from django.db.models import Sum, Max
+
         time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
-        
-        # Costruisci la query base
+
         query = DeviceMeasurement.objects.filter(
             device__is_active=True,
             timestamp__gte=time_threshold,
             quality='GOOD'
         )
-        
-        # Filtra per utente se specificato
+
         if user and not user.is_staff:
             query = query.filter(device__plant__owner=user)
-            
-        # Calcola la potenza totale
-        total_power = query.values(
-            'device'
-        ).annotate(
-            latest_power=Max('power')
-        ).aggregate(
+
+        total_power = query.values('device').annotate(latest_power=Max('power')).aggregate(
             total=Sum('latest_power')
         )['total'] or 0
-        
+
         return round(total_power / 1000.0, 2)
         
     def get_total_power(self, time_window_minutes=5):
@@ -877,96 +867,9 @@ class Plant(models.Model):
         
         return round(total_power / 1000.0, 2)
 
-    @classmethod
-    def get_total_system_power(cls, user=None, time_window_minutes=5):
-        """
-        Calcola la potenza totale di tutti gli impianti.
-        """
-        # Import locale per evitare l'importazione circolare
-        from energy.models import DeviceMeasurement
-        from django.db.models import Sum, Max
-        
-        time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
-        
-        query = DeviceMeasurement.objects.filter(
-            device__is_active=True,
-            timestamp__gte=time_threshold,
-            quality='GOOD'
-        )
-        
-        if user and not user.is_staff:
-            query = query.filter(device__plant__owner=user)
-        
-        total_power = query.values(
-            'device'
-        ).annotate(
-            latest_power=Max('power')
-        ).aggregate(
-            total=Sum('latest_power')
-        )['total'] or 0
-        
-        return round(total_power / 1000.0, 2)
+    # (duplicato rimosso)
 
-def test_mqtt_connection(self):
-    """Test the MQTT connection for this plant"""
-    try:
-        # Specifichiamo esplicitamente la versione dell'API di callback
-        client = mqtt.Client(
-            client_id=self.mqtt_client_id,
-            protocol=mqtt.MQTTv5,
-            callback_api_version=mqtt.CallbackAPIVersion.VERSION2
-        )
-        
-        # Configura le credenziali se necessario
-        if self.mqtt_username or (hasattr(settings, 'MQTT_USERNAME') and settings.MQTT_USERNAME):
-            username = self.mqtt_username or settings.MQTT_USERNAME
-            password = self.mqtt_password or settings.MQTT_PASSWORD
-            client.username_pw_set(username, password)
-
-        # Variabile per tracciare lo stato della connessione
-        connection_status = {'connected': False}
-
-        # Imposta il callback di connessione
-        def on_connect(client, userdata, flags, reason_code, properties):
-            connection_status['connected'] = (reason_code == 0)
-
-        client.on_connect = on_connect
-
-        # Tenta la connessione
-        try:
-            # Usa prima il broker specifico dell'impianto, se presente
-            broker = self.mqtt_broker or settings.MQTT_BROKER
-            port = self.mqtt_port or settings.MQTT_PORT
-            
-            client.connect(
-                host=broker,
-                port=port,
-                keepalive=60
-            )
-            client.loop_start()
-            time.sleep(1)  # Breve attesa per permettere la connessione
-            client.loop_stop()
-            
-            # Aggiorna lo stato della connessione nel modello
-            self.mqtt_connected = connection_status['connected']
-            self.save(update_fields=['mqtt_connected'])
-            
-            return self.mqtt_connected
-            
-        except Exception as e:
-            self.mqtt_connected = False
-            self.save(update_fields=['mqtt_connected'])
-            return False
-        finally:
-            try:
-                client.disconnect()
-            except:
-                pass
-
-    except Exception as e:
-        self.mqtt_connected = False
-        self.save(update_fields=['mqtt_connected'])
-        return False
+# (funzione globale duplicata test_mqtt_connection rimossa; usare il metodo della classe Plant)
 
 class PlantMeasurement(models.Model):
     """Misurazioni MQTT dell'impianto"""
@@ -1015,8 +918,8 @@ class Alert(models.Model):
     severity = models.CharField(max_length=20)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    # Aggiungi questi campi
+
+    # Riferimenti opzionali
     plant = models.ForeignKey(
         'Plant',
         on_delete=models.CASCADE,
@@ -1024,11 +927,6 @@ class Alert(models.Model):
         blank=True,
         related_name='alerts'
     )
-    status = models.CharField(max_length=20)
-    severity = models.CharField(max_length=20)
-    message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
     cer_configuration = models.ForeignKey(
         'CERConfiguration',
         on_delete=models.CASCADE,

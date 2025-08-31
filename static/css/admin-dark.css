@@ -1,0 +1,83 @@
+/* CerCollettiva - Admin dark theme alignment */
+:root {
+  --dark-primary: #0f172a;   /* slate-900 */
+  --dark-secondary: #111827; /* gray-900 */
+  --dark-accent: #374151;    /* gray-700 */
+  --text-primary: #e5e7eb;   /* gray-200 */
+  --text-secondary: #9ca3af; /* gray-400 */
+  --accent-color: #667eea;   /* indigo */
+  --accent-secondary: #764ba2; /* violet */
+  --success-color: #10b981;  /* emerald */
+  --danger-color: #ef4444;   /* red */
+}
+
+html, body { background: var(--dark-primary); color: var(--text-primary); }
+
+/* Header */
+#header { 
+  background: linear-gradient(135deg, var(--dark-secondary) 0%, #283040 100%) !important;
+  border-bottom: 1px solid var(--dark-accent);
+  position: relative; z-index: 1080;
+}
+#header #site-name a, #user-tools, #user-tools a { color: var(--text-primary) !important; }
+
+/* Breadcrumbs */
+div.breadcrumbs {
+  background: var(--dark-secondary);
+  border-bottom: 1px solid var(--dark-accent);
+  color: var(--text-secondary);
+}
+div.breadcrumbs a { color: var(--text-primary); }
+
+/* Content wrappers */
+#content, #content-main, #content-related { color: var(--text-primary); }
+.module, .module caption, .inline-group, fieldset, .inline-related, .aligned .form-row { 
+  background: var(--dark-secondary);
+  border: 1px solid var(--dark-accent);
+}
+.module h2, .module caption { color: var(--text-primary); }
+
+/* Tables */
+table, td, th { border-color: var(--dark-accent) !important; }
+thead th { background: #1f2937; color: var(--text-primary); }
+tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+/* Forms */
+input, select, textarea { 
+  background: var(--dark-primary); 
+  color: var(--text-primary); 
+  border: 1px solid var(--dark-accent); 
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
+}
+
+/* Buttons */
+.button, input[type=submit], .submit-row input, .object-tools a { 
+  background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+  color: #fff !important; border: none; border-radius: 10px; 
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+.deletelink, .cancel-link { background: linear-gradient(45deg, var(--danger-color), #dc2626) !important; }
+.success { background: linear-gradient(45deg, var(--success-color), #059669) !important; }
+
+/* Links */
+a { color: #93c5fd; }
+a:hover { color: #bfdbfe; }
+
+/* Messages and alerts */
+ul.messagelist li { 
+  background: rgba(16,185,129,0.1); 
+  color: var(--success-color); 
+  border-left: 4px solid var(--success-color);
+}
+ul.messagelist li.error { 
+  background: rgba(239,68,68,0.1); 
+  color: var(--danger-color); 
+  border-left: 4px solid var(--danger-color); 
+}
+
+/* Keep popups and menus above cards */
+.selector, .calendarbox, .clockbox, .autocomplete, .related-widget-wrapper, .results { z-index: 1500; }
+

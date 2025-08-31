@@ -7,6 +7,8 @@
   - App generale: `logs/cercollettiva.log`
   - MQTT: `logs/mqtt.log`
   - Documents/Gaudi: `logs/documents.log`, `logs/gaudi.log`
+  - Misure: `logs/measurements.log` (local)
+  - Dispositivi: `logs/devices.log` (local)
 
 ### Linee Guida
 - Livelli: INFO per eventi business, WARNING/ERROR per anomalie; DEBUG solo in debugging local.
@@ -26,4 +28,3 @@
 - Messaggi ricevuti totali e per device_type
 - Errori decoding/persistenza
 - Tempo medio processing
-

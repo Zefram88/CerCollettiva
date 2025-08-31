@@ -8,8 +8,15 @@ param(
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location -Path (Join-Path $ScriptDir '..')
 
+# Attiva virtualenv se presente
+$venvActivate = Join-Path (Get-Location) 'venv\Scripts\Activate.ps1'
+if (Test-Path $venvActivate) {
+    . $venvActivate
+}
+
 $env:DJANGO_SETTINGS_MODULE = 'cercollettiva.settings.local'
 Write-Host "DJANGO_SETTINGS_MODULE=$($env:DJANGO_SETTINGS_MODULE)"
 
 $endpoint = "{0}:{1}" -f $BindAddress, $Port
+Write-Host "Starting Django dev server at $endpoint"
 python manage.py runserver $endpoint

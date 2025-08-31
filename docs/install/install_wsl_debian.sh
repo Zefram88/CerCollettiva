@@ -808,10 +808,8 @@ EOL
     cat > "$APP_PATH/logs.sh" << EOL
 #!/bin/bash
 echo "Mostra ultimi log di CerCollettiva..."
-echo "=== LOG DJANGO ==="
-tail -n 50 $LOGS_PATH/django.log
-echo "=== LOG GUNICORN ==="
-tail -n 50 $LOGS_PATH/gunicorn.log
+echo "=== LOG APPLICAZIONE ==="
+tail -n 50 $LOGS_PATH/cercollettiva.log
 echo "=== LOG MQTT ==="
 tail -n 50 $LOGS_PATH/mqtt.log
 EOL
@@ -828,44 +826,15 @@ EOL
 setup_wsl_development() {
     log "Configurazione ambiente di sviluppo in WSL..."
     
-    # Crea un file env per lo sviluppo con DEBUG=True
-    local settings_dir="$PROJECT_PATH/cercollettiva/settings"
-    local dev_settings="$settings_dir/dev.py"
-    
-    cat > "$dev_settings" << EOL
-from .local import *
-
-# Impostazioni per sviluppo
-DEBUG = True
-ALLOWED_HOSTS = ['*']
-
-# Disattiva alcune restrizioni di sicurezza per lo sviluppo
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-SECURE_SSL_REDIRECT = False
-SECURE_HSTS_SECONDS = 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
-
-# Attiva toolbar di debug se installata
-try:
-    import debug_toolbar
-    INSTALLED_APPS += ['debug_toolbar']
-    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-    INTERNAL_IPS = ['127.0.0.1']
-except ImportError:
-    pass
-
-# Configurazione logging più dettagliata
-LOGGING['loggers']['django']['level'] = 'DEBUG'
-EOL
+    # Usa direttamente settings.local per lo sviluppo (niente overlay dev.py)
+    # Impostazioni di sviluppo sono già adeguate nel modulo local.py
     
     # Script per avviare in modalità sviluppo
     cat > "$APP_PATH/rundev.sh" << EOL
 #!/bin/bash
 cd $PROJECT_PATH
 source $VENV_PATH/bin/activate
-export DJANGO_SETTINGS_MODULE=cercollettiva.settings.dev
+export DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
 python manage.py runserver 0.0.0.0:8000
 EOL
     

@@ -11,6 +11,9 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
   - Supportato anche il prefisso `base64:...` (verrà normalizzato automaticamente)
 - `DEBUG`: `True|False` (solo local: True)
 
+### Opzionali utili
+- `DJANGO_LOG_LEVEL`: livello log Django (default `INFO`)
+
 ### Database
 - `DB_NAME`
 - `DB_USER`
@@ -41,11 +44,15 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
 
 ### Script e Comandi utili
 - Avvio sviluppo (PowerShell Windows): `pwsh scripts/rundev.ps1 -BindAddress 127.0.0.1 -Port 8000`
-- Sanity check + migrazioni: `pwsh scripts/check.ps1`
+- Avvio sviluppo (Unix): `bash scripts/rundev.sh --bind 127.0.0.1 --port 8000`
+- Sanity check + migrazioni (Windows): `pwsh scripts/check.ps1`
+- Sanity check + migrazioni (Unix): `bash scripts/check.sh`
 - Client/Service MQTT:
   - Configura e stampa stato una sola volta: `python manage.py mqtt_client --once`
   - Avvio con heartbeat: `python manage.py mqtt_client`
-- Inizializza broker MQTT attivo dalle variabili di ambiente: `python manage.py init_mqtt_broker`
+  - Inizializza broker MQTT attivo dalle variabili di ambiente: `python manage.py init_mqtt_broker`
+  - Genera credenziali per-device: `python manage.py gen_mqtt_device_creds <device_id> [--acl]`
+  - Pubblica payload di test: `python manage.py publish_mqtt_demo <device_id> [--count N] [--interval S]`
 - Genera chiave cifratura valida (Fernet): `python manage.py gen_field_key`
 
 ### Sentry (produzione opzionale)
