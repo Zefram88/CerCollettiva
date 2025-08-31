@@ -6,6 +6,9 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
 - `DJANGO_SETTINGS_MODULE`: modulo settings (`cercollettiva.settings.local` in dev, `cercollettiva.settings.production` in prod)
 - `SECRET_KEY`: chiave Django
 - `FIELD_ENCRYPTION_KEY`: chiave cifratura per `encrypted_model_fields`
+  - Formato: chiave Fernet base64 url-safe (32 byte)
+  - Generazione: `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`
+  - Supportato anche il prefisso `base64:...` (verrà normalizzato automaticamente)
 - `DEBUG`: `True|False` (solo local: True)
 
 ### Database
@@ -52,7 +55,7 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
 ```
 DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
 SECRET_KEY=change-me
-FIELD_ENCRYPTION_KEY=base64:change-me
+FIELD_ENCRYPTION_KEY=Z1o9j5T2T1Qz3KJmWmKx1e0Y2xJYg2f4m0f4O5z6X9o=
 DEBUG=True
 
 DB_NAME=cercollettiva

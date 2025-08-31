@@ -1,6 +1,7 @@
 # cercollettiva/settings/base.py
 
 import os
+import base64
 import logging.config
 from pathlib import Path
 from dotenv import load_dotenv
@@ -11,11 +12,42 @@ load_dotenv()
 # Configurazioni di base
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-your-secret-key-here')
-# Leggi la chiave di cifratura dai parametri d'ambiente; fallback solo per sviluppo
-FIELD_ENCRYPTION_KEY = os.getenv(
-    'FIELD_ENCRYPTION_KEY',
-    'DeN2PosBdpf14DwdYqeTgzcT0Ysfk3lfGMqEI9nls9k='
-)
+
+# Normalizzazione chiave cifratura campi (Fernet, 32 byte base64 url-safe)
+def _normalize_field_encryption_key() -> str:
+    env_val = os.getenv('FIELD_ENCRYPTION_KEY', '')
+
+    # Consenti prefisso 'base64:' e placeholder
+    candidate = env_val
+    if env_val.lower().startswith('base64:'):
+        candidate = env_val.split(':', 1)[1]
+
+    # Se vuota o placeholder, prova a generare una chiave di sviluppo
+    if not candidate or 'change-me' in candidate.lower():
+        try:
+            from cryptography.fernet import Fernet
+            return Fernet.generate_key().decode('utf-8')
+        except Exception:
+            # Fallback hardcoded per sviluppo se cryptography non disponibile
+            return 'DeN2PosBdpf14DwdYqeTgzcT0Ysfk3lfGMqEI9nls9k='
+
+    # Valida che sia base64 url-safe di 32 byte
+    try:
+        raw = base64.urlsafe_b64decode(candidate)
+        if len(raw) == 32:
+            return candidate
+    except Exception:
+        pass
+
+    # Ultimo tentativo: genera chiave di sviluppo
+    try:
+        from cryptography.fernet import Fernet
+        return Fernet.generate_key().decode('utf-8')
+    except Exception:
+        return 'DeN2PosBdpf14DwdYqeTgzcT0Ysfk3lfGMqEI9nls9k='
+
+
+FIELD_ENCRYPTION_KEY = _normalize_field_encryption_key()
 ENCRYPTED_FIELDS_KEYDIR = None  # Usa la chiave in settings invece di file
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
