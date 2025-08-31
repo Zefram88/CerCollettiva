@@ -111,8 +111,9 @@ class MQTTHealthView(View):
     """MQTT broker connectivity health check"""
     
     def get(self, request):
-        """Check MQTT broker health"""
-        from energy.models import MQTTBroker
+        """Check MQTT broker + service health"""
+        from energy.models import MQTTBroker, DeviceConfiguration
+        from energy.mqtt.core import get_mqtt_service
         
         start_time = time.time()
         status = HealthStatus.HEALTHY
@@ -120,9 +121,8 @@ class MQTTHealthView(View):
         broker_info = {}
         
         try:
-            # Check if there's an active MQTT broker configured
+            # Broker attivo
             active_broker = MQTTBroker.objects.filter(is_active=True).first()
-            
             if not active_broker:
                 status = HealthStatus.DEGRADED
                 error_message = "No active MQTT broker configured"
@@ -133,17 +133,24 @@ class MQTTHealthView(View):
                     'port': active_broker.port,
                     'use_tls': active_broker.use_tls
                 }
-                
-                # Check last connection time if available
-                if hasattr(active_broker, 'last_connected'):
-                    if active_broker.last_connected:
-                        time_since_connection = timezone.now() - active_broker.last_connected
-                        if time_since_connection > timedelta(minutes=5):
-                            status = HealthStatus.DEGRADED
-                            error_message = f"No recent connection (last: {active_broker.last_connected.isoformat()})"
-                    else:
-                        status = HealthStatus.DEGRADED
-                        error_message = "Never connected to broker"
+
+            # Stato servizio MQTT
+            svc = get_mqtt_service()
+            is_connected = getattr(svc, 'is_connected', False)
+            messages_received = getattr(svc, 'messages_received', 0)
+            last_error = getattr(svc, 'last_error', None)
+
+            # Dispositivi online negli ultimi 5 minuti
+            five_minutes_ago = timezone.now() - timezone.timedelta(minutes=5)
+            online_devices = DeviceConfiguration.objects.filter(
+                is_active=True,
+                last_seen__gte=five_minutes_ago
+            ).count()
+
+            if not is_connected:
+                status = HealthStatus.DEGRADED if status != HealthStatus.UNHEALTHY else status
+                if not error_message:
+                    error_message = 'MQTT service disconnected'
                         
         except Exception as e:
             status = HealthStatus.UNHEALTHY
@@ -154,7 +161,15 @@ class MQTTHealthView(View):
             'status': status,
             'timestamp': timezone.now().isoformat(),
             'response_time_ms': round((time.time() - start_time) * 1000, 2),
-            'broker': broker_info
+            'broker': broker_info,
+            'client': {
+                'connected': is_connected if 'is_connected' in locals() else None,
+                'messages_received': messages_received if 'messages_received' in locals() else 0,
+                'last_error': last_error if 'last_error' in locals() else None,
+            },
+            'devices': {
+                'online_last_5m': online_devices if 'online_devices' in locals() else 0,
+            }
         }
         
         if error_message:
