@@ -1,6 +1,6 @@
 # core/views/cer.py
 import logging
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
@@ -225,6 +225,11 @@ class CERJoinView(BaseCERView, GDPRConsentRequiredMixin):
         )
     
     def dispatch(self, request, *args, **kwargs):
+        # Verifica autenticazione prima
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+            
         cer = self.get_object()
         
         # Verifica se l'utente è già membro
@@ -236,6 +241,42 @@ class CERJoinView(BaseCERView, GDPRConsentRequiredMixin):
             return redirect('core:cer_detail', pk=cer.pk)
             
         return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cer = self.get_object()
+        
+        # Add member and plant counts for the sidebar
+        members_count = CERMembership.objects.filter(
+            cer_configuration=cer, is_active=True
+        ).count()
+        plants_count = Plant.objects.filter(
+            cer_configuration=cer, is_active=True
+        ).count()
+        
+        context.update({
+            'cer': cer,
+            'object': cer,
+            'members_count': members_count,
+            'plants_count': plants_count
+        })
+        
+        return context
+    
+    def get(self, request, *args, **kwargs):
+        """Handle GET request - display the form"""
+        form = self.form_class()
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
+    
+    def post(self, request, *args, **kwargs):
+        """Handle POST request - process the form"""
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            context = self.get_context_data(form=form)
+            return self.render_to_response(context)
     
     def form_valid(self, form):
         membership = form.save(commit=False)

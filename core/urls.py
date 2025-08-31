@@ -27,6 +27,14 @@ from .views.api import (
     cer_power_api,
     mqtt_status_api
 )
+# Temporaneamente disabilitato - richiede GDAL/PostGIS
+# from .views.api_primary_substation import (
+#     lookup_primary_substation_by_pod,
+#     lookup_primary_substation_by_address,
+#     bulk_lookup_pods,
+#     get_primary_substations_near_cer,
+#     validate_pod_for_cer
+# )
 
 app_name = 'core'
 
@@ -81,5 +89,12 @@ urlpatterns = [
     # API URLs - Fees Management
     path('api/fees/set/<int:card_id>/', set_membership_fee, name='api_set_fee'),
     path('api/fees/paid/<int:card_id>/', mark_fee_paid, name='api_mark_fee_paid'),
-    path('api/cer/<int:cer_pk>/bulk-fees/', bulk_set_fees, name='api_bulk_fees')
+    path('api/cer/<int:cer_pk>/bulk-fees/', bulk_set_fees, name='api_bulk_fees'),
+    
+    # API URLs - Primary Substation Lookup (temporaneamente disabilitato - richiede GDAL/PostGIS)
+    # path('api/primary-substation/lookup-pod/', lookup_primary_substation_by_pod, name='api_lookup_pod'),
+    # path('api/primary-substation/lookup-address/', lookup_primary_substation_by_address, name='api_lookup_address'),
+    # path('api/primary-substation/bulk-lookup-pods/', bulk_lookup_pods, name='api_bulk_lookup_pods'),
+    # path('api/primary-substation/near-cer/<int:cer_id>/', get_primary_substations_near_cer, name='api_substations_near_cer'),
+    # path('api/validate-pod-for-cer/', validate_pod_for_cer, name='api_validate_pod_cer')
 ]

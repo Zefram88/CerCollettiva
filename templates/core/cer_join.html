@@ -1,0 +1,187 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Aderisci a {{ cer.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.producer-only, .prosumer-only, .consumer-only {
+    display: none;
+}
+.form-section {
+    margin-bottom: 2rem;
+}
+.form-section h5 {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-user-plus"></i> 
+                        Aderisci alla CER "{{ cer.name }}"
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Member Type -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-user-tag"></i> Tipo di Membro</h5>
+                            <div class="form-group">
+                                <label for="{{ form.member_type.id_for_label }}" class="form-label">{{ form.member_type.label }}</label>
+                                {{ form.member_type }}
+                                {% if form.member_type.help_text %}
+                                    <div class="form-text">{{ form.member_type.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.member_type.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <strong>Scegli il tuo ruolo:</strong><br>
+                                <i class="fas fa-plug"></i> <strong>Solo Consumatore:</strong> Consumi energia dalla CER<br>
+                                <i class="fas fa-solar-panel"></i> <strong>Produttore:</strong> Produci energia per la CER<br>
+                                <i class="fas fa-sync-alt"></i> <strong>Prosumer:</strong> Produci e consumi energia
+                            </div>
+                        </div>
+
+                        <!-- Basic Info -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-info-circle"></i> Informazioni di Base</h5>
+                            <div class="row">
+                                <div class="col-md-6">{{ form.pod_code }}</div>
+                                <div class="col-md-6">{{ form.address }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Consumer fields -->
+                        <div class="form-section consumer-only">
+                            <h5><i class="fas fa-plug"></i> Informazioni Consumo</h5>
+                            {{ form.annual_consumption }}
+                        </div>
+
+                        <!-- Producer fields -->
+                        <div class="form-section producer-only">
+                            <h5><i class="fas fa-solar-panel"></i> Informazioni Impianto</h5>
+                            <div class="row">
+                                <div class="col-md-6">{{ form.annual_production }}</div>
+                                <div class="col-md-6">{{ form.plant_power }}</div>
+                            </div>
+                            {{ form.installation_date }}
+                        </div>
+
+                        <!-- Documents -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-file-alt"></i> Documentazione</h5>
+                            
+                            <!-- Common docs -->
+                            <div class="alert alert-info">
+                                <strong><i class="fas fa-info-circle"></i> Documenti Richiesti per Tutti:</strong>
+                                Documento di identità e codice fiscale sono sempre obbligatori.
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">{{ form.identity_document }}</div>
+                                <div class="col-md-6">{{ form.fiscal_code_document }}</div>
+                            </div>
+                            
+                            <!-- Producer docs -->
+                            <div class="producer-only">
+                                <div class="alert alert-warning">
+                                    <strong><i class="fas fa-exclamation-triangle"></i> Documenti Aggiuntivi per Produttori:</strong>
+                                    I seguenti documenti sono obbligatori per impianti di produzione.
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">{{ form.gaudi_document }}</div>
+                                    <div class="col-md-6">{{ form.plant_authorization }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">{{ form.conformity_declaration }}</div>
+                                    <div class="col-md-6">{{ form.gse_practice }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">{{ form.panels_photo }}</div>
+                                    <div class="col-md-6">{{ form.inverter_photo }}</div>
+                                </div>
+                                {{ form.panels_serial_list }}
+                            </div>
+                        </div>
+
+                        <!-- GDPR -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-shield-alt"></i> Consensi Privacy</h5>
+                            {{ form.privacy_consent }}
+                            {{ form.data_processing_consent }}
+                            {{ form.marketing_consent }}
+                        </div>
+
+                        <!-- Role -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-user-cog"></i> Ruolo nella CER</h5>
+                            {{ form.role }}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'core:cer_public_detail' cer.pk %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Torna Indietro
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Invia Richiesta di Adesione
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Informazioni CER
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ cer.name }}</h6>
+                    {% if cer.description %}
+                        <p class="text-muted">{{ cer.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <strong>{{ members_count|default:0 }}</strong>
+                            </div>
+                            <small class="text-muted">Membri</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <strong>{{ plants_count|default:0 }}</strong>
+                            </div>
+                            <small class="text-muted">Impianti</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/primary_substation_lookup.js' %}"></script>
+<script src="{% static 'js/cer_membership_form.js' %}"></script>
+{% endblock %}

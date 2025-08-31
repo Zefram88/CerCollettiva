@@ -289,7 +289,152 @@ class CERConfigurationForm(forms.ModelForm):
         }
 
 class CERMembershipForm(forms.ModelForm):
-    """Form per la gestione dell'adesione a una CER"""
+    """Form per la gestione dell'adesione a una CER con documenti dinamici"""
+    
+    # Campi aggiuntivi per tutti
+    pod_code = forms.CharField(
+        label="Codice POD",
+        max_length=15,
+        required=False,  # Validazione nel clean()
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'IT001E12345678',
+            'data-pod-input': '',  # Per JavaScript lookup
+        }),
+        help_text="Codice del punto di prelievo (visibile in bolletta) - alternativo all'indirizzo"
+    )
+    
+    address = forms.CharField(
+        label="Indirizzo di Fornitura",
+        max_length=500,
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 2,
+            'placeholder': 'Via Roma 123, Milano, MI',
+            'data-address-input': '',  # Per JavaScript lookup
+        }),
+        help_text="Indirizzo dove hai la fornitura elettrica (alternativo al POD)"
+    )
+    
+    annual_consumption = forms.IntegerField(
+        label="Consumo Annuo Stimato (kWh)",
+        required=False,
+        validators=[MinValueValidator(0)],
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': '3000',
+            'min': '0'
+        }),
+        help_text="Consumo elettrico annuo stimato in kWh"
+    )
+    
+    # Campi specifici per produttori
+    annual_production = forms.IntegerField(
+        label="Produzione Annua Stimata (kWh)",
+        required=False,
+        validators=[MinValueValidator(0)],
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control producer-field',
+            'placeholder': '5000',
+            'min': '0',
+            'style': 'display: none;'  # Nascosto inizialmente
+        }),
+        help_text="Produzione elettrica annua stimata in kWh"
+    )
+    
+    plant_power = forms.DecimalField(
+        label="Potenza Impianto (kW)",
+        required=False,
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control producer-field',
+            'placeholder': '6.0',
+            'min': '0',
+            'step': '0.01',
+            'style': 'display: none;'  # Nascosto inizialmente
+        }),
+        help_text="Potenza nominale dell'impianto fotovoltaico"
+    )
+    
+    installation_date = forms.DateField(
+        label="Data Installazione Impianto",
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control producer-field',
+            'type': 'date',
+            'style': 'display: none;'  # Nascosto inizialmente
+        }),
+        help_text="Data di installazione dell'impianto fotovoltaico"
+    )
+    
+    # Documenti comuni
+    identity_document = forms.FileField(
+        label="Documento di Identità",
+        required=True,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.pdf,.jpg,.jpeg,.png'
+        }),
+        help_text="Copia documento di identità valido (PDF, JPG, PNG)"
+    )
+    
+    fiscal_code_document = forms.FileField(
+        label="Codice Fiscale",
+        required=True,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.pdf,.jpg,.jpeg,.png'
+        }),
+        help_text="Copia codice fiscale (PDF, JPG, PNG)"
+    )
+    
+    # Documenti specifici per produttori (inizialmente nascosti)
+    gaudi_document = forms.FileField(
+        label="Attestato GAUDÌ",
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control producer-field',
+            'accept': '.pdf',
+            'style': 'display: none;'
+        }),
+        help_text="Attestato GAUDÌ dell'impianto (PDF) - OBBLIGATORIO per produttori"
+    )
+    
+    plant_authorization = forms.FileField(
+        label="Autorizzazione Impianto",
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control producer-field',
+            'accept': '.pdf',
+            'style': 'display: none;'
+        }),
+        help_text="Autorizzazione installazione impianto (PDF) - OBBLIGATORIO per produttori"
+    )
+    
+    # Consensi GDPR
+    privacy_consent = forms.BooleanField(
+        label="Consenso Privacy",
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Accetto l'informativa sulla privacy e autorizzo il trattamento dei dati personali"
+    )
+    
+    data_processing_consent = forms.BooleanField(
+        label="Trattamento Dati Energetici",
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Autorizzo il trattamento dei dati di consumo/produzione per la gestione CER"
+    )
+    
+    marketing_consent = forms.BooleanField(
+        label="Consenso Marketing",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Acconsento all'invio di comunicazioni promozionali (facoltativo)"
+    )
     
     class Meta:
         model = CERMembership
@@ -303,44 +448,121 @@ class CERMembershipForm(forms.ModelForm):
             'panels_serial_list'
         ]
         widgets = {
-            'member_type': forms.Select(attrs={'class': 'form-control'}),
+            'member_type': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'member_type_select'  # Per JavaScript
+            }),
             'role': forms.Select(attrs={'class': 'form-control'}),
             'panels_serial_list': forms.Textarea(attrs={
-                'class': 'form-control',
+                'class': 'form-control producer-field',
                 'rows': 3,
-                'placeholder': 'Inserire i numeri seriali dei pannelli, uno per riga'
+                'placeholder': 'Inserire i numeri seriali dei pannelli, uno per riga',
+                'style': 'display: none;'  # Nascosto inizialmente
+            }),
+            'conformity_declaration': forms.ClearableFileInput(attrs={
+                'class': 'form-control producer-field',
+                'accept': '.pdf',
+                'style': 'display: none;'  # Nascosto inizialmente
+            }),
+            'gse_practice': forms.ClearableFileInput(attrs={
+                'class': 'form-control producer-field',
+                'accept': '.pdf',
+                'style': 'display: none;'  # Nascosto inizialmente
+            }),
+            'panels_photo': forms.ClearableFileInput(attrs={
+                'class': 'form-control producer-field',
+                'accept': 'image/*',
+                'style': 'display: none;'  # Nascosto inizialmente
+            }),
+            'inverter_photo': forms.ClearableFileInput(attrs={
+                'class': 'form-control producer-field',
+                'accept': 'image/*',
+                'style': 'display: none;'  # Nascosto inizialmente
             }),
         }
         help_texts = {
             'member_type': 'Seleziona il tipo di partecipazione nella CER',
-            'conformity_declaration': 'Dichiarazione di conformità dell\'impianto (PDF) - Solo per produttori',
-            'gse_practice': 'Documentazione GSE completa (PDF) - Solo per produttori',
-            'panels_photo': 'Foto dei pannelli installati (JPG/PNG) - Solo per produttori',
-            'inverter_photo': 'Foto dell\'inverter installato (JPG/PNG) - Solo per produttori',
+            'conformity_declaration': 'Dichiarazione di conformità dell\'impianto (PDF) - OBBLIGATORIO per produttori',
+            'gse_practice': 'Documentazione GSE completa (PDF) - OBBLIGATORIO per produttori',
+            'panels_photo': 'Foto dei pannelli installati - OBBLIGATORIA per produttori',
+            'inverter_photo': 'Foto dell\'inverter installato - OBBLIGATORIA per produttori',
+            'panels_serial_list': 'Numeri seriali dei pannelli - OBBLIGATORIO per produttori',
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Inizialmente nascondi i campi di produzione
-        self.fields['conformity_declaration'].required = False
-        self.fields['gse_practice'].required = False
-        self.fields['panels_photo'].required = False
-        self.fields['inverter_photo'].required = False
-        self.fields['panels_serial_list'].required = False
+        # Inizialmente imposta tutti i campi producer come non richiesti
+        # La validazione vera avviene nel clean()
+        producer_fields = [
+            'conformity_declaration', 'gse_practice', 'panels_photo', 
+            'inverter_photo', 'panels_serial_list', 'gaudi_document', 
+            'plant_authorization', 'annual_production', 'plant_power', 
+            'installation_date'
+        ]
+        
+        for field_name in producer_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
 
     def clean(self):
         cleaned_data = super().clean()
         member_type = cleaned_data.get('member_type')
         
-        # Se è un produttore o prosumer, richiedi i documenti
-        if member_type in ['PRODUCER', 'PROSUMER']:
-            required_docs = ['conformity_declaration', 'gse_practice', 'panels_photo', 'inverter_photo']
+        # Validazione documenti comuni (sempre richiesti)
+        if not cleaned_data.get('identity_document'):
+            self.add_error('identity_document', 'Il documento di identità è obbligatorio per tutti i tipi di membri')
+        
+        if not cleaned_data.get('fiscal_code_document'):
+            self.add_error('fiscal_code_document', 'Il codice fiscale è obbligatorio per tutti i tipi di membri')
             
-            for field_name in required_docs:
+        # Validazione POD code o indirizzo (almeno uno richiesto)
+        pod_code = cleaned_data.get('pod_code')
+        address = cleaned_data.get('address')
+        
+        if not pod_code and not address:
+            self.add_error('pod_code', 'È necessario fornire il codice POD o l\'indirizzo di fornitura')
+            self.add_error('address', 'È necessario fornire il codice POD o l\'indirizzo di fornitura')
+        
+        # Validazioni specifiche per tipo di membro
+        if member_type in ['PRODUCER', 'PROSUMER']:
+            # Documenti obbligatori per produttori
+            producer_docs = {
+                'gaudi_document': 'Attestato GAUDÌ',
+                'plant_authorization': 'Autorizzazione impianto',
+                'conformity_declaration': 'Dichiarazione di conformità',
+                'gse_practice': 'Documentazione GSE',
+                'panels_photo': 'Foto dei pannelli',
+                'inverter_photo': 'Foto dell\'inverter'
+            }
+            
+            for field_name, field_label in producer_docs.items():
                 if not cleaned_data.get(field_name):
-                    self.add_error(field_name, f'Questo documento è obbligatorio per {self.fields["member_type"].choices[member_type]}')
+                    self.add_error(field_name, f'{field_label} è obbligatorio per {self.get_member_type_label(member_type)}')
+            
+            # Campi numerici obbligatori per produttori
+            if not cleaned_data.get('annual_production'):
+                self.add_error('annual_production', 'La produzione annua stimata è obbligatoria per i produttori')
+                
+            if not cleaned_data.get('plant_power'):
+                self.add_error('plant_power', 'La potenza dell\'impianto è obbligatoria per i produttori')
+                
+            if not cleaned_data.get('installation_date'):
+                self.add_error('installation_date', 'La data di installazione è obbligatoria per i produttori')
+        
+        elif member_type == 'CONSUMER':
+            # Per i consumatori, il consumo annuo è utile ma non obbligatorio
+            pass
         
         return cleaned_data
+        
+    def get_member_type_label(self, member_type):
+        """Restituisce la label leggibile del tipo di membro"""
+        type_labels = {
+            'CONSUMER': 'consumatori',
+            'PRODUCER': 'produttori', 
+            'PROSUMER': 'prosumer'
+        }
+        return type_labels.get(member_type, member_type.lower())
 
     def clean_conformity_declaration(self):
         file = self.cleaned_data.get('conformity_declaration')
