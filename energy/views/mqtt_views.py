@@ -6,8 +6,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
-from ..models import MQTTBroker, MQTTAuditLog
+from ..models import MQTTBroker, MQTTAuditLog, DeviceConfiguration
 from ..mqtt.client import get_mqtt_client
+from django.http import JsonResponse
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -173,3 +175,40 @@ def mqtt_control(request):
             messages.error(request, f'Errore durante l\'operazione: {str(e)}')
     
     return redirect('energy:mqtt_settings')
+
+
+@login_required
+def mqtt_status_overview(request):
+    """API overview per stato MQTT richiesto da static/js/mqtt-status.js"""
+    try:
+        client = get_mqtt_client()
+        is_connected = bool(getattr(client, 'is_connected', False))
+        now = timezone.now()
+        five_minutes_ago = now - timezone.timedelta(minutes=5)
+        connected_devices = DeviceConfiguration.objects.filter(
+            is_active=True,
+            last_seen__gte=five_minutes_ago
+        ).count()
+
+        data = {
+            'connection': 'connected' if is_connected else 'disconnected',
+            'messages_processed': int(getattr(client, '_message_count', 0)),
+            'connected_devices': connected_devices,
+            'last_error': None,
+            'performance': {
+                'message_rate': 0.0,
+                'average_processing_time': 0.0,
+            }
+        }
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({
+            'connection': 'error',
+            'messages_processed': 0,
+            'connected_devices': 0,
+            'last_error': str(e),
+            'performance': {
+                'message_rate': 0.0,
+                'average_processing_time': 0.0,
+            }
+        }, status=500)

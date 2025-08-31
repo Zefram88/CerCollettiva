@@ -18,7 +18,7 @@ from .views.device_views import (
     MeasurementDetailView, 
     device_delete
 )
-from .views.mqtt_views import mqtt_settings, mqtt_control, save_mqtt_settings
+from .views.mqtt_views import mqtt_settings, mqtt_control, save_mqtt_settings, mqtt_status_overview
 from .views.api import PlantViewSet, DeviceConfigurationViewSet, DeviceMeasurementViewSet
 
 app_name = 'energy'
@@ -53,6 +53,8 @@ urlpatterns = [
     path('settings/mqtt/', mqtt_settings, name='mqtt_settings'),
     path('settings/mqtt/save/', save_mqtt_settings, name='save_mqtt_settings'),
     path('settings/mqtt/control/', mqtt_control, name='mqtt_control'),
+    # API stato MQTT per frontend
+    path('api/mqtt/status/', mqtt_status_overview, name='mqtt_status_overview'),
 
     # API MQTT Data - Messo al livello principale
     path('api/plants/<int:plant_id>/mqtt-data/', plant_mqtt_data, name='plant-mqtt-data'),
