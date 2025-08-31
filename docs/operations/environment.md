@@ -46,6 +46,7 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
   - Configura e stampa stato una sola volta: `python manage.py mqtt_client --once`
   - Avvio con heartbeat: `python manage.py mqtt_client`
 - Inizializza broker MQTT attivo dalle variabili di ambiente: `python manage.py init_mqtt_broker`
+- Genera chiave cifratura valida (Fernet): `python manage.py gen_field_key`
 
 ### Sentry (produzione opzionale)
 - `SENTRY_DSN`
