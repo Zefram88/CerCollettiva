@@ -45,6 +45,7 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
 - Client/Service MQTT:
   - Configura e stampa stato una sola volta: `python manage.py mqtt_client --once`
   - Avvio con heartbeat: `python manage.py mqtt_client`
+- Inizializza broker MQTT attivo dalle variabili di ambiente: `python manage.py init_mqtt_broker`
 
 ### Sentry (produzione opzionale)
 - `SENTRY_DSN`
