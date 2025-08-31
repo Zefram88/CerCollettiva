@@ -127,6 +127,11 @@ CerCollettiva/
 - [CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md) - Codice di condotta
 - [LICENSE](LICENSE) - Licenza MIT
 - Documentazione tecnica estesa: vedi `docs/overview.md` e l’indice in `docs/README.md`
+- Deploy e DevOps:
+  - [Deploy su web server](docs/deploy.md)
+  - [Persistenza DB con Docker](docs/docker_db_persistence.md)
+- OTA IoT:
+  - [Analisi di fattibilità OTA](docs/ota.md)
 
 ## Script di utilità
 
