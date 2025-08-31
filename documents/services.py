@@ -18,10 +18,20 @@ class SystemDocumentService:
         # Genera il contenuto HTML dal template
         html_content = render_to_string(f'documents/system/{document_type}.html', context)
         
-        # Converti HTML in PDF (fallback a HTML se conversione non disponibile)
+        # Converti HTML in PDF (preferisci WeasyPrint se disponibile; fallback a pdfkit/HTML)
         pdf_bytes = None
         try:
-            pdf_bytes = pdfkit.from_string(html_content, False)
+            # Tentativo con WeasyPrint (se installato)
+            try:
+                from weasyprint import HTML  # type: ignore
+
+                pdf_bytes = HTML(string=html_content).write_pdf()
+            except Exception:
+                # Tentativo con pdfkit
+                try:
+                    pdf_bytes = pdfkit.from_string(html_content, False)
+                except Exception:
+                    pdf_bytes = None
         except Exception:
             pdf_bytes = None
         

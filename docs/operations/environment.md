@@ -89,3 +89,5 @@ USE_NEW_MQTT=True
 - Non committare `.env`.
 - Gestire segreti con secret manager in produzione.
 - Rotazione periodica `FIELD_ENCRYPTION_KEY` con piano di re-cifratura (out-of-scope qui).
+- PDF: opzionale `WeasyPrint` per generare PDF senza dipendenze OS di wkhtmltopdf.
+  - `pip install weasyprint` e relativi prerequisiti di sistema come da documentazione ufficiale.
