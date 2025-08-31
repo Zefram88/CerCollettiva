@@ -641,6 +641,19 @@ class NewMQTTAdapter:
         except Exception:
             return False
 
+    # Compat: subscribe/unsubscribe used in some views
+    def subscribe(self, topic: str, qos: int = 1):
+        try:
+            return self._svc.subscribe(topic, qos=qos)
+        except Exception:
+            return False
+
+    def unsubscribe(self, topic: str):
+        try:
+            return self._svc.unsubscribe(topic)
+        except Exception:
+            return False
+
 
 def get_mqtt_client():
     """Return legacy client or adapter to new service based on flag."""

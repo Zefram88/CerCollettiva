@@ -365,6 +365,33 @@ class MQTTService:
         except Exception as e:
             logger.error(f"Errore pubblicazione stato: {str(e)}")
 
+    # --- Compat layer for direct subscribe/unsubscribe ---
+    def subscribe(self, topic: str, qos: int = 1) -> bool:
+        """Sottoscrive direttamente ad un topic specifico (compatibilità legacy)."""
+        try:
+            with self._lock:
+                if self._client:
+                    self._client.subscribe(topic, qos=qos)
+                    self._subscribed_topics.add(topic)
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"Errore subscribe({topic}): {e}")
+            return False
+
+    def unsubscribe(self, topic: str) -> bool:
+        """Annulla la sottoscrizione ad un topic specifico (compatibilità legacy)."""
+        try:
+            with self._lock:
+                if self._client:
+                    self._client.unsubscribe(topic)
+                    self._subscribed_topics.discard(topic)
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"Errore unsubscribe({topic}): {e}")
+            return False
+
     def _anonymize_topic(self, topic: str) -> str:
         """Anonimizza dati sensibili nel topic per GDPR"""
         parts = topic.split('/')
