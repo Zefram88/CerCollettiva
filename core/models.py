@@ -24,6 +24,39 @@ class CERConfiguration(models.Model):
     name = models.CharField("Nome", max_length=255)
     code = models.CharField("Codice identificativo", max_length=50, unique=True)
     primary_substation = models.CharField("Cabina primaria", max_length=100)
+    
+    # Campi per personalizzazione pubblica
+    logo = models.ImageField(
+        "Logo CER",
+        upload_to="cer_logos/",
+        blank=True,
+        null=True,
+        help_text="Logo della CER (formato consigliato: PNG, max 2MB)"
+    )
+    description = models.TextField(
+        "Descrizione",
+        blank=True,
+        help_text="Descrizione della CER che apparirà nella vista pubblica"
+    )
+    
+    # Documenti ufficiali
+    statute_document = models.FileField(
+        "Statuto",
+        upload_to="cer_documents/",
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        help_text="Documento PDF dello statuto della CER"
+    )
+    regulation_document = models.FileField(
+        "Regolamento",
+        upload_to="cer_documents/",
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        help_text="Documento PDF del regolamento della CER"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField("Attiva", default=True)

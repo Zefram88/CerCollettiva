@@ -3,18 +3,77 @@
 
 {% block title %}{{ cer.name }} - Informazioni Pubbliche{% endblock %}
 
+{% block extra_css %}
+<style>
+.legend {
+    padding: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+#distributionChart {
+    max-width: 100%;
+    height: auto;
+}
+
+.cer-logo {
+    max-width: 150px;
+    max-height: 100px;
+    object-fit: contain;
+}
+
+.document-link {
+    display: inline-block;
+    margin: 5px 10px 5px 0;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid px-4">
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-solar-panel me-2"></i>
-                        {{ cer.name }}
-                    </h4>
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="fas fa-solar-panel me-2"></i>
+                                {{ cer.name }}
+                            </h4>
+                        </div>
+                        {% if cer.logo %}
+                        <div class="col-auto">
+                            <img src="{{ cer.logo.url }}" alt="Logo {{ cer.name }}" class="cer-logo">
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-body">
+                    {% if cer.description %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-light">
+                                <h5><i class="fas fa-info-circle me-2"></i>Descrizione</h5>
+                                <p class="mb-0">{{ cer.description|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <h5>Informazioni Generali</h5>
@@ -51,54 +110,39 @@
                         <div class="col-md-6">
                             <h5>Ripartizione Economica</h5>
                             {% if distribution_config %}
-                                <div class="mb-3">
-                                    <div class="progress mb-1" style="height: 30px;">
-                                        <div class="progress-bar bg-success" 
-                                             style="width: {{ distribution_config.producer_percentage }}%">
-                                            Produttori: {{ distribution_config.producer_percentage }}%
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <canvas id="distributionChart" width="300" height="300"></canvas>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="legend">
+                                            <div class="legend-item mb-2">
+                                                <span class="legend-color" style="background-color: #28a745;"></span>
+                                                <strong>Produttori</strong><br>
+                                                <small>{{ distribution_config.producer_percentage }}% - Destinata ai produttori di energia</small>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <span class="legend-color" style="background-color: #17a2b8;"></span>
+                                                <strong>Consumatori</strong><br>
+                                                <small>{{ distribution_config.consumer_percentage }}% - Destinata ai consumatori</small>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <span class="legend-color" style="background-color: #ffc107;"></span>
+                                                <strong>Gestione</strong><br>
+                                                <small>{{ distribution_config.management_percentage }}% - Spese amministrative</small>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <span class="legend-color" style="background-color: #007bff;"></span>
+                                                <strong>Investimenti</strong><br>
+                                                <small>{{ distribution_config.investment_fund_percentage }}% - Fondo investimenti</small>
+                                            </div>
+                                            <div class="legend-item">
+                                                <span class="legend-color" style="background-color: #dc3545;"></span>
+                                                <strong>Solidarietà</strong><br>
+                                                <small>{{ distribution_config.solidarity_fund_percentage }}% - Fondo solidarietà</small>
+                                            </div>
                                         </div>
                                     </div>
-                                    <small class="text-muted">Percentuale destinata ai produttori di energia</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <div class="progress mb-1" style="height: 30px;">
-                                        <div class="progress-bar bg-info" 
-                                             style="width: {{ distribution_config.consumer_percentage }}%">
-                                            Consumatori: {{ distribution_config.consumer_percentage }}%
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Percentuale destinata ai consumatori</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <div class="progress mb-1" style="height: 30px;">
-                                        <div class="progress-bar bg-warning" 
-                                             style="width: {{ distribution_config.management_percentage }}%">
-                                            Gestione: {{ distribution_config.management_percentage }}%
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Spese di gestione (commercialista, spese bancarie, legali, marketing)</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <div class="progress mb-1" style="height: 30px;">
-                                        <div class="progress-bar bg-primary" 
-                                             style="width: {{ distribution_config.investment_fund_percentage }}%">
-                                            Investimenti: {{ distribution_config.investment_fund_percentage }}%
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Fondo per investimenti futuri</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <div class="progress mb-1" style="height: 30px;">
-                                        <div class="progress-bar bg-danger" 
-                                             style="width: {{ distribution_config.solidarity_fund_percentage }}%">
-                                            Solidarietà: {{ distribution_config.solidarity_fund_percentage }}%
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Fondo di solidarietà</small>
                                 </div>
                                 
                                 {% if distribution_config.management_description %}
@@ -117,6 +161,28 @@
                     </div>
                     
                     <hr class="my-4">
+                    
+                    {% if cer.statute_document or cer.regulation_document %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5><i class="fas fa-file-pdf me-2"></i>Documenti Ufficiali</h5>
+                            <div class="d-flex flex-wrap align-items-center">
+                                {% if cer.statute_document %}
+                                <a href="{{ cer.statute_document.url }}" target="_blank" class="btn btn-outline-danger document-link">
+                                    <i class="fas fa-file-pdf me-2"></i>Statuto CER
+                                </a>
+                                {% endif %}
+                                {% if cer.regulation_document %}
+                                <a href="{{ cer.regulation_document.url }}" target="_blank" class="btn btn-outline-danger document-link">
+                                    <i class="fas fa-file-pdf me-2"></i>Regolamento CER
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    {% endif %}
                     
                     <div class="row">
                         <div class="col-12 text-center">
@@ -150,7 +216,59 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Add any JavaScript if needed
+{% if distribution_config %}
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('distributionChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                'Produttori ({{ distribution_config.producer_percentage }}%)',
+                'Consumatori ({{ distribution_config.consumer_percentage }}%)',
+                'Gestione ({{ distribution_config.management_percentage }}%)',
+                'Investimenti ({{ distribution_config.investment_fund_percentage }}%)',
+                'Solidarietà ({{ distribution_config.solidarity_fund_percentage }}%)'
+            ],
+            datasets: [{
+                data: [
+                    {{ distribution_config.producer_percentage }},
+                    {{ distribution_config.consumer_percentage }},
+                    {{ distribution_config.management_percentage }},
+                    {{ distribution_config.investment_fund_percentage }},
+                    {{ distribution_config.solidarity_fund_percentage }}
+                ],
+                backgroundColor: [
+                    '#28a745',  // Verde per produttori
+                    '#17a2b8',  // Azzurro per consumatori
+                    '#ffc107',  // Giallo per gestione
+                    '#007bff',  // Blu per investimenti
+                    '#dc3545'   // Rosso per solidarietà
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false  // Usiamo la nostra legenda custom
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+{% endif %}
 </script>
 {% endblock %}
