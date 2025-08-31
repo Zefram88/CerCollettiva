@@ -222,31 +222,41 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('distributionChart').getContext('2d');
     
+    // Dati per il grafico a torta
+    const chartData = {
+        labels: [
+            'Produttori',
+            'Consumatori', 
+            'Gestione',
+            'Investimenti',
+            'Solidarietà'
+        ],
+        values: [
+            parseFloat('{{ distribution_config.producer_percentage|floatformat:1 }}'),
+            parseFloat('{{ distribution_config.consumer_percentage|floatformat:1 }}'),
+            parseFloat('{{ distribution_config.management_percentage|floatformat:1 }}'),
+            parseFloat('{{ distribution_config.investment_fund_percentage|floatformat:1 }}'),
+            parseFloat('{{ distribution_config.solidarity_fund_percentage|floatformat:1 }}')
+        ],
+        colors: [
+            '#28a745',  // Verde per produttori
+            '#17a2b8',  // Azzurro per consumatori
+            '#ffc107',  // Giallo per gestione
+            '#007bff',  // Blu per investimenti
+            '#dc3545'   // Rosso per solidarietà
+        ]
+    };
+    
+    // Debug log per verificare i dati
+    console.log('Chart Data:', chartData);
+    
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: [
-                'Produttori ({{ distribution_config.producer_percentage }}%)',
-                'Consumatori ({{ distribution_config.consumer_percentage }}%)',
-                'Gestione ({{ distribution_config.management_percentage }}%)',
-                'Investimenti ({{ distribution_config.investment_fund_percentage }}%)',
-                'Solidarietà ({{ distribution_config.solidarity_fund_percentage }}%)'
-            ],
+            labels: chartData.labels,
             datasets: [{
-                data: [
-                    {{ distribution_config.producer_percentage }},
-                    {{ distribution_config.consumer_percentage }},
-                    {{ distribution_config.management_percentage }},
-                    {{ distribution_config.investment_fund_percentage }},
-                    {{ distribution_config.solidarity_fund_percentage }}
-                ],
-                backgroundColor: [
-                    '#28a745',  // Verde per produttori
-                    '#17a2b8',  // Azzurro per consumatori
-                    '#ffc107',  // Giallo per gestione
-                    '#007bff',  // Blu per investimenti
-                    '#dc3545'   // Rosso per solidarietà
-                ],
+                data: chartData.values,
+                backgroundColor: chartData.colors,
                 borderWidth: 2,
                 borderColor: '#ffffff'
             }]
@@ -261,7 +271,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            return label + ': ' + value.toFixed(1) + '%';
                         }
                     }
                 }
