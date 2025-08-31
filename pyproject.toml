@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 100
+target-version = ["py311", "py313"]
+exclude = ["venv", "migrations"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip = ["venv", "migrations"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["venv", "migrations"]
+fix = true

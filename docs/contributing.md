@@ -15,7 +15,8 @@ python manage.py runserver
 ```
 
 ## Stile e Qualità
-- PEP8; suggeriti `black`, `isort`, `ruff` (opzionale pre-commit).
+- PEP8; `black`, `isort`, `ruff` (pre-commit configurato).
+- Installa pre-commit: `pip install pre-commit` poi `pre-commit install` nella root.
 - Commit convention (consigliato): Conventional Commits.
 
 ## Branch & PR
@@ -24,4 +25,3 @@ python manage.py runserver
 
 ## Test
 - Preferire unit test mirati; integrazione con broker esistente per MQTT.
-

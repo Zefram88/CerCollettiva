@@ -37,6 +37,7 @@ Questa directory contiene tutta la documentazione del progetto CerCollettiva.
 - [Panoramica API](api/index.md)
 - [Core Endpoints](api/endpoints-core.md)
 - [Energy Endpoints](api/endpoints-energy.md)
+  - Swagger UI (dev): `/api/docs/` — Redoc: `/api/redoc/`
 
 ### Sicurezza & GDPR
 - [Sicurezza e GDPR](security-gdpr.md)
