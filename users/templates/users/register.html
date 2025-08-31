@@ -88,7 +88,12 @@
                                 <label for="{{ form.password1.id_for_label }}" class="form-label required">
                                     <i class="fas fa-lock me-2"></i>{{ form.password1.label }}
                                 </label>
-                                {{ form.password1 }}
+                                <div class="position-relative">
+                                    {{ form.password1 }}
+                                    <button type="button" class="btn password-toggle-btn" onclick="togglePassword('{{ form.password1.id_for_label }}', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                                 {% if form.password1.errors %}
                                     <div class="invalid-feedback d-block">{{ form.password1.errors.0 }}</div>
                                 {% endif %}
@@ -101,7 +106,12 @@
                                 <label for="{{ form.password2.id_for_label }}" class="form-label required">
                                     <i class="fas fa-lock me-2"></i>{{ form.password2.label }}
                                 </label>
-                                {{ form.password2 }}
+                                <div class="position-relative">
+                                    {{ form.password2 }}
+                                    <button type="button" class="btn password-toggle-btn" onclick="togglePassword('{{ form.password2.id_for_label }}', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                                 {% if form.password2.errors %}
                                     <div class="invalid-feedback d-block">{{ form.password2.errors.0 }}</div>
                                 {% endif %}
@@ -139,12 +149,33 @@
                             <div id="additional-fields" style="display: none;">
                                 <!-- Codice fiscale per privati -->
                                 <div class="col-12" id="fiscal-code-field">
-                                    <label for="{{ form.fiscal_code.id_for_label }}" class="form-label">
+                                    <label for="{{ form.fiscal_code.id_for_label }}" class="form-label required">
                                         <i class="fas fa-id-card me-2"></i>{{ form.fiscal_code.label }}
                                     </label>
                                     {{ form.fiscal_code }}
                                     {% if form.fiscal_code.errors %}
                                         <div class="invalid-feedback d-block">{{ form.fiscal_code.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Phone e Address per privati -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label required">
+                                        <i class="fas fa-phone me-2"></i>{{ form.phone.label }}
+                                    </label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.address.id_for_label }}" class="form-label required">
+                                        <i class="fas fa-map-marker-alt me-2"></i>{{ form.address.label }}
+                                    </label>
+                                    {{ form.address }}
+                                    {% if form.address.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.address.errors.0 }}</div>
                                     {% endif %}
                                 </div>
 
@@ -183,6 +214,40 @@
                             </div>
                         </div>
 
+                        <!-- Privacy Policy e Consensi GDPR -->
+                        <div class="col-12 mt-4">
+                            <hr class="my-4">
+                            <h6 class="text-energy mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>Consensi Privacy
+                            </h6>
+                            
+                            <div class="form-check mb-3">
+                                {{ form.privacy_policy }}
+                                <label class="form-check-label" for="{{ form.privacy_policy.id_for_label }}">
+                                    <strong>{{ form.privacy_policy.label }}</strong>
+                                    {% if form.privacy_policy.help_text %}
+                                        <br><small class="text-muted">{{ form.privacy_policy.help_text }}</small>
+                                    {% endif %}
+                                </label>
+                                {% if form.privacy_policy.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.privacy_policy.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                {{ form.data_processing }}
+                                <label class="form-check-label" for="{{ form.data_processing.id_for_label }}">
+                                    <strong>{{ form.data_processing.label }}</strong>
+                                    {% if form.data_processing.help_text %}
+                                        <br><small class="text-muted">{{ form.data_processing.help_text }}</small>
+                                    {% endif %}
+                                </label>
+                                {% if form.data_processing.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.data_processing.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
                         <div class="d-grid gap-2 mt-5">
                             <button type="submit" class="btn btn-cer-primary btn-lg">
                                 <i class="fas fa-rocket me-2"></i>Crea Account
@@ -208,6 +273,22 @@
 
 {% block extra_js %}
 <script>
+// Funzione semplificata per toggle password visibility
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const legalTypeSelect = document.getElementById('id_legal_type');
     const profitTypeField = document.getElementById('profit-type-field');
@@ -225,23 +306,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Handle profit type based on legal type
         const profitTypeSelect = document.getElementById('id_profit_type');
-        const profitTypeInfo = document.getElementById('profit-type-info');
-        
-        // Remove existing info
-        if (profitTypeInfo) profitTypeInfo.remove();
         
         if (selectedType === 'PRIVATE') {
-            // For private users
             profitTypeSelect.value = 'NON_PROFIT';
             profitTypeSelect.disabled = true;
             profitTypeField.style.display = 'none';
             
-            // Show fiscal code field
             additionalFields.style.display = 'block';
             fiscalCodeField.style.display = 'block';
             
         } else if (['BUSINESS', 'ASSOCIATION', 'PUBLIC', 'CHURCH'].includes(selectedType)) {
-            // For business entities
             if (selectedType === 'BUSINESS') {
                 profitTypeSelect.value = 'PROFIT';
                 profitTypeSelect.disabled = true;
@@ -253,61 +327,10 @@ document.addEventListener('DOMContentLoaded', function() {
             additionalFields.style.display = 'block';
             businessFields.forEach(field => field.style.display = 'block');
         }
-        
-        // Add visual feedback
-        legalTypeSelect.classList.add('is-valid');
-        setTimeout(() => legalTypeSelect.classList.remove('is-valid'), 2000);
     }
     
-    // Initialize form state
     legalTypeSelect.addEventListener('change', updateFormFields);
     updateFormFields();
-    
-    // Add form validation feedback
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        const requiredFields = form.querySelectorAll('[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-            }
-        });
-        
-        if (!isValid) {
-            e.preventDefault();
-            const firstError = form.querySelector('.is-invalid');
-            if (firstError) {
-                firstError.focus();
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    });
-    
-    // Real-time validation
-    const inputs = form.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.hasAttribute('required') && !this.value.trim()) {
-                this.classList.add('is-invalid');
-            } else {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            }
-        });
-        
-        input.addEventListener('input', function() {
-            if (this.classList.contains('is-invalid') && this.value.trim()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            }
-        });
-    });
 });
 </script>
 
@@ -335,6 +358,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
 #additional-fields {
     transition: all 0.3s ease;
+}
+
+/* Password Toggle Button Styles */
+.password-toggle-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    border: none;
+    background: transparent;
+    color: #718096;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle-btn:hover {
+    background: rgba(116, 129, 151, 0.1);
+    color: var(--cer-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.position-relative .form-control {
+    padding-right: 60px !important;
 }
 </style>
 {% endblock %}

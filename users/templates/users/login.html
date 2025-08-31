@@ -228,6 +228,41 @@
         }
     }
     
+    /* Password Toggle Button Styles */
+    .password-toggle-btn {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        border: none;
+        background: transparent;
+        color: #718096;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .password-toggle-btn:hover {
+        background: rgba(116, 129, 151, 0.1);
+        color: var(--cer-primary);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .password-toggle-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .password-input {
+        padding-right: 60px !important;
+    }
+    
     @media (max-width: 768px) {
         .login-container {
             padding: 1rem;
@@ -306,6 +341,7 @@
                            name="username" 
                            placeholder="Username o Email"
                            value="{{ form.username.value|default_if_none:'' }}"
+                           autocomplete="username"
                            required>
                     <label for="id_username">
                         <i class="bi bi-person me-2"></i>Username o Email
@@ -313,16 +349,20 @@
                 </div>
 
                 <!-- Campo Password -->
-                <div class="form-floating">
+                <div class="form-floating position-relative">
                     <input type="password" 
-                           class="form-control" 
+                           class="form-control password-input" 
                            id="id_password" 
                            name="password" 
                            placeholder="Password"
+                           autocomplete="current-password"
                            required>
                     <label for="id_password">
                         <i class="bi bi-lock me-2"></i>Password
                     </label>
+                    <button type="button" class="btn password-toggle-btn" onclick="togglePassword('id_password', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
                 </div>
 
                 <!-- Checkbox Remember Me (se disponibile) -->
@@ -365,7 +405,39 @@
 </div>
 
 <script>
+// Funzione per toggle password visibility
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+        button.setAttribute('aria-label', 'Nascondi password');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+        button.setAttribute('aria-label', 'Mostra password');
+    }
+    
+    // Mantieni il focus sull'input e triggera l'evento input per assicurarci che il valore sia mantenuto
+    input.focus();
+    
+    // Triggera eventi per assicurarsi che i validatori funzionino correttamente
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Inizializza gli attributi accessibility per i toggle password
+    const toggleButtons = document.querySelectorAll('.password-toggle-btn');
+    toggleButtons.forEach(button => {
+        button.setAttribute('aria-label', 'Mostra password');
+        button.setAttribute('tabindex', '0');
+    });
+
     // Aggiungi effetto focus sui campi
     const inputs = document.querySelectorAll('.form-control');
     inputs.forEach(input => {
@@ -379,6 +451,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Aggiungi listener per il submit del form
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Assicurati che tutti i campi password siano di tipo "password" prima della sottomissione
+            const passwordFields = form.querySelectorAll('input[name*="password"]');
+            passwordFields.forEach(field => {
+                if (field.type === 'text') {
+                    field.type = 'password';
+                }
+            });
+        });
+    }
+    
     // Aggiungi animazione al bottone
     const loginBtn = document.querySelector('.btn-login');
     loginBtn.addEventListener('click', function(e) {
@@ -391,6 +477,16 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             // Il form si sottometterà normalmente
         }, 100);
+    });
+    
+    // Supporto tastiera per toggle password
+    toggleButtons.forEach(button => {
+        button.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
     });
 });
 </script>

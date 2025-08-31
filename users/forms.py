@@ -13,11 +13,19 @@ class UserLoginForm(forms.Form):
     """Form per il login degli utenti"""
     username = forms.CharField(
         label=_('Username'),
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Nome utente')})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': _('Nome utente'),
+            'autocomplete': 'username'
+        })
     )
     password = forms.CharField(
         label=_('Password'),
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': _('Password')})
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control', 
+            'placeholder': _('Password'),
+            'autocomplete': 'current-password'
+        })
     )
 
 class UserRegistrationForm(UserCreationForm):
@@ -38,13 +46,21 @@ class UserRegistrationForm(UserCreationForm):
     # Campi base
     username = forms.CharField(
         label=_('Username'),
-        help_text=_('Richiesto. 150 caratteri o meno. Solo lettere, numeri e @/./+/-/_')
+        help_text=_('Richiesto. 150 caratteri o meno. Solo lettere, numeri e @/./+/-/_'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'username'
+        })
     )
     
     email = forms.EmailField(
         label=_('Email'),
         required=True,
-        help_text=_('Inserisci un indirizzo email valido')
+        help_text=_('Inserisci un indirizzo email valido'),
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'email'
+        })
     )
 
     # Campi tipologia
@@ -67,21 +83,31 @@ class UserRegistrationForm(UserCreationForm):
         label=_('Codice Fiscale'),
         max_length=16,
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'off'
+        })
     )
     
     phone = forms.CharField(
         label=_('Telefono'),
         max_length=20,
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+39'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': '+39',
+            'autocomplete': 'tel'
+        })
     )
     
     address = forms.CharField(
         label=_('Indirizzo'),
         max_length=255,
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'street-address'
+        })
     )
 
     # Campi per aziende/enti
@@ -89,20 +115,29 @@ class UserRegistrationForm(UserCreationForm):
         label=_('Denominazione'),
         max_length=255,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'organization'
+        })
     )
     
     vat_number = forms.CharField(
         label=_('Partita IVA'),
         max_length=11,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'off'
+        })
     )
     
     pec = forms.EmailField(
         label=_('PEC'),
         required=False,
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'email'
+        })
     )
 
     # Consensi GDPR
@@ -126,14 +161,20 @@ class UserRegistrationForm(UserCreationForm):
         label=_('Nome'),
         max_length=30,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'given-name'
+        })
     )
     
     last_name = forms.CharField(
         label=_('Cognome'),
         max_length=30,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'family-name'
+        })
     )
 
     class Meta:
@@ -162,8 +203,14 @@ class UserRegistrationForm(UserCreationForm):
             self.fields['profit_type'].initial = 'NON_PROFIT'
 
         # Configurazione password
-        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
-        self.fields['password2'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control password-input',
+            'autocomplete': 'new-password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control password-input',
+            'autocomplete': 'new-password'
+        })
         
         # Help text personalizzati
         self.fields['password1'].help_text = _('La password deve contenere almeno 8 caratteri')

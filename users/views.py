@@ -30,7 +30,23 @@ logger = logging.getLogger('access_logger')
 def register(request):
     """Vista per la registrazione di nuovi utenti"""
     if request.method == 'POST':
+        print("=== DEBUG REGISTRAZIONE ===")
+        print(f"Dati POST ricevuti: {list(request.POST.keys())}")
+        print(f"Password1 presente: {'password1' in request.POST}")
+        print(f"Password2 presente: {'password2' in request.POST}")
+        if 'password1' in request.POST and 'password2' in request.POST:
+            print(f"Password1 length: {len(request.POST['password1'])}")
+            print(f"Password2 length: {len(request.POST['password2'])}")
+            print(f"Passwords match: {request.POST['password1'] == request.POST['password2']}")
+        
         form = UserRegistrationForm(request.POST)
+        print(f"Form is valid: {form.is_valid()}")
+        
+        if not form.is_valid():
+            print("Form errors:", form.errors)
+            for field, errors in form.errors.items():
+                print(f"  {field}: {errors}")
+        
         if form.is_valid():
             # Verifica che la privacy policy sia stata accettata
             if form.cleaned_data.get('privacy_policy', False):
@@ -44,6 +60,8 @@ def register(request):
                 return redirect('users:login')
             else:
                 messages.error(request, 'Devi accettare la privacy policy per registrarti.')
+        else:
+            messages.error(request, 'Ci sono errori nel form. Controlla i campi evidenziati.')
     else:
         form = UserRegistrationForm()
         
