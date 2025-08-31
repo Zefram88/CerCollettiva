@@ -8,7 +8,8 @@ from .models import (
     EnergyAggregate,
     EnergyInterval,
     DeviceConfiguration,
-    MQTTBroker
+    MQTTBroker,
+    MQTTConfiguration,
 )
 from .models.device import DeviceType, Device
 
@@ -173,3 +174,32 @@ class MQTTBrokerAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(MQTTConfiguration)
+class MQTTConfigurationAdmin(admin.ModelAdmin):
+    list_display = [
+        'device_id',
+        'mqtt_username',
+        'is_active',
+        'last_connected',
+        'updated_at'
+    ]
+    list_filter = ['is_active', 'last_connected']
+    search_fields = ['mqtt_username', 'device__device_id']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('Device', {
+            'fields': ('device',)
+        }),
+        ('Credentials', {
+            'fields': ('mqtt_username', 'mqtt_password', 'is_active')
+        }),
+        ('Status', {
+            'fields': ('last_connected', 'created_at', 'updated_at')
+        }),
+    )
+
+    def device_id(self, obj):
+        return obj.device.device_id if obj.device else None
+    device_id.short_description = "Device ID"
