@@ -108,6 +108,8 @@ class MQTTService:
         self._retry_count = 0
         self._max_retries = 3
         self._retry_delay = 5  # secondi
+        self._messages_received = 0
+        self._last_error = None
         self._initialize_default_handlers()
         
     def _initialize_default_handlers(self):
@@ -214,6 +216,9 @@ class MQTTService:
     def _on_message(self, client, userdata, msg):
         """Gestione centralizzata dei messaggi MQTT"""
         try:
+            # aggiorna contatore
+            with self._lock:
+                self._messages_received += 1
             #logger.info(f"\n=== MQTT Message Received ===")
             #logger.info(f"Topic: {msg.topic}")
             #logger.info(f"Payload: {msg.payload}")
@@ -235,9 +240,13 @@ class MQTTService:
                     
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON from {msg.topic}: {e}")
+            with self._lock:
+                self._last_error = str(e)
         except Exception as e:
             logger.error(f"Error processing message: {str(e)}")
             logger.exception(e)
+            with self._lock:
+                self._last_error = str(e)
 
     def _handle_power_measurement(self, message: MQTTMessage):
         """Gestisce le misurazioni di potenza"""
@@ -383,6 +392,16 @@ class MQTTService:
     def is_connected(self) -> bool:
         """Verifica lo stato della connessione"""
         return self._connected and self._circuit_breaker.state != "OPEN"
+
+    @property
+    def messages_received(self) -> int:
+        with self._lock:
+            return int(self._messages_received)
+
+    @property
+    def last_error(self) -> str | None:
+        with self._lock:
+            return self._last_error
 
     def stop(self) -> None:
         """Arresto controllato del servizio MQTT"""

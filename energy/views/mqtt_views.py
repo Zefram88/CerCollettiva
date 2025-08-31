@@ -8,6 +8,7 @@ from django.views.decorators.http import require_http_methods
 
 from ..models import MQTTBroker, MQTTAuditLog, DeviceConfiguration
 from ..mqtt.client import get_mqtt_client
+from ..mqtt.core import get_mqtt_service
 from django.http import JsonResponse
 from django.utils import timezone
 
@@ -182,7 +183,8 @@ def mqtt_status_overview(request):
     """API overview per stato MQTT richiesto da static/js/mqtt-status.js"""
     try:
         client = get_mqtt_client()
-        is_connected = bool(getattr(client, 'is_connected', False))
+        svc = get_mqtt_service()
+        is_connected = bool(getattr(client, 'is_connected', False) or getattr(svc, 'is_connected', False))
         now = timezone.now()
         five_minutes_ago = now - timezone.timedelta(minutes=5)
         connected_devices = DeviceConfiguration.objects.filter(
@@ -192,9 +194,9 @@ def mqtt_status_overview(request):
 
         data = {
             'connection': 'connected' if is_connected else 'disconnected',
-            'messages_processed': int(getattr(client, '_message_count', 0)),
+            'messages_processed': int(getattr(client, '_message_count', 0) or getattr(svc, 'messages_received', 0)),
             'connected_devices': connected_devices,
-            'last_error': None,
+            'last_error': getattr(svc, 'last_error', None),
             'performance': {
                 'message_rate': 0.0,
                 'average_processing_time': 0.0,

@@ -27,6 +27,7 @@ Questa directory contiene tutta la documentazione del progetto CerCollettiva.
 - [Ambiente e variabili](operations/environment.md)
 - [Migrazioni](operations/migrations.md)
 - [Logging e Monitoring](operations/logging-monitoring.md)
+  - Endpoint frontend stato MQTT: `GET /energy/api/mqtt/status/`
 
 ### Energia / MQTT
 - [Specifiche Topic MQTT](../docs/energy/mqtt-topics.md)

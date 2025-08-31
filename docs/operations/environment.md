@@ -36,6 +36,13 @@ Questo documento elenca le variabili di ambiente e le configurazioni richieste p
 - `MQTT_TLS` (`True|False`)
 - `USE_NEW_MQTT` (`True|False`) — feature flag unificazione stack
 
+### Script e Comandi utili
+- Avvio sviluppo (PowerShell Windows): `pwsh scripts/rundev.ps1 -BindAddress 127.0.0.1 -Port 8000`
+- Sanity check + migrazioni: `pwsh scripts/check.ps1`
+- Client/Service MQTT:
+  - Configura e stampa stato una sola volta: `python manage.py mqtt_client --once`
+  - Avvio con heartbeat: `python manage.py mqtt_client`
+
 ### Sentry (produzione opzionale)
 - `SENTRY_DSN`
 - `SENTRY_SAMPLE_RATE`
@@ -77,4 +84,3 @@ USE_NEW_MQTT=True
 - Non committare `.env`.
 - Gestire segreti con secret manager in produzione.
 - Rotazione periodica `FIELD_ENCRYPTION_KEY` con piano di re-cifratura (out-of-scope qui).
-
