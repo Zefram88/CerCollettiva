@@ -46,17 +46,17 @@ pip install Django==5.0 psycopg2-binary python-dotenv
 
 # Install other core dependencies
 pip install djangorestframework channels django-crispy-forms crispy-bootstrap5
-pip install django-widget-tweaks django-filter django-extensions paho-mqtt
+pip install django-widget-tweaks django-filter django-extensions paho-mqtt Pillow
 
 # Install all remaining dependencies from requirements file
-pip install -r app/requirements.txt
+pip install -r requirements.txt
 
 # Alternative: Install dependencies step by step if encountering issues
 # pip install django djangorestframework channels paho-mqtt
 # pip install psycopg2-binary python-dotenv django-crispy-forms crispy-bootstrap5  
 # pip install django-widget-tweaks django-filters whitenoise geopy
 # pip install openpyxl pandas django-extensions django-cors-headers
-# pip install daphne channels-redis cryptography django-encrypted-model-fields
+# pip install daphne channels-redis cryptography django-encrypted-model-fields Pillow
 ```
 
 ### Database Management

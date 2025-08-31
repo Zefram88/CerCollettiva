@@ -25,3 +25,4 @@ openpyxl
 pandas
 django-extensions
 cryptography
+Pillow
