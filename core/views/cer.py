@@ -56,10 +56,61 @@ class CERListView(LoginRequiredMixin, ListView):
         })
         
         return context
+class CERPublicDetailView(LoginRequiredMixin, DetailView):
+    """Vista pubblica della CER per utenti non membri"""
+    model = CERConfiguration
+    template_name = 'core/cer_public_detail.html'
+    context_object_name = 'cer'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cer = self.object
+        
+        # Check if user is already a member
+        is_member = CERMembership.objects.filter(
+            user=self.request.user,
+            cer_configuration=cer,
+            is_active=True
+        ).exists()
+        
+        # Get distribution configuration
+        distribution_config = None
+        try:
+            distribution_config = cer.distribution_config
+        except:
+            pass
+        
+        context.update({
+            'is_member': is_member,
+            'distribution_config': distribution_config,
+            'members_count': cer.memberships.filter(is_active=True).count(),
+            'plants_count': cer.plants.filter(is_active=True).count(),
+        })
+        
+        return context
+
 class CERDetailView(BaseCERView):
-    """Dettaglio di una CER"""
+    """Dettaglio completo della CER per membri"""
     template_name = 'core/cer_detail.html'
     context_object_name = 'cer'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """Check if user is member, otherwise redirect to public view"""
+        cer = get_object_or_404(CERConfiguration, pk=kwargs['pk'])
+        
+        if not request.user.is_staff:
+            is_member = CERMembership.objects.filter(
+                user=request.user,
+                cer_configuration=cer,
+                is_active=True
+            ).exists()
+            
+            if not is_member:
+                # Redirect to public view
+                from django.urls import reverse
+                return redirect(reverse('core:cer_public_detail', kwargs={'pk': cer.pk}))
+        
+        return super().dispatch(request, *args, **kwargs)
     
     def get_object(self):
         """Recupera l'oggetto CER"""
@@ -79,12 +130,15 @@ class CERDetailView(BaseCERView):
         # Recupera membership dell'utente
         user_membership = None
         if not self.request.user.is_staff:
-            user_membership = get_object_or_404(
-                CERMembership,
-                user=self.request.user,
-                cer_configuration=cer,
-                is_active=True
-            )
+            try:
+                user_membership = CERMembership.objects.get(
+                    user=self.request.user,
+                    cer_configuration=cer,
+                    is_active=True
+                )
+            except CERMembership.DoesNotExist:
+                # User doesn't have membership - could redirect or show limited view
+                user_membership = None
         
         # Calcola statistiche energetiche
         time_threshold = self.get_time_threshold()

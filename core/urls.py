@@ -3,7 +3,7 @@ from django.contrib import admin
 from .admin import admin_site
 from .views.gaudi import PlantCreateFromGaudiView
 from .views.dashboard import HomeView, DashboardView, CerDashboardView
-from .views.cer import CERListView, CERDetailView, CERJoinView, MembershipCardView, MemberRegistryView
+from .views.cer import CERListView, CERDetailView, CERPublicDetailView, CERJoinView, MembershipCardView, MemberRegistryView
 from .views.fees import CERFeesManagementView, MembershipFeeDetailView, set_membership_fee, mark_fee_paid, bulk_set_fees
 from .views.setup import InitialSetupView, setup_complete_view, setup_check_view
 from .views.plant import (
@@ -43,6 +43,7 @@ urlpatterns = [
     # CER URLs
     path('cer/', CERListView.as_view(), name='cer_list'),
     path('cer/<int:pk>/', CERDetailView.as_view(), name='cer_detail'),
+    path('cer/<int:pk>/public/', CERPublicDetailView.as_view(), name='cer_public_detail'),
     path('cer/<int:pk>/join/', CERJoinView.as_view(), name='cer_join'),
     path('cer/<int:cer_pk>/card/', MembershipCardView.as_view(), name='membership_card'),
     path('cer/<int:cer_pk>/registry/', MemberRegistryView.as_view(), name='member_registry'),
