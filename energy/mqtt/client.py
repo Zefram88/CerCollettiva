@@ -644,16 +644,15 @@ class NewMQTTAdapter:
 
 def get_mqtt_client():
     """Return legacy client or adapter to new service based on flag."""
+    global _mqtt_client
     use_new = getattr(settings, "USE_NEW_MQTT", True)
     if use_new:
         # Singleton adapter
-        global _mqtt_client
         if not isinstance(_mqtt_client, NewMQTTAdapter):
             _mqtt_client = NewMQTTAdapter()
         return _mqtt_client
 
     # Legacy client fallback
-    global _mqtt_client
     if not isinstance(_mqtt_client, EnergyMQTTClient):
         with threading.Lock():
             if not isinstance(_mqtt_client, EnergyMQTTClient):
