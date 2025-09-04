@@ -21,7 +21,7 @@ Benvenuto nella documentazione completa di CerCollettiva, il sistema di gestione
 
 ## 🎯 Panoramica del Sistema
 
-CerCollettiva è una piattaforma Django completa per la gestione delle comunità energetiche rinnovabili in Italia, conforme alle normative vigenti (Decreto CACER, TIAD).
+CerCollettiva è una **piattaforma open source** Django completa per la gestione delle comunità energetiche rinnovabili in Italia, conforme alle normative vigenti (Decreto CACER, TIAD).
 
 ### Caratteristiche Principali
 - **Gestione CER/CEC**: Costituzione e amministrazione comunità energetiche

@@ -167,18 +167,16 @@ Fornire una soluzione completa che automatizza la gestione delle CER, dalla prod
 - [ ] Auto-scaling
 - [ ] Disaster recovery
 
-## 💰 Business Model
+## 🌍 Open Source Model
 
-### Revenue Streams
-1. **SaaS Subscription**: Abbonamento mensile per CER
-2. **Transaction Fees**: Commissioni su transazioni economiche
-3. **Premium Features**: Funzionalità avanzate a pagamento
-4. **Professional Services**: Consulenza e setup
+### Mission
+CerCollettiva è un progetto **open source** che mira a democratizzare l'accesso alle tecnologie per le Comunità Energetiche Rinnovabili, rendendo disponibile gratuitamente una soluzione completa e professionale.
 
-### Pricing Strategy
-- **Starter**: €99/mese (fino a 50 membri)
-- **Professional**: €299/mese (fino a 200 membri)
-- **Enterprise**: €799/mese (illimitato + supporto dedicato)
+### Sostenibilità
+- **Community-driven**: Sviluppo guidato dalla comunità
+- **Donazioni**: Supporto volontario per sviluppo e hosting
+- **Partnership**: Collaborazioni con enti pubblici e privati
+- **Servizi**: Consulenza e supporto tecnico opzionale
 
 ## 🎯 Success Metrics
 
@@ -188,11 +186,11 @@ Fornire una soluzione completa che automatizza la gestione delle CER, dalla prod
 - **Test Coverage**: >90%
 - **Security Score**: A+ rating
 
-### Business KPIs
+### Community KPIs
 - **User Adoption**: 80% member engagement
-- **Revenue Growth**: 20% MoM
-- **Customer Satisfaction**: >4.5/5
-- **Churn Rate**: <5% monthly
+- **Community Growth**: 20% MoM active contributors
+- **User Satisfaction**: >4.5/5
+- **Retention Rate**: >95% monthly active users
 
 ## 🚨 Risk Assessment
 
@@ -201,10 +199,10 @@ Fornire una soluzione completa che automatizza la gestione delle CER, dalla prod
 - **GSE API Changes**: Versioning e backward compatibility
 - **Scalability**: Architettura cloud-native
 
-### Business Risks
+### Community Risks
 - **Regulatory Changes**: Monitoring normativo continuo
-- **Competition**: Focus su differentiation tecnica
-- **Market Adoption**: Pilot program con CER esistenti
+- **Maintenance Burden**: Community-driven development
+- **Adoption**: Pilot program con CER esistenti
 
 ## 📈 Next Steps
 
@@ -217,8 +215,8 @@ Fornire una soluzione completa che automatizza la gestione delle CER, dalla prod
 ### Short-term Goals (Next Month)
 1. **Complete Phase 1**: Core business logic
 2. **Pilot Program**: Testare con CER reale
-3. **User Feedback**: Raccogliere feedback utenti
-4. **Iterate**: Migliorare basandosi su feedback
+3. **Community Feedback**: Raccogliere feedback comunità
+4. **Iterate**: Migliorare basandosi su feedback open source
 
 ---
 
