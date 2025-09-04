@@ -17,7 +17,7 @@ gunicorn==21.2.0
 paho-mqtt>=2.0.0
 python-dotenv==1.0.0
 PyPDF2==3.0.1
-psycopg2-binary==2.9.9
+# psycopg2-binary==2.9.9  # Commented out for Windows development
 requests==2.31.0
 whitenoise==6.6.0
 psutil==7.0.0
@@ -26,3 +26,9 @@ pandas
 django-extensions
 cryptography
 Pillow
+
+# Testing
+pytest>=7.0.0
+pytest-django>=4.5.0
+pytest-cov>=4.0.0
+factory-boy>=3.2.0

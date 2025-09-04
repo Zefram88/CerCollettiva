@@ -46,7 +46,9 @@ class CustomUserModelTest(TestCase):
         admin_user = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.assertEqual(admin_user.username, 'admin')
@@ -59,9 +61,11 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
-        self.assertEqual(str(user), 'testuser')
+        self.assertEqual(str(user), 'testuser (Privato)')
     
     def test_user_full_name(self):
         """Test user full name property"""
@@ -79,14 +83,18 @@ class CustomUserModelTest(TestCase):
         User.objects.create_user(
             username='testuser',
             email='test1@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         with self.assertRaises(IntegrityError):
             User.objects.create_user(
                 username='testuser',
                 email='test2@example.com',
-                password='TestPass123!'
+                password='TestPass123!',
+                first_name='Test',
+                last_name='User'
             )
     
     def test_email_field(self):
@@ -94,7 +102,9 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         # Test valid email format
@@ -111,7 +121,9 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         # Regular user shouldn't have any permissions by default
@@ -122,7 +134,9 @@ class CustomUserModelTest(TestCase):
         admin = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         self.assertTrue(admin.has_perm('core.add_plant'))
         self.assertTrue(admin.has_module_perms('core'))
@@ -134,7 +148,9 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         group = Group.objects.create(name='CER Members')
@@ -148,7 +164,9 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         # Test fiscal code field if it exists
@@ -168,7 +186,9 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         self.assertIsNotNone(user.date_joined)
@@ -179,7 +199,9 @@ class CustomUserModelTest(TestCase):
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         # User should be active by default

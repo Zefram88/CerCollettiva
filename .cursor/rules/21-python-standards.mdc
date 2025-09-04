@@ -1,0 +1,18 @@
+---
+description: Standard Python minimi e pratici.
+globs: ["**/*.py"]
+---
+Obbligatorio
+- Type hints su parametri/ritorni delle funzioni pubbliche.
+- Docstring breve (Args/Returns/Raises) per funzioni pubbliche.
+- Logging: `logger = logging.getLogger(__name__)`, log JSON (no print).
+- Config: Pydantic BaseSettings + .env (mai segreti hardcoded).
+- Risorse: context manager (file/sessioni), no handle “pendenti”.
+- Error handling: cattura specifica prima di “Exception”, mai swallow; rilancia con contesto.
+- Async per I/O di rete; non bloccare loop con CPU-bound.
+- Strutture dati immutabili quando possibile (tuple, dataclass(frozen=True) se ha senso).
+
+Divieti
+- `from module import *`, `eval/exec` non giustificati, `time.sleep` in async.
+- Log di PII/API keys; stderr di stacktrace in prod (usa livelli e redazione).
+

@@ -47,8 +47,13 @@ def log_user_login_failed(sender, credentials, request, **kwargs):
     """
     Registra i tentativi di login falliti
     """
-    ip_address = request.META.get('REMOTE_ADDR', 'unknown')
-    user_agent = request.META.get('HTTP_USER_AGENT', 'unknown')
+    # Gestisce il caso in cui request è None (es. nei test)
+    if request is None:
+        ip_address = 'unknown'
+        user_agent = 'unknown'
+    else:
+        ip_address = request.META.get('REMOTE_ADDR', 'unknown')
+        user_agent = request.META.get('HTTP_USER_AGENT', 'unknown')
     
     # Rimuoviamo la password dalle credenziali per sicurezza
     safe_credentials = credentials.copy()

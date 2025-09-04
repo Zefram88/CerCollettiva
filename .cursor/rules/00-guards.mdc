@@ -1,0 +1,10 @@
+---
+description: Guard-rails non negoziabili per evitare deragliamenti
+alwaysApply: true
+---
+- Patch piccole: ≤ 3 file **o** ≤ 120 LOC per richiesta; se superi → proponi split e attendi conferma.
+- NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. (mock:forbidden). ZERO TOLLERANZA.
+- Prima di dire "fatto": **diff per file**, **comandi + exit code**, **test con coverage ≥ 80%**, **log smoke**.
+- Max 3 domande; poi **assunzioni esplicite** + passo **reversibile**.
+- Nessuna azione irreversibile: niente cancellazioni distruttive, niente scrittura fuori repo, niente segreti in log (redazione obbligatoria).
+- Autonomia default **L1** (niente merge autonomo). Richiedi approvazione esplicita per refactor ampi o azioni esterne.

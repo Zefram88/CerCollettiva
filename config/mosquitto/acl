@@ -1,0 +1,20 @@
+# Access Control List per Mosquitto MQTT Broker
+
+# Utente CerCollettiva - accesso completo
+user cercollettiva
+topic readwrite cercollettiva/#
+topic readwrite $SYS/#
+
+# Utente dispositivi IoT - solo pubblicazione su topic specifici
+user iot_devices
+topic write cercollettiva/+/+/status/#
+topic read cercollettiva/+/+/config/#
+
+# Utente monitoring - solo lettura
+user monitoring
+topic read cercollettiva/+/+/status/#
+topic read $SYS/#
+
+# Pattern per topic specifici
+# cercollettiva/{plant_id}/{device_id}/status/{message_type}
+# cercollettiva/{plant_id}/{device_id}/config/{setting}

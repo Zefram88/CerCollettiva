@@ -1,0 +1,228 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cercollettiva"
+version = "1.0.0"
+description = "Sistema di gestione per Comunità Energetiche Rinnovabili (CER) e Comunità Energetiche dei Cittadini (CEC)"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "CerCollettiva Team", email = "team@cercollettiva.it"}
+]
+maintainers = [
+    {name = "CerCollettiva Team", email = "team@cercollettiva.it"}
+]
+keywords = ["django", "energy", "renewable", "community", "cer", "cec", "iot", "mqtt"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Django",
+    "Framework :: Django :: 5.0",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "Django>=5.0,<6.0",
+    "channels>=4.0.0",
+    "channels-redis>=4.1.0",
+    "crispy-bootstrap5>=2023.10",
+    "daphne>=4.0.0",
+    "django-cors-headers>=4.3.1",
+    "django-crispy-forms>=2.1",
+    "django-debug-toolbar>=4.2.0",
+    "django-encrypted-model-fields>=0.6.5",
+    "django-filter>=23.4",
+    "django-oauth-toolkit>=2.3.0",
+    "djangorestframework>=3.14.0",
+    "django-widget-tweaks>=1.5.0",
+    "drf-yasg>=1.21.7",
+    "geopy>=2.4.1",
+    "gunicorn>=21.2.0",
+    "paho-mqtt>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "PyPDF2>=3.0.1",
+    "psycopg2-binary>=2.9.9",
+    "requests>=2.31.0",
+    "whitenoise>=6.6.0",
+    "psutil>=7.0.0",
+    "openpyxl>=3.1.0",
+    "pandas>=2.0.0",
+    "django-extensions>=3.2.0",
+    "cryptography>=41.0.0",
+    "Pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-django>=4.5.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "bandit>=1.7.0",
+    "safety>=2.3.0",
+    "pre-commit>=3.0.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-django>=4.5.0",
+    "pytest-cov>=4.0.0",
+    "factory-boy>=3.2.0",
+    "freezegun>=1.2.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/atomozero/CerCollettiva"
+Documentation = "https://docs.cercollettiva.it"
+Repository = "https://github.com/atomozero/CerCollettiva.git"
+"Bug Tracker" = "https://github.com/atomozero/CerCollettiva/issues"
+Changelog = "https://github.com/atomozero/CerCollettiva/blob/main/CHANGELOG.md"
+
+[project.scripts]
+cercollettiva = "cercollettiva.management:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cercollettiva*", "core*", "energy*", "documents*", "users*", "monitoring*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.html", "*.css", "*.js", "*.json", "*.yml", "*.yaml", "*.sql"]
+
+# Black configuration
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+# isort configuration
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_django = "django"
+known_first_party = ["cercollettiva", "core", "energy", "documents", "users", "monitoring"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
+
+# mypy configuration
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "channels.*",
+    "rest_framework.*",
+    "crispy_forms.*",
+    "widget_tweaks.*",
+    "django_filters.*",
+    "paho.*",
+    "geopy.*",
+    "psycopg2.*",
+    "redis.*",
+    "PIL.*",
+    "openpyxl.*",
+    "pandas.*",
+]
+ignore_missing_imports = true
+
+# pytest configuration
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "cercollettiva.settings.test"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=.",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "e2e: marks tests as end-to-end tests",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/venv/*",
+    "*/env/*",
+    "*/tests/*",
+    "*/test_*",
+    "manage.py",
+    "*/settings/*",
+    "*/__pycache__/*",
+    "*/node_modules/*",
+    "*/staticfiles/*",
+    "*/media/*",
+    "*/logs/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# Bandit configuration
+[tool.bandit]
+exclude_dirs = ["tests", "test_*", "*/tests/*", "*/test_*"]
+skips = ["B101", "B601"]

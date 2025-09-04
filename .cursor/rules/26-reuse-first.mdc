@@ -1,0 +1,6 @@
+---
+description: Riuso prima di creare nuovo codice
+alwaysApply: true
+---
+- Prima di proporre nuovo codice, cerca nella codebase e mostra 3 candidati con @Code.
+- Nel **THINK** e nel **PATCH REPORT** spiega in 1 riga perché scegli reuse/adapt/new.

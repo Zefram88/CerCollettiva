@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from decimal import Decimal
 from datetime import datetime, timedelta
-from energy.models import DeviceConfiguration, Measurement, MQTTBroker
+from energy.models import DeviceConfiguration, DeviceMeasurement, MQTTBroker
 from core.models import Plant, CERConfiguration
 
 User = get_user_model()
@@ -21,53 +21,44 @@ class DeviceConfigurationModelTest(TestCase):
         self.user = User.objects.create_user(
             username='deviceowner',
             email='owner@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Device',
+            last_name='Owner'
         )
         
         self.admin = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.cer = CERConfiguration.objects.create(
             name='Test CER',
             code='CER001',
-            vat_number='12345678901',
-            address='Via Roma 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
-            email='info@testcer.com',
-            phone='+390212345678',
-            admin=self.admin
+            primary_substation='Cabina Primaria Test',
+            description='Test CER Description'
         )
         
         self.plant = Plant.objects.create(
             name='Test Plant',
-            code='PLANT001',
-            type='PHOTOVOLTAIC',
-            power_kw=Decimal('50.00'),
-            address='Via Test 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
+            pod_code='PLANT001',
+            plant_type='PRODUCER',
+            nominal_power=50.0,
+            connection_voltage='400V',
+            installation_date='2023-01-01',
             owner=self.user,
-            cer=self.cer
+            cer_configuration=self.cer
         )
         
         self.device_data = {
             'device_id': 'DEVICE001',
-            'name': 'Smart Meter 1',
-            'device_type': 'METER',
+            'device_type': 'SHELLY_EM',
             'vendor': 'SHELLY',
-            'model': 'EM',
+            'model': 'em',
             'plant': self.plant,
-            'is_active': True,
-            'configuration': {
-                'ip_address': '192.168.1.100',
-                'polling_interval': 60
-            }
+            'is_active': True
         }
     
     def test_create_device_configuration(self):
@@ -75,17 +66,16 @@ class DeviceConfigurationModelTest(TestCase):
         device = DeviceConfiguration.objects.create(**self.device_data)
         
         self.assertEqual(device.device_id, 'DEVICE001')
-        self.assertEqual(device.name, 'Smart Meter 1')
-        self.assertEqual(device.device_type, 'METER')
+        self.assertEqual(device.device_type, 'SHELLY_EM')
         self.assertEqual(device.vendor, 'SHELLY')
-        self.assertEqual(device.model, 'EM')
+        self.assertEqual(device.model, 'em')
         self.assertEqual(device.plant, self.plant)
         self.assertTrue(device.is_active)
     
     def test_device_str_method(self):
         """Test string representation of device"""
         device = DeviceConfiguration.objects.create(**self.device_data)
-        self.assertEqual(str(device), 'Smart Meter 1 (DEVICE001)')
+        self.assertEqual(str(device), 'DEVICE001 (Shelly EM)')
     
     def test_device_unique_id(self):
         """Test that device_id must be unique"""
@@ -111,37 +101,40 @@ class DeviceConfigurationModelTest(TestCase):
     
     def test_device_vendor_choices(self):
         """Test device vendor field choices"""
-        valid_vendors = ['SHELLY', 'TASMOTA', 'HUAWEI', 'OTHER']
+        # Test SHELLY device type
+        device_data = self.device_data.copy()
+        device_data['device_id'] = 'DEV_SHELLY'
+        device_data['device_type'] = 'SHELLY_EM'
         
-        for vendor in valid_vendors:
-            device_data = self.device_data.copy()
-            device_data['device_id'] = f'DEV_{vendor}'
-            device_data['vendor'] = vendor
-            
-            device = DeviceConfiguration.objects.create(**device_data)
-            self.assertEqual(device.vendor, vendor)
+        device = DeviceConfiguration.objects.create(**device_data)
+        self.assertEqual(device.vendor, 'SHELLY')
+        self.assertEqual(device.model, 'em')
+        
+        # Test CUSTOM device type
+        device_data = self.device_data.copy()
+        device_data['device_id'] = 'DEV_CUSTOM'
+        device_data['device_type'] = 'CUSTOM'
+        
+        device = DeviceConfiguration.objects.create(**device_data)
+        self.assertEqual(device.vendor, 'CUSTOM')
+        self.assertEqual(device.model, 'custom')
     
     def test_device_json_configuration(self):
-        """Test JSON configuration field"""
+        """Test device configuration fields"""
         device = DeviceConfiguration.objects.create(**self.device_data)
         
-        self.assertIsInstance(device.configuration, dict)
-        self.assertEqual(device.configuration['ip_address'], '192.168.1.100')
-        self.assertEqual(device.configuration['polling_interval'], 60)
-        
-        # Update configuration
-        device.configuration['new_setting'] = 'value'
-        device.save()
-        
-        device.refresh_from_db()
-        self.assertEqual(device.configuration['new_setting'], 'value')
+        # Test that device has required fields
+        self.assertEqual(device.device_id, 'DEVICE001')
+        self.assertEqual(device.device_type, 'SHELLY_EM')
+        self.assertEqual(device.vendor, 'SHELLY')
+        self.assertEqual(device.model, 'em')
     
     def test_device_plant_relationship(self):
         """Test device-plant relationship"""
         device = DeviceConfiguration.objects.create(**self.device_data)
         
         self.assertEqual(device.plant, self.plant)
-        self.assertIn(device, self.plant.deviceconfiguration_set.all())
+        self.assertIn(device, self.plant.devices.all())
     
     def test_device_last_seen(self):
         """Test device last_seen timestamp"""
@@ -171,47 +164,43 @@ class DeviceConfigurationModelTest(TestCase):
         self.assertFalse(device.is_active)
 
 
-class MeasurementModelTest(TestCase):
-    """Test cases for Measurement model"""
+class DeviceMeasurementModelTest(TestCase):
+    """Test cases for DeviceMeasurement model"""
     
     def setUp(self):
         """Set up test data"""
         self.user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         self.admin = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.cer = CERConfiguration.objects.create(
             name='Test CER',
             code='CER001',
-            vat_number='12345678901',
-            address='Via Roma 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
-            email='info@testcer.com',
-            phone='+390212345678',
-            admin=self.admin
+            primary_substation='Cabina Primaria Test',
+            description='Test CER Description'
         )
         
         self.plant = Plant.objects.create(
             name='Test Plant',
-            code='PLANT001',
-            type='PHOTOVOLTAIC',
-            power_kw=Decimal('50.00'),
-            address='Via Test 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
+            pod_code='PLANT001',
+            plant_type='PRODUCER',
+            nominal_power=50.0,
+            connection_voltage='400V',
+            installation_date='2023-01-01',
             owner=self.user,
-            cer=self.cer
+            cer_configuration=self.cer
         )
         
         self.device = DeviceConfiguration.objects.create(
@@ -240,7 +229,7 @@ class MeasurementModelTest(TestCase):
     
     def test_create_measurement(self):
         """Test creating a measurement"""
-        measurement = Measurement.objects.create(**self.measurement_data)
+        measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         
         self.assertEqual(measurement.device, self.device)
         self.assertEqual(measurement.power, Decimal('1500.50'))
@@ -252,13 +241,13 @@ class MeasurementModelTest(TestCase):
     
     def test_measurement_str_method(self):
         """Test string representation of measurement"""
-        measurement = Measurement.objects.create(**self.measurement_data)
+        measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         expected = f'{self.device.name} - {measurement.timestamp}'
         self.assertEqual(str(measurement), expected)
     
     def test_measurement_timestamp(self):
         """Test measurement timestamp field"""
-        measurement = Measurement.objects.create(**self.measurement_data)
+        measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         
         self.assertIsNotNone(measurement.timestamp)
         self.assertIsInstance(measurement.timestamp, datetime)
@@ -269,13 +258,13 @@ class MeasurementModelTest(TestCase):
         
         m1_data = self.measurement_data.copy()
         m1_data['timestamp'] = time1
-        m1 = Measurement.objects.create(**m1_data)
+        m1 = DeviceMeasurement.objects.create(**m1_data)
         
         m2_data = self.measurement_data.copy()
         m2_data['timestamp'] = time2
-        m2 = Measurement.objects.create(**m2_data)
+        m2 = DeviceMeasurement.objects.create(**m2_data)
         
-        measurements = Measurement.objects.filter(
+        measurements = DeviceMeasurement.objects.filter(
             device=self.device
         ).order_by('-timestamp')
         
@@ -284,7 +273,7 @@ class MeasurementModelTest(TestCase):
     
     def test_measurement_power_values(self):
         """Test power measurement values"""
-        measurement = Measurement.objects.create(**self.measurement_data)
+        measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         
         # Test positive power (consumption)
         self.assertGreater(measurement.power, 0)
@@ -292,7 +281,7 @@ class MeasurementModelTest(TestCase):
         # Test negative power (production)
         measurement_data = self.measurement_data.copy()
         measurement_data['power'] = Decimal('-2000.00')
-        production = Measurement.objects.create(**measurement_data)
+        production = DeviceMeasurement.objects.create(**measurement_data)
         
         self.assertLess(production.power, 0)
     
@@ -307,12 +296,12 @@ class MeasurementModelTest(TestCase):
             measurement_data['timestamp'] = base_time + timedelta(hours=i)
             measurement_data['energy'] = Decimal(str(10 * (i + 1)))
             
-            measurement = Measurement.objects.create(**measurement_data)
+            measurement = DeviceMeasurement.objects.create(**measurement_data)
             total_energy += measurement.energy
         
         # Query total energy
         from django.db.models import Sum
-        total = Measurement.objects.filter(
+        total = DeviceMeasurement.objects.filter(
             device=self.device
         ).aggregate(total_energy=Sum('energy'))
         
@@ -320,7 +309,7 @@ class MeasurementModelTest(TestCase):
     
     def test_measurement_raw_data_json(self):
         """Test raw data JSON field"""
-        measurement = Measurement.objects.create(**self.measurement_data)
+        measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         
         self.assertIsInstance(measurement.raw_data, dict)
         self.assertEqual(measurement.raw_data['temperature'], 25.5)
@@ -335,7 +324,7 @@ class MeasurementModelTest(TestCase):
     
     def test_measurement_device_relationship(self):
         """Test measurement-device relationship"""
-        measurement = Measurement.objects.create(**self.measurement_data)
+        measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         
         self.assertEqual(measurement.device, self.device)
         self.assertIn(measurement, self.device.measurement_set.all())
@@ -346,7 +335,7 @@ class MeasurementModelTest(TestCase):
         
         # Test invalid voltage (too high)
         measurement_data['voltage'] = Decimal('1000.0')
-        measurement = Measurement(**measurement_data)
+        measurement = DeviceMeasurement(**measurement_data)
         
         # This should ideally raise a validation error
         # but depends on model implementation
@@ -354,7 +343,7 @@ class MeasurementModelTest(TestCase):
         
         # Test invalid power factor (must be between 0 and 1)
         measurement_data['power_factor'] = Decimal('1.5')
-        measurement2 = Measurement(**measurement_data)
+        measurement2 = DeviceMeasurement(**measurement_data)
         
         # Should validate power factor
         with self.assertRaises(ValidationError):

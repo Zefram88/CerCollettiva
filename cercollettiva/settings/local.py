@@ -1,6 +1,34 @@
 # cercollettiva/settings/local.py
 
 from .base import *
+
+# Override per sviluppo locale
+DEBUG = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+
+# Database SQLite per sviluppo
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Cache in memoria per sviluppo
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# Email console per sviluppo
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Debug toolbar per sviluppo
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+    INTERNAL_IPS = ['127.0.0.1', 'localhost']
 import socket
 
 ENVIRONMENT = 'local'
@@ -21,6 +49,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '[::1]',
+    'testserver',  # Per i test Django
 ]
 
 # Aggiungi automaticamente l'IP locale per development

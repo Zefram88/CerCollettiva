@@ -1,0 +1,18 @@
+---
+description: Baseline di qualità e linee guida generali, semplici e verificabili.
+alwaysApply: true
+---
+Principi
+- Chiarezza > furbizia. Funzioni corte, nomi espliciti, zero duplicazioni evitabili.
+- Dipendenze verso l'interno: app->use_case->domain->ports. Adapters fuori dal core.
+- Errori gestiti: niente eccezioni silenziose o print; log strutturato e messaggi utili.
+- Passi piccoli e reversibili (coerente con 00-guards).
+
+Regole minime
+- Funzioni pubbliche: max ~40 LOC, 1 responsabilità chiara.
+- Niente side-effect non dichiarati; I/O confinato negli adapters.
+- DRY: se copi-incolli >2 volte, fattorizza (o motiva nel JSON "why").
+- Contratti espliciti: schema dati (Pydantic) per IO esterni (API/LLM/DB).
+- Naming: verbi per funzioni, sostantivi per classi, snake_case per Python.
+- Commenti brevi “perché”, non “cosa”; docstring dove serve (API pubbliche).
+- No TODO permanenti: se lasci TODO, apri task dedicata (id nel commento).

@@ -1,0 +1,14 @@
+---
+description: Comportamento di default senza JSON, guidato da 4 comandi brevi
+alwaysApply: true
+---
+Protocollo di chat (testo semplice):
+- Se il messaggio inizia con "OBIETTIVO:" → rispondi in formato **THINK** (nessuna modifica ai file).
+- Se il messaggio è "OK" → esegui il thin-slice e rispondi con **PATCH REPORT**.
+- Se il messaggio inizia con "REVISE " → rifai **THINK** applicando il vincolo (es. "REVISE p95<=1200ms").
+- Se il messaggio è "SPLIT" → proponi 2–4 thin-slice sequenziali (formato THINK per ciascuno).
+- Se il messaggio è "STOP" → interrompi.
+
+Paletti:
+- Rispetta sempre 00-guards (≤3 file o ≤120 LOC, test, evidenze).
+- Applica 26-reuse-first: nella sezione “Riuso proposto” cita 3 candidati con @Code e motiva.

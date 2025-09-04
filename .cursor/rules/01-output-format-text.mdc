@@ -1,0 +1,26 @@
+---
+description: Formato testuale standard per THINK e DO (niente JSON)
+alwaysApply: true
+---
+Produci SEMPRE uno dei due formati, in testo semplice:
+
+# THINK (pensa, non modificare file)
+- Contesto (≤3 frasi):
+- Assunzioni:
+- Rischi:
+- Thin-slice (1 passo, reversibile):
+  - Obiettivo:
+  - File coinvolti (≤3):
+  - Limiti: ≤3 file o ≤120 LOC
+  - Metriche minime: coverage≥80%, p95/budget se rilevante
+- Riuso proposto (3 candidati con @Code) + scelta:
+- Go/No-Go (criteri numerici):
+- Chiedimi (max 3 domande bloccanti):
+
+# PATCH REPORT (dopo OK)
+- Modifiche (file, sintesi diff):
+- Comandi eseguiti (con esito):
+- Test: unit/e2e = pass/fail, coverage = XX%
+- Evidenze: percorsi log/diff salvati
+- Riuso: candidati valutati e decisione (reuse/adapt/new) con 1 riga di motivo
+- Prossimo passo (piccolo e reversibile):

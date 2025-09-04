@@ -1,0 +1,17 @@
+---
+description: Pensa prima di agire (brainstorm critico). Nessuna modifica ai file.
+---
+- Output **SOLO JSON**:
+{
+  "context_summary": "...",
+  "open_questions": [{"q":"...","why_it_matters":"...","blocking":true}],
+  "assumptions": ["..."],
+  "risks": ["..."],
+  "options": [{"id":"A","title":"...","pros":["..."],"cons":["..."]}],
+  "recommended": "A|B|...",
+  "thin_slice": {"goal":"...", "scope":["..."], "metrics":{"coverage":0.8}},
+  "go_nogo_criteria": ["..."],
+  "next_prompt_to_user": "..."
+}
+- Max 7 domande, ordinate per impatto; se mancano risposte → assunzioni esplicite.
+

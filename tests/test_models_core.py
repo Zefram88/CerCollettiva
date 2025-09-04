@@ -19,20 +19,16 @@ class CERConfigurationModelTest(TestCase):
         self.admin_user = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.cer_data = {
             'name': 'Test CER Community',
             'code': 'CER001',
-            'vat_number': '12345678901',
-            'address': 'Via Roma 1',
-            'city': 'Milano',
-            'province': 'MI',
-            'zip_code': '20100',
-            'email': 'info@testcer.com',
-            'phone': '+390212345678',
-            'admin': self.admin_user
+            'primary_substation': 'Cabina Primaria Test',
+            'description': 'Test CER Description'
         }
     
     def test_create_cer_configuration(self):
@@ -41,14 +37,14 @@ class CERConfigurationModelTest(TestCase):
         
         self.assertEqual(cer.name, 'Test CER Community')
         self.assertEqual(cer.code, 'CER001')
-        self.assertEqual(cer.vat_number, '12345678901')
-        self.assertEqual(cer.admin, self.admin_user)
+        self.assertEqual(cer.primary_substation, 'Cabina Primaria Test')
+        self.assertEqual(cer.description, 'Test CER Description')
         self.assertTrue(cer.is_active)
     
     def test_cer_str_method(self):
         """Test string representation of CER"""
         cer = CERConfiguration.objects.create(**self.cer_data)
-        self.assertEqual(str(cer), 'Test CER Community')
+        self.assertEqual(str(cer), 'Test CER Community (CER001)')
     
     def test_cer_unique_code(self):
         """Test that CER code must be unique"""
@@ -90,26 +86,24 @@ class PlantModelTest(TestCase):
         self.user = User.objects.create_user(
             username='plantowner',
             email='owner@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Plant',
+            last_name='Owner'
         )
         
         self.admin = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.cer = CERConfiguration.objects.create(
             name='Test CER',
             code='CER001',
-            vat_number='12345678901',
-            address='Via Roma 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
-            email='info@testcer.com',
-            phone='+390212345678',
-            admin=self.admin
+            primary_substation='Cabina Primaria Test',
+            description='Test CER Description'
         )
         
         self.plant_data = {
@@ -226,26 +220,24 @@ class CERMembershipModelTest(TestCase):
         self.admin = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.member = User.objects.create_user(
             username='member',
             email='member@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Member',
+            last_name='User'
         )
         
         self.cer = CERConfiguration.objects.create(
             name='Test CER',
             code='CER001',
-            vat_number='12345678901',
-            address='Via Roma 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
-            email='info@testcer.com',
-            phone='+390212345678',
-            admin=self.admin
+            primary_substation='Cabina Primaria Test',
+            description='Test CER Description'
         )
     
     def test_create_membership(self):
@@ -339,26 +331,24 @@ class AlertModelTest(TestCase):
         self.admin = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='AdminPass123!'
+            password='AdminPass123!',
+            first_name='Admin',
+            last_name='User'
         )
         
         self.user = User.objects.create_user(
             username='user',
             email='user@example.com',
-            password='TestPass123!'
+            password='TestPass123!',
+            first_name='Test',
+            last_name='User'
         )
         
         self.cer = CERConfiguration.objects.create(
             name='Test CER',
             code='CER001',
-            vat_number='12345678901',
-            address='Via Roma 1',
-            city='Milano',
-            province='MI',
-            zip_code='20100',
-            email='info@testcer.com',
-            phone='+390212345678',
-            admin=self.admin
+            primary_substation='Cabina Primaria Test',
+            description='Test CER Description'
         )
         
         self.plant = Plant.objects.create(

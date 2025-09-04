@@ -1,0 +1,17 @@
+---
+description: Baseline di testing semplice ma solida.
+alwaysApply: true
+---
+Copertura e tipologie
+- Coverage totale ≥ 80% (coerente con 01-output-contract).
+- Unit: dominio/trasformazioni pure (veloci).
+- Contract: validazione IO esterni (API provider/LLM) contro schemi Pydantic.
+- E2E/Smoke: 1 flusso minimo “happy path” per feature.
+
+Regole minime
+- Ogni nuova funzione pubblica → almeno 1 test unit + (se tocca IO) 1 contract.
+- Trasformazioni: aggiungi 1 property-based semplice (range/enums/idempotenza).
+- LLM: output **solo JSON** validato (Pydantic) + 3 golden test.
+- NIENTE MOCK. MAI. ZERO MOCK TOLLERATI. Tutti i test devono essere reali (connessioni vere, API reali, database reali).
+- I test devono essere riproducibili (seed fisso se random).
+

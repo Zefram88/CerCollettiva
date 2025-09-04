@@ -1,0 +1,78 @@
+# Docker Compose Override per sviluppo
+# Questo file estende docker-compose.yml per l'ambiente di sviluppo
+# Usa: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+version: '3.8'
+
+services:
+  # Override per sviluppo
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app  # Mount codice sorgente per hot reload
+      - ./logs:/app/logs
+    environment:
+      - DEBUG=True
+      - DJANGO_LOG_LEVEL=DEBUG
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Database con dati di test
+  db:
+    environment:
+      - POSTGRES_DB=cercollettiva_dev
+    volumes:
+      - ./examples/test-data.sql:/docker-entrypoint-initdb.d/test-data.sql
+
+  # Redis senza password per sviluppo
+  redis:
+    command: redis-server --appendonly yes
+
+  # MQTT senza autenticazione per sviluppo
+  mqtt:
+    volumes:
+      - ./config/mosquitto/mosquitto.dev.conf:/mosquitto/config/mosquitto.conf
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+
+  # Aggiungi servizi di sviluppo
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+
+  # Selenium per test E2E
+  selenium:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - "4444:4444"
+    environment:
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_SESSION_TIMEOUT=300
+
+  # Redis Commander per debug
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+
+  # pgAdmin per debug database
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@cercollettiva.dev
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgadmin_data:

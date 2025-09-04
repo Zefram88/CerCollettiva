@@ -1,0 +1,19 @@
+---
+description: Paletti minimi di sicurezza, osservabilità e budget prestazionali.
+alwaysApply: true
+---
+Sicurezza
+- Segreti solo via env/secret manager; vietato loggarli.
+- Input validation su tutti gli endpoint pubblici.
+- Error policy: messaggi dettagliati solo in dev; generici in prod.
+
+Osservabilità
+- Log strutturato JSON con correlation-id propagato.
+- Metriche RED minime: request_rate, error_rate, duration_p95 per API/provider/LLM.
+- Health/ready endpoints distinguono: dipendenze critiche → /readyz.
+
+Performance (budget di base, adattabili per progetto)
+- API p95 ≤ 200 ms per endpoint interno; Provider p95 ≤ 800 ms; LLM p95 ≤ 1500 ms.
+- Memory: no carichi “full dataset” se superano budget; preferisci streaming/chunk.
+- Cache dove idempotente (chiave = input normalizzato); scadenza esplicita.
+

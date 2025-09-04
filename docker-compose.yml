@@ -1,0 +1,248 @@
+version: '3.8'
+
+services:
+  # Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: cercollettiva_db
+    environment:
+      POSTGRES_DB: cercollettiva
+      POSTGRES_USER: cercollettiva_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cercollettiva_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - cercollettiva_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cercollettiva_user -d cercollettiva"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: cercollettiva_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_pass}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - cercollettiva_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MQTT Broker
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: cercollettiva_mqtt
+    volumes:
+      - ./config/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./config/mosquitto/passwd:/mosquitto/config/passwd
+      - mqtt_data:/mosquitto/data
+      - mqtt_logs:/mosquitto/log
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - cercollettiva_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-t", "test", "-m", "test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Django Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cercollettiva_web
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=cercollettiva
+      - DB_USER=cercollettiva_user
+      - DB_PASSWORD=${DB_PASSWORD:-cercollettiva_pass}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/1
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=1883
+      - MQTT_USER=${MQTT_USER:-mqtt_user}
+      - MQTT_PASS=${MQTT_PASS:-mqtt_pass}
+    volumes:
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    networks:
+      - cercollettiva_network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/monitoring/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: cercollettiva_nginx
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./staticfiles:/var/www/static
+      - ./media:/var/www/media
+      - ./config/ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - cercollettiva_network
+    depends_on:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker (per task asincroni)
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cercollettiva_celery
+    command: celery -A cercollettiva worker -l info
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=cercollettiva
+      - DB_USER=cercollettiva_user
+      - DB_PASSWORD=${DB_PASSWORD:-cercollettiva_pass}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/0
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+    networks:
+      - cercollettiva_network
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  # Celery Beat (per task schedulati)
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cercollettiva_celery_beat
+    command: celery -A cercollettiva beat -l info
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=cercollettiva
+      - DB_USER=cercollettiva_user
+      - DB_PASSWORD=${DB_PASSWORD:-cercollettiva_pass}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - cercollettiva_network
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  # Flower (monitoring Celery)
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cercollettiva_flower
+    command: celery -A cercollettiva flower --port=5555
+    environment:
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/0
+    ports:
+      - "5555:5555"
+    networks:
+      - cercollettiva_network
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Prometheus (monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cercollettiva_prometheus
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - cercollettiva_network
+    restart: unless-stopped
+
+  # Grafana (dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cercollettiva_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+    networks:
+      - cercollettiva_network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  mqtt_data:
+    driver: local
+  mqtt_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  cercollettiva_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
