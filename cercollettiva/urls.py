@@ -21,6 +21,9 @@ urlpatterns = [
     
     # Monitoring and health checks
     path('monitoring/', include('monitoring.urls')),
+    
+    # Monitoring API endpoints
+    path('', include('core.urls_monitoring')),
 
     # Authentication
     path('accounts/login/', lambda request: redirect('users:login')),

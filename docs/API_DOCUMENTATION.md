@@ -20,6 +20,149 @@ X-CSRFToken: <csrf_token>  # Per session auth
 
 ## Endpoints Principali
 
+### Monitoring API
+
+#### Performance Metrics
+```http
+POST   /api/performance-metrics/         # Invia metriche performance
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "string",
+  "url": "string",
+  "lcp": 1200.0,
+  "fid": 50.0,
+  "cls": 0.1,
+  "fcp": 800.0,
+  "ttfb": 200.0,
+  "memory": {
+    "used": 50000000,
+    "total": 100000000,
+    "limit": 200000000
+  }
+}
+```
+
+#### Device Information
+```http
+POST   /api/device-info/                 # Invia info dispositivo
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "string",
+  "deviceType": "desktop|mobile|tablet",
+  "os": "string",
+  "osVersion": "string",
+  "browser": "string",
+  "browserVersion": "string",
+  "screenWidth": 1920,
+  "screenHeight": 1080,
+  "viewportWidth": 1200,
+  "viewportHeight": 800,
+  "pixelRatio": 1.0,
+  "touchSupport": false,
+  "hardwareAcceleration": true,
+  "webglSupport": true,
+  "connectionType": "wifi|4g|5g",
+  "deviceMemory": 8,
+  "userAgent": "string"
+}
+```
+
+#### Session Data
+```http
+POST   /api/session-data/                # Invia dati sessione
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "string",
+  "startTime": 1694000000000,
+  "endTime": 1694003600000,
+  "sessionDuration": 3600000,
+  "pageTime": 300000,
+  "interactions": 5,
+  "userAgent": "string",
+  "referrer": "string",
+  "screenResolution": "1920x1080",
+  "viewportSize": "1200x800",
+  "performanceRating": "good|fair|poor",
+  "issues": 0
+}
+```
+
+#### A/B Testing
+```http
+POST   /api/ab-testing/event/            # Invia evento A/B test
+POST   /api/ab-testing/participation/    # Invia partecipazione A/B test
+```
+
+**A/B Testing Event Request:**
+```json
+{
+  "userId": "string",
+  "eventType": "button_click|page_view|conversion",
+  "eventData": {
+    "button": "string",
+    "page": "string"
+  },
+  "experiments": {
+    "button-style": "rounded",
+    "card-layout": "compact"
+  },
+  "url": "string"
+}
+```
+
+#### User Feedback
+```http
+POST   /api/user-feedback/               # Invia feedback utente
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "string",
+  "overallRating": 5,
+  "performanceRating": "excellent",
+  "issuesReported": "string",
+  "suggestions": "string",
+  "comments": "string",
+  "sessionDuration": 3600000,
+  "pageTime": 300000,
+  "interactionsCount": 5
+}
+```
+
+#### Accessibility Audit
+```http
+POST   /api/accessibility-audit/         # Invia audit accessibilità
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "string",
+  "url": "string",
+  "totalIssues": 3,
+  "errors": 1,
+  "warnings": 2,
+  "accessibilityScore": 85,
+  "issuesData": [
+    {
+      "type": "error",
+      "message": "Missing alt text",
+      "element": "img"
+    }
+  ]
+}
+```
+
 ### Core API
 
 #### CER Management

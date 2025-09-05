@@ -24,470 +24,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom CSS -->
-    <style>
-        :root {
-            /* Brand Colors */
-            --cer-primary: #2563eb;
-            --cer-primary-dark: #1d4ed8;
-            --cer-primary-light: #3b82f6;
-            --cer-secondary: #64748b;
-            --cer-success: #10b981;
-            --cer-warning: #f59e0b;
-            --cer-danger: #ef4444;
-            --cer-info: #06b6d4;
-            
-            /* Neutral Colors */
-            --cer-white: #ffffff;
-            --cer-gray-50: #f8fafc;
-            --cer-gray-100: #f1f5f9;
-            --cer-gray-200: #e2e8f0;
-            --cer-gray-300: #cbd5e1;
-            --cer-gray-400: #94a3b8;
-            --cer-gray-500: #64748b;
-            --cer-gray-600: #475569;
-            --cer-gray-700: #334155;
-            --cer-gray-800: #1e293b;
-            --cer-gray-900: #0f172a;
-            
-            /* Spacing */
-            --cer-header-height: 70px;
-            --cer-sidebar-width: 280px;
-            --cer-border-radius: 12px;
-            --cer-border-radius-sm: 8px;
-            --cer-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --cer-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --cer-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            
-            /* Energy Theme */
-            --energy-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --solar-gradient: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-            --green-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-        }
-        
-        /* Global Styles */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--cer-gray-800);
-            background-color: var(--cer-gray-50);
-        }
-        
-        /* Typography */
-        .text-gradient {
-            background: var(--energy-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-        }
-        
-        .text-energy {
-            color: var(--cer-primary);
-            font-weight: 600;
-        }
-        
-        /* Cards */
-        .cer-card {
-            background: var(--cer-white);
-            border: 1px solid var(--cer-gray-200);
-            border-radius: var(--cer-border-radius);
-            box-shadow: var(--cer-shadow);
-            transition: all 0.3s ease;
-        }
-        
-        .cer-card:hover {
-            box-shadow: var(--cer-shadow-lg);
-            transform: translateY(-2px);
-        }
-        
-        .cer-card-header {
-            background: var(--energy-gradient);
-            color: var(--cer-white);
-            border-radius: var(--cer-border-radius) var(--cer-border-radius) 0 0;
-            padding: 1.5rem;
-            border-bottom: none;
-        }
-        
-        /* Buttons */
-        .btn-cer-primary {
-            background: var(--energy-gradient);
-            border: none;
-            color: var(--cer-white);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-            text-transform: none;
-        }
-        
-        .btn-cer-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--cer-shadow-lg);
-            color: var(--cer-white);
-        }
-        
-        /* Navbar */
-        .cer-navbar {
-            background: var(--cer-white) !important;
-            box-shadow: var(--cer-shadow);
-            border-bottom: 1px solid var(--cer-gray-200);
-            padding: 0.75rem 0;
-            min-height: var(--cer-header-height);
-        }
-        
-        .cer-navbar .navbar-brand {
-            font-size: 1.75rem;
-            font-weight: 700;
-            background: var(--energy-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .cer-navbar .nav-link {
-            color: var(--cer-gray-700) !important;
-            font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-        }
-        
-        .cer-navbar .nav-link:hover {
-            background-color: var(--cer-gray-100);
-            color: var(--cer-primary) !important;
-        }
-        
-        .cer-navbar .nav-link.active {
-            background: var(--energy-gradient);
-            color: var(--cer-white) !important;
-        }
-        
-        /* Alerts */
-        .alert-cer {
-            border: none;
-            border-radius: var(--cer-border-radius);
-            box-shadow: var(--cer-shadow);
-            border-left: 4px solid;
-        }
-        
-        .alert-success.alert-cer {
-            background-color: rgba(16, 185, 129, 0.1);
-            border-left-color: var(--cer-success);
-            color: #065f46;
-        }
-        
-        .alert-info.alert-cer {
-            background-color: rgba(6, 182, 212, 0.1);
-            border-left-color: var(--cer-info);
-            color: #0c4a6e;
-        }
-        
-        .alert-warning.alert-cer {
-            background-color: rgba(245, 158, 11, 0.1);
-            border-left-color: var(--cer-warning);
-            color: #92400e;
-        }
-        
-        .alert-danger.alert-cer {
-            background-color: rgba(239, 68, 68, 0.1);
-            border-left-color: var(--cer-danger);
-            color: #991b1b;
-        }
-        
-        /* Forms */
-        .form-control, .form-select {
-            border: 2px solid var(--cer-gray-200);
-            border-radius: var(--cer-border-radius-sm);
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: var(--cer-primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: var(--cer-gray-700);
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Utilities */
-        .bg-gradient-primary {
-            background: var(--energy-gradient) !important;
-        }
-        
-        .bg-gradient-solar {
-            background: var(--solar-gradient) !important;
-        }
-        
-        .bg-gradient-green {
-            background: var(--green-gradient) !important;
-        }
-        
-        .rounded-cer {
-            border-radius: var(--cer-border-radius) !important;
-        }
-        
-        .shadow-cer {
-            box-shadow: var(--cer-shadow) !important;
-        }
-        
-        .shadow-cer-lg {
-            box-shadow: var(--cer-shadow-lg) !important;
-        }
-        
-        /* Main Content */
-        .main-content {
-            min-height: calc(100vh - var(--cer-header-height));
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        
-        /* Footer */
-        .cer-footer {
-            background: var(--cer-gray-800);
-            color: var(--cer-gray-300);
-            padding: 2rem 0;
-            margin-top: auto;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .cer-navbar .navbar-brand {
-                font-size: 1.5rem;
-            }
-            
-            .main-content {
-                padding-top: 1rem;
-            }
-        }
-        
-        /* Animation */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        /* Status Badges */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.375rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        
-        .status-badge.status-active {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #065f46;
-        }
-        
-        .status-badge.status-inactive {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #991b1b;
-        }
-        
-        .status-badge.status-pending {
-            background-color: rgba(245, 158, 11, 0.1);
-            color: #92400e;
-        }
-        
-        /* Additional Button Variants */
-        .btn-cer-secondary {
-            background: var(--cer-gray-600);
-            border: none;
-            color: var(--cer-white);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cer-secondary:hover {
-            background: var(--cer-gray-700);
-            transform: translateY(-2px);
-            box-shadow: var(--cer-shadow-lg);
-            color: var(--cer-white);
-        }
-        
-        .btn-cer-success {
-            background: var(--cer-success);
-            border: none;
-            color: var(--cer-white);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cer-success:hover {
-            background: #0d9488;
-            transform: translateY(-2px);
-            box-shadow: var(--cer-shadow-lg);
-            color: var(--cer-white);
-        }
-        
-        .btn-cer-warning {
-            background: var(--cer-warning);
-            border: none;
-            color: var(--cer-white);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cer-warning:hover {
-            background: #d97706;
-            transform: translateY(-2px);
-            box-shadow: var(--cer-shadow-lg);
-            color: var(--cer-white);
-        }
-        
-        .btn-cer-danger {
-            background: var(--cer-danger);
-            border: none;
-            color: var(--cer-white);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cer-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-            box-shadow: var(--cer-shadow-lg);
-            color: var(--cer-white);
-        }
-        
-        .btn-cer-outline-primary {
-            background: transparent;
-            border: 2px solid var(--cer-primary);
-            color: var(--cer-primary);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--cer-border-radius-sm);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cer-outline-primary:hover {
-            background: var(--cer-primary);
-            color: var(--cer-white);
-            transform: translateY(-2px);
-            box-shadow: var(--cer-shadow-lg);
-        }
-        
-        /* Legacy Support - Redirect old classes to new ones */
-        .data-card {
-            background: var(--cer-white);
-            border: 1px solid var(--cer-gray-200);
-            border-radius: var(--cer-border-radius);
-            box-shadow: var(--cer-shadow);
-            transition: all 0.3s ease;
-        }
-        
-        .data-card:hover {
-            box-shadow: var(--cer-shadow-lg);
-            transform: translateY(-2px);
-        }
-        
-        /* Enhanced Form Components */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            font-weight: 600;
-            color: var(--cer-gray-700);
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Enhanced Badges */
-        .badge-cer {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-        
-        .badge-cer-primary {
-            background-color: rgba(37, 99, 235, 0.1);
-            color: var(--cer-primary);
-        }
-        
-        .badge-cer-success {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #065f46;
-        }
-        
-        .badge-cer-warning {
-            background-color: rgba(245, 158, 11, 0.1);
-            color: #92400e;
-        }
-        
-        .badge-cer-danger {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #991b1b;
-        }
-        
-        /* Enhanced Breadcrumb */
-        .cer-breadcrumb {
-            background: var(--cer-gray-100);
-            border-radius: var(--cer-border-radius);
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .cer-breadcrumb .breadcrumb {
-            margin-bottom: 0;
-            background: transparent;
-            padding: 0;
-        }
-        
-        .cer-breadcrumb .breadcrumb-item a {
-            color: var(--cer-primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .cer-breadcrumb .breadcrumb-item a:hover {
-            color: var(--cer-primary-dark);
-            text-decoration: underline;
-        }
-        
-        .cer-breadcrumb .breadcrumb-item.active {
-            color: var(--cer-gray-700);
-            font-weight: 600;
-        }
-        
-        /* Show navbar by default, hide only when explicitly disabled */
-        .cer-navbar {
-            display: block;
-        }
-        
-        .hide-navbar .cer-navbar {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -534,6 +71,18 @@
                 </ul>
                 
                 <ul class="navbar-nav">
+                    <!-- Dark Mode Toggle -->
+                    <li class="nav-item d-flex align-items-center">
+                        <button class="btn" 
+                                id="themeToggle" 
+                                title="Cambia tema scuro/chiaro"
+                                aria-label="Cambia tema scuro/chiaro"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </button>
+                    </li>
+                    
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -653,9 +202,115 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     
     <!-- Custom JavaScript -->
+    <script src="{% static 'js/performance-monitor.js' %}"></script>
+    <script src="{% static 'js/device-detector.js' %}"></script>
+    <script src="{% static 'js/accessibility-audit.js' %}"></script>
+    <script src="{% static 'js/user-feedback.js' %}"></script>
+    <script src="{% static 'js/ab-testing.js' %}"></script>
+    <script src="{% static 'js/analytics-dashboard.js' %}"></script>
     <script>
+        // Theme Management
+        const themeManager = {
+            init() {
+                const savedTheme = localStorage.getItem('theme') || 'auto';
+                this.setTheme(savedTheme);
+                this.updateToggleIcon(savedTheme);
+                
+                // Add event listener to toggle button
+                const toggleBtn = document.getElementById('themeToggle');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => this.toggle());
+                }
+            },
+            
+            setTheme(theme) {
+                document.documentElement.setAttribute('data-bs-theme', theme);
+                localStorage.setItem('theme', theme);
+            },
+            
+            toggle() {
+                const current = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = current === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+                this.updateToggleIcon(newTheme);
+                this.showNotification(`Tema ${newTheme === 'dark' ? 'scuro' : 'chiaro'} attivato`);
+            },
+            
+            updateToggleIcon(theme) {
+                const icon = document.getElementById('themeIcon');
+                const button = document.getElementById('themeToggle');
+                if (icon && button) {
+                    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                    const newLabel = theme === 'dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro';
+                    
+                    // Update attributes
+                    button.setAttribute('aria-label', newLabel);
+                    button.setAttribute('title', newLabel);
+                    
+                    // Update Bootstrap tooltip if it exists
+                    const tooltipInstance = bootstrap.Tooltip.getInstance(button);
+                    if (tooltipInstance) {
+                        tooltipInstance.setContent({ '.tooltip-inner': newLabel });
+                    }
+                }
+            },
+            
+            showNotification(message) {
+                // Create a centered bottom notification
+                const notification = document.createElement('div');
+                notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+                notification.style.cssText = `
+                    bottom: 30px; 
+                    left: 50%; 
+                    transform: translateX(-50%); 
+                    z-index: 9999; 
+                    min-width: 320px; 
+                    max-width: 90vw;
+                    text-align: center;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+                    backdrop-filter: blur(10px);
+                `;
+                notification.innerHTML = `
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span>${message}</span>
+                        <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                // Auto-remove after 4 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.classList.add('fade');
+                        setTimeout(() => {
+                            if (notification.parentNode) {
+                                notification.remove();
+                            }
+                        }, 300);
+                    }
+                }, 4000);
+            }
+        };
+        
         // Auto-hide alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize theme manager
+            themeManager.init();
+            
+            // Initialize Bootstrap tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Update tooltip content after initialization
+            setTimeout(() => {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                themeManager.updateToggleIcon(currentTheme);
+            }, 100);
+            
             const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
             alerts.forEach(function(alert) {
                 setTimeout(function() {

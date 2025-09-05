@@ -8,6 +8,18 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
 ## [Unreleased]
 
 ### Added
+- **Sistema di Monitoring Completo**
+  - 7 API endpoints per raccolta dati monitoring
+  - Modelli database per performance, device, accessibility, feedback, sessioni, A/B testing
+  - Client-side monitoring scripts (performance, device detection, accessibility audit)
+  - User feedback system e A/B testing framework
+  - Analytics dashboard in-browser (Ctrl+Shift+A)
+- **UI/UX Improvements**
+  - Dark/Light mode toggle con persistenza
+  - UI harmonization e legibility improvements
+  - Enhanced hover effects e micro-interactions
+  - Responsive design e cross-browser compatibility
+  - Accessibility enhancements (WCAG compliance)
 - Documentazione completa architetturale
 - Guide per sviluppatori e deployment
 - Configurazioni Docker complete

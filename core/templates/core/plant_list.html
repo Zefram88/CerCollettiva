@@ -31,9 +31,8 @@
 
 
     <!-- Filtri e Ricerca -->
-    <div class="cer-card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
+    <div class="search-form-container mb-4">
+        <form method="get" class="row g-3">
                 <div class="col-md-3">
                     <input type="text" name="q" class="form-control" placeholder="Cerca per nome o POD..." 
                            value="{{ request.GET.q }}">
@@ -66,13 +65,12 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-cer-primary me-2">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search"></i> Filtra
                     </button>
-                    <a href="{% url 'core:plant_list' %}" class="btn btn-cer-outline-primary">Reset</a>
+                    <a href="{% url 'core:plant_list' %}" class="btn btn-outline-primary">Reset</a>
                 </div>
             </form>
-        </div>
     </div>
 
     <!-- Tabella Impianti -->

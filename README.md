@@ -20,6 +20,18 @@ CerCollettiva è un software open source progettato per semplificare la creazion
 - Calcolo incentivi e contributi
 - Amministrazione e reporting
 - Gestione delle domande di contributo PNRR
+- **Sistema di Monitoring Avanzato**
+  - Performance monitoring (Core Web Vitals)
+  - Device detection e analytics
+  - Accessibility audit automatico
+  - User feedback system
+  - A/B testing framework
+  - Analytics dashboard in-browser
+- **UI/UX Moderna**
+  - Dark/Light mode toggle
+  - Responsive design
+  - Enhanced accessibility (WCAG compliance)
+  - Micro-interactions e animazioni
 
 ![Home Page](https://github.com/atomozero/CerCollettiva/blob/main/screenshot/homepage%20V.A.2.png)
 

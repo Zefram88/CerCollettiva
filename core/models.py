@@ -8,6 +8,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
+
+# Monitoring models will be imported at the end of this file
 from django.utils import timezone
 from datetime import timedelta
 from geopy.geocoders import Nominatim
@@ -1362,3 +1364,248 @@ class Alert(models.Model):
             models.Index(fields=['plant', 'status']),
             models.Index(fields=['cer_configuration', 'status'])
         ]
+
+# =============================================================================
+# MONITORING MODELS
+# =============================================================================
+
+class PerformanceMetrics(models.Model):
+    """Modello per salvare metriche performance"""
+    
+    session_id = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    url = models.URLField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # Core Web Vitals
+    lcp = models.FloatField(null=True, blank=True, help_text="Largest Contentful Paint (ms)")
+    fid = models.FloatField(null=True, blank=True, help_text="First Input Delay (ms)")
+    cls = models.FloatField(null=True, blank=True, help_text="Cumulative Layout Shift")
+    fcp = models.FloatField(null=True, blank=True, help_text="First Contentful Paint (ms)")
+    ttfb = models.FloatField(null=True, blank=True, help_text="Time to First Byte (ms)")
+    
+    # Memory usage
+    memory_used = models.BigIntegerField(null=True, blank=True, help_text="Memory used (bytes)")
+    memory_total = models.BigIntegerField(null=True, blank=True, help_text="Memory total (bytes)")
+    memory_limit = models.BigIntegerField(null=True, blank=True, help_text="Memory limit (bytes)")
+    
+    # Additional data
+    raw_data = models.JSONField(default=dict, help_text="Raw performance data")
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"Performance {self.session_id} - {self.timestamp}"
+
+class DeviceInfo(models.Model):
+    """Modello per salvare informazioni dispositivo"""
+    
+    session_id = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # Device info
+    device_type = models.CharField(max_length=20, choices=[
+        ('mobile', 'Mobile'),
+        ('tablet', 'Tablet'),
+        ('desktop', 'Desktop'),
+        ('unknown', 'Unknown'),
+    ])
+    os = models.CharField(max_length=50)
+    os_version = models.CharField(max_length=50, blank=True)
+    browser = models.CharField(max_length=50)
+    browser_version = models.CharField(max_length=50, blank=True)
+    
+    # Screen info
+    screen_width = models.IntegerField()
+    screen_height = models.IntegerField()
+    viewport_width = models.IntegerField()
+    viewport_height = models.IntegerField()
+    pixel_ratio = models.FloatField(default=1.0)
+    
+    # Capabilities
+    touch_support = models.BooleanField(default=False)
+    hardware_acceleration = models.BooleanField(default=False)
+    webgl_support = models.BooleanField(default=False)
+    connection_type = models.CharField(max_length=20, blank=True)
+    device_memory = models.IntegerField(null=True, blank=True)
+    
+    # Additional data
+    user_agent = models.TextField()
+    raw_data = models.JSONField(default=dict)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['device_type', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"Device {self.device_type} - {self.browser} - {self.timestamp}"
+
+class AccessibilityAudit(models.Model):
+    """Modello per salvare risultati audit accessibilità"""
+    
+    session_id = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    url = models.URLField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # Audit results
+    total_issues = models.IntegerField(default=0)
+    errors = models.IntegerField(default=0)
+    warnings = models.IntegerField(default=0)
+    accessibility_score = models.IntegerField(default=100)
+    
+    # Issue details
+    issues_data = models.JSONField(default=list, help_text="Detailed issues data")
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['accessibility_score', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"Accessibility {self.session_id} - {self.total_issues} issues - {self.timestamp}"
+
+class UserFeedback(models.Model):
+    """Modello per salvare feedback utenti"""
+    
+    session_id = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # Feedback data
+    overall_rating = models.IntegerField(null=True, blank=True, choices=[
+        (1, 'Very Dissatisfied'),
+        (2, 'Dissatisfied'),
+        (3, 'Neutral'),
+        (4, 'Satisfied'),
+        (5, 'Very Satisfied'),
+    ])
+    performance_rating = models.CharField(max_length=20, blank=True)
+    
+    # Text feedback
+    issues_reported = models.TextField(blank=True)
+    suggestions = models.TextField(blank=True)
+    comments = models.TextField(blank=True)
+    
+    # Session data
+    session_duration = models.BigIntegerField(null=True, blank=True, help_text="Session duration (ms)")
+    page_time = models.BigIntegerField(null=True, blank=True, help_text="Page time (ms)")
+    interactions_count = models.IntegerField(default=0)
+    
+    # Additional data
+    raw_data = models.JSONField(default=dict)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['overall_rating', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"Feedback {self.session_id} - Rating: {self.overall_rating} - {self.timestamp}"
+
+class SessionData(models.Model):
+    """Modello per salvare dati sessione utente"""
+    
+    session_id = models.CharField(max_length=100, unique=True, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    
+    # Session metrics
+    session_duration = models.BigIntegerField(null=True, blank=True, help_text="Session duration (ms)")
+    page_time = models.BigIntegerField(default=0, help_text="Total page time (ms)")
+    interactions_count = models.IntegerField(default=0)
+    pages_visited = models.IntegerField(default=0)
+    
+    # Technical data
+    user_agent = models.TextField()
+    referrer = models.URLField(blank=True)
+    screen_resolution = models.CharField(max_length=20, blank=True)
+    viewport_size = models.CharField(max_length=20, blank=True)
+    
+    # Performance
+    performance_rating = models.CharField(max_length=20, blank=True)
+    issues_count = models.IntegerField(default=0)
+    
+    # Additional data
+    raw_data = models.JSONField(default=dict)
+    
+    class Meta:
+        ordering = ['-last_activity']
+        indexes = [
+            models.Index(fields=['session_id']),
+            models.Index(fields=['user', 'last_activity']),
+            models.Index(fields=['last_activity']),
+        ]
+    
+    def __str__(self):
+        return f"Session {self.session_id} - {self.start_time}"
+
+class ABTestingParticipation(models.Model):
+    """Modello per salvare partecipazioni A/B testing"""
+    
+    session_id = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # Experiment data
+    experiment_id = models.CharField(max_length=100)
+    variant = models.CharField(max_length=50)
+    user_id_hash = models.CharField(max_length=100, help_text="Hashed user ID for consistent assignment")
+    
+    # Additional data
+    url = models.URLField()
+    raw_data = models.JSONField(default=dict)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['experiment_id', 'variant']),
+            models.Index(fields=['timestamp']),
+        ]
+        unique_together = ['session_id', 'experiment_id']
+    
+    def __str__(self):
+        return f"A/B Test {self.experiment_id} - {self.variant} - {self.timestamp}"
+
+class ABTestingEvent(models.Model):
+    """Modello per salvare eventi A/B testing"""
+    
+    session_id = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # Event data
+    event_type = models.CharField(max_length=100)
+    event_data = models.JSONField(default=dict)
+    experiments = models.JSONField(default=dict, help_text="Active experiments at time of event")
+    
+    # Additional data
+    url = models.URLField()
+    raw_data = models.JSONField(default=dict)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['event_type', 'timestamp']),
+            models.Index(fields=['timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"A/B Event {self.event_type} - {self.session_id} - {self.timestamp}"
