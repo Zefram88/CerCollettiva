@@ -87,17 +87,17 @@ jobs:
       run: |
         python manage.py collectstatic --noinput
     
-                - name: Run tests (Fast CI - Core Only)
-                  run: |
-                    # Fast CI: Only critical core tests for rapid feedback
-                    # cer.test_forms excluded due to 7/10 failing tests (form validation logic issues)
-                    coverage run --source='.' manage.py test \
-                      tests.test_models_core \
-                      tests.test_models_users \
-                      tests.test_models_energy \
-                      --keepdb --noinput --parallel
-                    coverage report
-                    coverage xml
+    - name: Run tests (Fast CI - Core Only)
+      run: |
+        # Fast CI: Only critical core tests for rapid feedback
+        # cer.test_forms excluded due to 7/10 failing tests (form validation logic issues)
+        coverage run --source='.' manage.py test \
+          tests.test_models_core \
+          tests.test_models_users \
+          tests.test_models_energy \
+          --keepdb --noinput --parallel
+        coverage report
+        coverage xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
