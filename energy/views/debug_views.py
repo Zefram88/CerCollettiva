@@ -1,9 +1,10 @@
 #energy/views/debug_views.py
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.shortcuts import render
 
 from ..models import DeviceConfiguration
+
 
 @login_required
 def debug_device_status(request):

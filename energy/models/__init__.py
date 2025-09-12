@@ -1,29 +1,29 @@
 # energy/models/__init__.py
+from .audit import MQTTAuditLog
 from .device import (
     Device,
-    DeviceType,
     DeviceConfiguration,
     DeviceMeasurement,
-    DeviceMeasurementDetail
+    DeviceMeasurementDetail,
+    DeviceType,
 )
+from .energy import EnergyInterval  # Aggiunto il nuovo modello
 from .energy import (
-    EnergyMeasurement,
     EnergyAggregate,
-    EnergyInterval  # Aggiunto il nuovo modello
+    EnergyMeasurement,
 )
 from .mqtt import MQTTBroker, MQTTConfiguration
-from .audit import MQTTAuditLog
 
 __all__ = [
-    'Device',
-    'DeviceType',
-    'DeviceConfiguration',
-    'DeviceMeasurement',
-    'DeviceMeasurementDetail',
-    'EnergyMeasurement',
-    'EnergyAggregate',
-    'EnergyInterval',  # Aggiunto il nuovo modello
-    'MQTTBroker',
-    'MQTTConfiguration',
-    'MQTTAuditLog',
+    "Device",
+    "DeviceType",
+    "DeviceConfiguration",
+    "DeviceMeasurement",
+    "DeviceMeasurementDetail",
+    "EnergyMeasurement",
+    "EnergyAggregate",
+    "EnergyInterval",  # Aggiunto il nuovo modello
+    "MQTTBroker",
+    "MQTTConfiguration",
+    "MQTTAuditLog",
 ]

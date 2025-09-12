@@ -1,13 +1,13 @@
 from ..models import (
+    DeviceConfiguration,
     DeviceMeasurement,
-    EnergyMeasurement,
     EnergyAggregate,
-    DeviceConfiguration
+    EnergyMeasurement,
 )
 
 __all__ = [
-    'DeviceMeasurement',
-    'DeviceMeasurementDetail',
-    'EnergyMeasurement',
-    'EnergyAggregate'
+    "DeviceMeasurement",
+    "DeviceMeasurementDetail",
+    "EnergyMeasurement",
+    "EnergyAggregate",
 ]

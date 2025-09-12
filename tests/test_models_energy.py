@@ -1,14 +1,16 @@
 """
 Test suite for Energy app models
 """
-from django.test import TestCase
+from datetime import datetime, timedelta
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.test import TestCase
 from django.utils import timezone
-from decimal import Decimal
-from datetime import datetime, timedelta
+
+from core.models import CERConfiguration, Plant
 from energy.models import DeviceConfiguration, DeviceMeasurement, MQTTBroker
-from core.models import Plant, CERConfiguration
 
 User = get_user_model()
 

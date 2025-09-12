@@ -5,13 +5,13 @@ Sistema centralizzato di validazione input per documenti
 """
 
 from .document_validators import (
+    DocumentAccessValidator,
     DocumentCreateValidator,
     DocumentUpdateValidator,
-    DocumentAccessValidator
 )
 
 __all__ = [
-    'DocumentCreateValidator',
-    'DocumentUpdateValidator',
-    'DocumentAccessValidator'
+    "DocumentCreateValidator",
+    "DocumentUpdateValidator",
+    "DocumentAccessValidator",
 ]

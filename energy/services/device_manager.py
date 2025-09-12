@@ -1,19 +1,23 @@
 # energy/services/device_manager.py
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from django.core.cache import cache
+
 from ..models.device import Device, DeviceType
+
 
 class DeviceManager:
     """Gestore centralizzato dei dispositivi"""
-    
+
     @staticmethod
     def get_device(device_id: int) -> Optional[Device]:
         """Recupera un dispositivo dal database"""
-        return Device.objects.filter(
-            id=device_id,
-            is_active=True
-        ).select_related('device_type').first()
-    
+        return (
+            Device.objects.filter(id=device_id, is_active=True)
+            .select_related("device_type")
+            .first()
+        )
+
     @staticmethod
     def process_mqtt_message(topic: str, payload: Dict[str, Any]) -> None:
         """Processa un messaggio MQTT"""
@@ -23,9 +27,7 @@ class DeviceManager:
     @staticmethod
     def get_active_devices():
         """Recupera tutti i dispositivi attivi"""
-        return Device.objects.filter(
-            is_active=True
-        ).select_related('device_type')
+        return Device.objects.filter(is_active=True).select_related("device_type")
 
     @classmethod
     def validate_payload(cls, device: Device, payload: Dict[str, Any]) -> bool:

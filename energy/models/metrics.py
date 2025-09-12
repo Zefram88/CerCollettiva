@@ -1,14 +1,15 @@
 from django.db import models
 from django.utils import timezone
+
 from .base import BaseTimestampModel
+
 
 class TopicMetrics(BaseTimestampModel):
     """Metriche per topic MQTT"""
+
     topic = models.CharField(max_length=255, db_index=True)
     device = models.ForeignKey(
-        'DeviceConfiguration',
-        on_delete=models.CASCADE,
-        related_name='topic_metrics'
+        "DeviceConfiguration", on_delete=models.CASCADE, related_name="topic_metrics"
     )
     messages_count = models.IntegerField(default=0)
     errors_count = models.IntegerField(default=0)
@@ -18,16 +19,16 @@ class TopicMetrics(BaseTimestampModel):
     period_type = models.CharField(
         max_length=10,
         choices=[
-            ('HOUR', 'Hourly'),
-            ('DAY', 'Daily'),
-            ('MONTH', 'Monthly'),
-            ('YEAR', 'Yearly'),
-        ]
+            ("HOUR", "Hourly"),
+            ("DAY", "Daily"),
+            ("MONTH", "Monthly"),
+            ("YEAR", "Yearly"),
+        ],
     )
 
     class Meta:
-        unique_together = ['topic', 'period_start', 'period_type']
+        unique_together = ["topic", "period_start", "period_type"]
         indexes = [
-            models.Index(fields=['period_type', 'period_start']),
-            models.Index(fields=['device', 'period_type']),
+            models.Index(fields=["period_type", "period_start"]),
+            models.Index(fields=["device", "period_type"]),
         ]

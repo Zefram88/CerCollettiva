@@ -1,7 +1,9 @@
 from django.core.management.base import BaseCommand
-from energy.models import DeviceConfiguration
-from core.models import Plant 
 from django.utils import timezone
+
+from core.models import Plant
+from energy.models import DeviceConfiguration
+
 
 class Command(BaseCommand):
     help = 'Debug device and plant configurations'

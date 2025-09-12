@@ -1,1 +1,1 @@
-default_app_config = 'energy.apps.EnergyConfig'
+default_app_config = "energy.apps.EnergyConfig"

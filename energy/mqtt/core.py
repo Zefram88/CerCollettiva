@@ -1,58 +1,71 @@
-#energy/mqtt/core.py
+# energy/mqtt/core.py
+import json
 import logging
+import re
 import threading
-from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from django.utils import timezone
+from typing import Any, Dict, List, Optional
+
 import paho.mqtt.client as mqtt
+
 from django.conf import settings
 from django.core.cache import cache
-from ..models import DeviceConfiguration, DeviceMeasurement, MQTTAuditLog
+from django.utils import timezone
 
 from ..devices.registry import DeviceRegistry
-from typing import Dict, Optional, List, Any
-import json
+from ..models import DeviceConfiguration, DeviceMeasurement, MQTTAuditLog
 from ..models.device import DeviceConfiguration, DeviceMeasurementDetail
-import re
 
-logger = logging.getLogger('energy.mqtt')
+logger = logging.getLogger("energy.mqtt")
+
 
 @dataclass
 class MQTTMessage:
     """Classe per standardizzare i messaggi MQTT"""
+
     topic: str
     payload: Dict[str, Any]
     qos: int
     timestamp: datetime
     device_type: Optional[str] = None
-    
+
     @property
     def vendor(self) -> Optional[str]:
         """Estrae il vendor dal topic"""
-        parts = self.topic.split('/')
+        parts = self.topic.split("/")
         return parts[0] if len(parts) > 0 else None
-    
+
+
 class TopicMatcher:
     """Gestione avanzata dei topic MQTT"""
+
     @staticmethod
     def match(pattern: str, topic: str) -> bool:
         return mqtt.topic_matches_sub(pattern, topic)
-    
+
     @staticmethod
     def extract_device_info(topic: str) -> Optional[Dict[str, str]]:
         """Estrae un identificatore dal topic per la ricerca nel DB."""
         try:
             # Esempio pattern per estrarre il device_id (o una sua parte)
-            match = re.match(r'^cercollettiva/(?P<device_id_part>[-\w]+)/status/.*$', topic)
+            match = re.match(
+                r"^cercollettiva/(?P<device_id_part>[-\w]+)/status/.*$", topic
+            )
             if match:
-                return {"device_id_part": match.group('device_id_part')}
+                return {"device_id_part": match.group("device_id_part")}
 
             # Pattern di esempio per VePro
-            match = re.match(r'^VePro/(?P<pod_code>[-\w]+)/(?P<device_id_part>[-\w]+)/status/.*$', topic)
+            match = re.match(
+                r"^VePro/(?P<pod_code>[-\w]+)/(?P<device_id_part>[-\w]+)/status/.*$",
+                topic,
+            )
             if match:
-                return {"pod_code": match.group('pod_code'), "device_id_part": match.group('device_id_part')}
-            
+                return {
+                    "pod_code": match.group("pod_code"),
+                    "device_id_part": match.group("device_id_part"),
+                }
+
             logger.warning(f"Topic {topic} does not match any known pattern")
             return None
         except Exception as e:
@@ -60,8 +73,10 @@ class TopicMatcher:
             logger.exception(e)
             return None
 
+
 class CircuitBreaker:
     """Implementazione del pattern Circuit Breaker"""
+
     def __init__(self, failure_threshold: int = 3, reset_timeout: int = 60):
         self.failure_threshold = failure_threshold
         self.reset_timeout = reset_timeout
@@ -87,16 +102,19 @@ class CircuitBreaker:
             return True
 
         if self.state == "OPEN":
-            if (timezone.now() - self.last_failure_time).total_seconds() > self.reset_timeout:
+            if (
+                timezone.now() - self.last_failure_time
+            ).total_seconds() > self.reset_timeout:
                 self.state = "HALF-OPEN"
                 return True
             return False
 
         return True  # HALF-OPEN state
 
+
 class MQTTService:
     """Servizio unificato per la gestione MQTT con integrazione DeviceRegistry"""
-    
+
     def __init__(self):
         self._client = None
         self._connected = False
@@ -109,64 +127,77 @@ class MQTTService:
         self._max_retries = 3
         self._retry_delay = 5  # secondi
         self._initialize_default_handlers()
-        
+
     def _initialize_default_handlers(self):
         """Inizializza gli handler predefiniti basati sul device registry - Event-driven"""
         # Registra event handlers con EventBus
         from .event_bus import get_event_bus
-        from .handlers.measurement import MeasurementHandler
         from .handlers.device import DeviceHandler
-        
+        from .handlers.measurement import MeasurementHandler
+
         event_bus = get_event_bus()
-        
+
         # Crea istanze degli handler
         measurement_handler = MeasurementHandler()
         device_handler = DeviceHandler()
-        
+
         # Registra handler per eventi di misurazione
-        event_bus.register_handler('power_measurement', measurement_handler.handle_power_measurement)
-        event_bus.register_handler('energy_measurement', measurement_handler.handle_energy_measurement)
-        event_bus.register_handler('device_status', device_handler.handle_device_status)
-        
+        event_bus.register_handler(
+            "power_measurement", measurement_handler.handle_power_measurement
+        )
+        event_bus.register_handler(
+            "energy_measurement", measurement_handler.handle_energy_measurement
+        )
+        event_bus.register_handler("device_status", device_handler.handle_device_status)
+
         logger.info("Event-driven handlers registered with EventBus")
 
-    def configure(self, host: str, port: int, username: Optional[str] = None, 
-                 password: Optional[str] = None, use_tls: bool = False) -> None:
+    def configure(
+        self,
+        host: str,
+        port: int,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        use_tls: bool = False,
+    ) -> None:
         """Configura il client MQTT con retry"""
         try:
             with self._lock:
                 client_id = f"CerCollettiva-{timezone.now().timestamp()}"
                 self._client = mqtt.Client(client_id=client_id)
-                
+
                 # Callbacks
                 self._client.on_connect = self._on_connect
                 self._client.on_disconnect = self._on_disconnect
                 self._client.on_message = self._on_message
-                
+
                 # Configurazione
                 if username:
                     self._client.username_pw_set(username, password)
                 if use_tls:
                     self._client.tls_set()
-                
+
                 # Imposta LWT
                 self._client.will_set(
                     "CerCollettiva/status",
-                    json.dumps({"status": "offline", "timestamp": timezone.now().isoformat()}),
+                    json.dumps(
+                        {"status": "offline", "timestamp": timezone.now().isoformat()}
+                    ),
                     qos=1,
-                    retain=True
+                    retain=True,
                 )
-                
+
                 # Connessione con retry
                 self._connect_with_retry(host, port)
-                
+
                 # Avvia EventBus per processing asincrono
                 from .event_bus import get_event_bus
+
                 event_bus = get_event_bus()
                 if not event_bus._running:
                     event_bus.start()
                     logger.info("EventBus started for MQTT message processing")
-                
+
         except Exception as e:
             logger.error(f"Errore configurazione MQTT: {str(e)}")
             self._circuit_breaker.record_failure()
@@ -185,7 +216,7 @@ class MQTTService:
                 else:
                     logger.warning("Circuit breaker aperto, attendere reset")
                     return
-                    
+
             except Exception as e:
                 self._retry_count += 1
                 self._circuit_breaker.record_failure()
@@ -212,9 +243,11 @@ class MQTTService:
                     2: "Identificatore client non valido",
                     3: "Server non disponibile",
                     4: "Credenziali non valide",
-                    5: "Non autorizzato"
+                    5: "Non autorizzato",
                 }
-                logger.error(f"Connessione fallita: {error_msgs.get(rc, f'Errore sconosciuto {rc}')}")
+                logger.error(
+                    f"Connessione fallita: {error_msgs.get(rc, f'Errore sconosciuto {rc}')}"
+                )
                 self._circuit_breaker.record_failure()
         except Exception as e:
             logger.error(f"Errore in _on_connect: {str(e)}")
@@ -230,31 +263,35 @@ class MQTTService:
     def _on_message(self, client, userdata, msg):
         """Gestione centralizzata dei messaggi MQTT - Event-driven"""
         try:
-            #logger.info(f"\n=== MQTT Message Received ===")
-            #logger.info(f"Topic: {msg.topic}")
-            #logger.info(f"Payload: {msg.payload}")
-            
+            # logger.info(f"\n=== MQTT Message Received ===")
+            # logger.info(f"Topic: {msg.topic}")
+            # logger.info(f"Payload: {msg.payload}")
+
             payload = json.loads(msg.payload.decode())
-            
+
             # Pubblica evento nell'EventBus invece di gestione diretta
             from .event_bus import get_event_bus
+
             event_bus = get_event_bus()
-            
+
             # Crea contesto del messaggio
             from .router import MessageContext
+
             context = MessageContext(
                 topic=msg.topic,
                 payload=payload,
                 qos=msg.qos,
                 retain=msg.retain,
-                timestamp=timezone.now()
+                timestamp=timezone.now(),
             )
-            
+
             # Pubblica evento per processing asincrono
             success = event_bus.publish_mqtt_message(msg.topic, payload, context)
             if not success:
-                logger.warning(f"Failed to publish MQTT message to EventBus: {msg.topic}")
-                    
+                logger.warning(
+                    f"Failed to publish MQTT message to EventBus: {msg.topic}"
+                )
+
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON from {msg.topic}: {e}")
         except Exception as e:
@@ -268,7 +305,7 @@ class MQTTService:
         with self._lock:
             if self._circuit_breaker.state == from_state:
                 self._circuit_breaker.state = to_state
-                #logger.info(f"Transizione stato: {from_state} -> {to_state}")
+                # logger.info(f"Transizione stato: {from_state} -> {to_state}")
 
     def register_handler(self, topic_pattern: str, handler_func: callable) -> None:
         """Registra un handler per un pattern di topic"""
@@ -290,41 +327,36 @@ class MQTTService:
             message = {
                 "status": status,
                 "timestamp": timezone.now().isoformat(),
-                "topics": list(self._subscribed_topics)
+                "topics": list(self._subscribed_topics),
             }
-            
+
             self._client.publish(
-                "CerCollettiva/status",
-                json.dumps(message),
-                qos=1,
-                retain=True
+                "CerCollettiva/status", json.dumps(message), qos=1, retain=True
             )
-            
+
         except Exception as e:
             logger.error(f"Errore pubblicazione stato: {str(e)}")
 
     def _anonymize_topic(self, topic: str) -> str:
         """Anonimizza dati sensibili nel topic per GDPR"""
-        parts = topic.split('/')
+        parts = topic.split("/")
         if len(parts) >= 3:
             # Maschera POD code
             parts[2] = f"{parts[2][:3]}...{parts[2][-3:]}"
-        return '/'.join(parts)
+        return "/".join(parts)
 
     def _get_device_type(self, device_info: Dict[str, str]) -> Optional[str]:
         """Determina il tipo di dispositivo dai dati del topic"""
         try:
-            device = DeviceConfiguration.objects.get(
-                device_id=device_info['device_id']
-            )
+            device = DeviceConfiguration.objects.get(device_id=device_info["device_id"])
             return device.device_type
         except DeviceConfiguration.DoesNotExist:
             return None
 
     def _update_metrics(self, message: MQTTMessage):
         """Aggiorna metriche per monitoring"""
-        cache.incr('mqtt_messages_received')
-        cache.incr(f'mqtt_messages_{message.device_type}')
+        cache.incr("mqtt_messages_received")
+        cache.incr(f"mqtt_messages_{message.device_type}")
 
     @property
     def is_connected(self) -> bool:
@@ -337,23 +369,23 @@ class MQTTService:
             if self._client:
                 # Pubblica lo stato di arresto
                 self._publish_status("shutting_down")
-                
+
                 # Pulizia sottoscrizioni in modo thread-safe
                 with self._lock:
                     for topic in self._subscribed_topics:
                         self._client.unsubscribe(topic)
                     self._subscribed_topics.clear()
                     self._connected = False  # Dal tuo codice originale
-                
+
                 # Arresto del client
                 self._client.loop_stop()
                 self._client.disconnect()
-                
+
                 # Pubblica stato finale
                 self._publish_status("offline")
-                
+
                 logger.info("Servizio MQTT arrestato correttamente")
-                
+
         except Exception as e:
             logger.error(f"Errore durante l'arresto del client MQTT: {str(e)}")
             # In caso di errore, forza lo stato a disconnesso
@@ -364,6 +396,7 @@ class MQTTService:
 
 # Singleton instance
 _mqtt_service = None
+
 
 def get_mqtt_service() -> MQTTService:
     """Ottiene l'istanza singleton del servizio MQTT"""

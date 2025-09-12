@@ -1,6 +1,8 @@
 # energy/devices/vendors/tasmota/power_meter.py
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
+
 from ....devices.base.meter import BaseMeter, MeasurementData
+
 
 class TasmotaPowerMeter(BaseMeter):
     @property
@@ -14,9 +16,12 @@ class TasmotaPowerMeter(BaseMeter):
     def get_topics(self, base_topic: str) -> List[str]:
         return [f"{base_topic}/tele/SENSOR"]
 
-    def parse_message(self, topic: str, payload: Dict[str, Any]) -> Optional[MeasurementData]:
+    def parse_message(
+        self, topic: str, payload: Dict[str, Any]
+    ) -> Optional[MeasurementData]:
         # Implementa il parsing specifico per Tasmota
         pass
+
 
 # Registra il nuovo dispositivo
 DeviceRegistry.register(TasmotaPowerMeter)

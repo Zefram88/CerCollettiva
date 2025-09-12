@@ -4,38 +4,38 @@ from .base import *
 
 # Override per sviluppo locale
 DEBUG = True
-ALLOWED_HOSTS = ['*']  # Per sviluppo - accetta tutti gli host
+ALLOWED_HOSTS = ["*"]  # Per sviluppo - accetta tutti gli host
 
 # Database PostgreSQL per coerenza con produzione (configurazione già definita in base.py)
 
 # Cache in memoria per sviluppo
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
 
 # Email console per sviluppo
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Debug toolbar per sviluppo
 if DEBUG:
-    INSTALLED_APPS += ['debug_toolbar']
-    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
-    INTERNAL_IPS = ['127.0.0.1', 'localhost']
+    INSTALLED_APPS += ["debug_toolbar"]
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+    INTERNAL_IPS = ["127.0.0.1", "localhost"]
 import socket
 
-ENVIRONMENT = 'local'
+ENVIRONMENT = "local"
 
 # Debug
 DEBUG = True
 
 
 GEOCODING_SETTINGS = {
-    'TIMEOUT': 5,  # Aumentato da 1 a 5 secondi
-    'MAX_RETRIES': 2,
-    'OPTIONAL': True,
-    'CACHE_TIMEOUT': 86400  # 24 ore di cache
+    "TIMEOUT": 5,  # Aumentato da 1 a 5 secondi
+    "MAX_RETRIES": 2,
+    "OPTIONAL": True,
+    "CACHE_TIMEOUT": 86400,  # 24 ore di cache
 }
 
 # Aggiungi automaticamente l'IP locale per development
@@ -44,203 +44,206 @@ ALLOWED_HOSTS.extend([ip for ip in ips])
 
 # Apps installate
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     # Third party apps
-    'rest_framework',
-    'channels',
-    'crispy_forms',
-    'crispy_bootstrap5',
-    'widget_tweaks',
-    'django_extensions',
-    'django_filters',
-
+    "rest_framework",
+    "channels",
+    "crispy_forms",
+    "crispy_bootstrap5",
+    "widget_tweaks",
+    "django_extensions",
+    "django_filters",
     # Local apps
-    'users.apps.UsersConfig',
-    'core.apps.CoreConfig',
-    'energy.apps.EnergyConfig',
-    'documents.apps.DocumentsConfig',
-    'monitoring.apps.MonitoringConfig',
-    'cer.apps.CerConfig',
+    "users.apps.UsersConfig",
+    "core.apps.CoreConfig",
+    "energy.apps.EnergyConfig",
+    "documents.apps.DocumentsConfig",
+    "monitoring.apps.MonitoringConfig",
+    "cer.apps.CerConfig",
 ]
 
 # Middleware (senza debug_toolbar)
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Setup middleware - deve essere dopo AuthenticationMiddleware
-    'core.middleware.FirstInstallationMiddleware',
+    "core.middleware.FirstInstallationMiddleware",
 ]
 
 # Database PostgreSQL per coerenza con produzione (configurazione già definita sopra)
 
 # Cache per sviluppo
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 
 # Email backend per sviluppo
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Configurazione logging
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s [%(name)s] %(levelname)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'mqtt': {
-            'format': '%(asctime)s [MQTT] %(levelname)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+        "mqtt": {
+            "format": "%(asctime)s [MQTT] %(levelname)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'measurement': {
-            'format': '%(asctime)s [MEASUREMENT] %(levelname)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+        "measurement": {
+            "format": "%(asctime)s [MEASUREMENT] %(levelname)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'device': {
-            'format': '%(asctime)s [DEVICE] %(levelname)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+        "device": {
+            "format": "%(asctime)s [DEVICE] %(levelname)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'document_processor': {
-            'format': '%(asctime)s [%(name)s] %(levelname)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        }
+        "document_processor": {
+            "format": "%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-            'level': 'DEBUG',
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+            "level": "DEBUG",
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs/debug.log',
-            'formatter': 'verbose',
-            'level': 'DEBUG',
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs/debug.log",
+            "formatter": "verbose",
+            "level": "DEBUG",
         },
-        'mqtt_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/mqtt.log',
-            'maxBytes': 10485760,
-            'backupCount': 5,
-            'formatter': 'mqtt',
-            'level': 'INFO',
+        "mqtt_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/mqtt.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+            "formatter": "mqtt",
+            "level": "INFO",
         },
-        'measurement_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/measurements.log',
-            'maxBytes': 10485760,
-            'backupCount': 5,
-            'formatter': 'measurement',
-            'level': 'INFO',
+        "measurement_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/measurements.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+            "formatter": "measurement",
+            "level": "INFO",
         },
-        'device_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/devices.log',
-            'maxBytes': 10485760,
-            'backupCount': 5,
-            'formatter': 'device',
-            'level': 'INFO',
+        "device_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/devices.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+            "formatter": "device",
+            "level": "INFO",
         },
-        'general_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/cercollettiva.log',
-            'maxBytes': 10485760,
-            'backupCount': 5,
-            'formatter': 'verbose',
-            'level': 'INFO',
+        "general_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/cercollettiva.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "level": "INFO",
         },
-        'gaudi_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/gaudi.log',
-            'formatter': 'verbose',
+        "gaudi_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": "logs/gaudi.log",
+            "formatter": "verbose",
         },
-        'document_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/documents.log',
-            'maxBytes': 10485760,
-            'backupCount': 5,
-            'formatter': 'document_processor',
-            'level': 'INFO',
+        "document_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/documents.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+            "formatter": "document_processor",
+            "level": "INFO",
         },
-        'document_error_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/documents_error.log',
-            'maxBytes': 10485760,
-            'backupCount': 5,
-            'formatter': 'document_processor',
-            'level': 'ERROR',
-        }
+        "document_error_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/documents_error.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+            "formatter": "document_processor",
+            "level": "ERROR",
+        },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'general_file'],
-            'level': 'WARNING',
-            'propagate': False,
+    "loggers": {
+        "django": {
+            "handlers": ["console", "general_file"],
+            "level": "WARNING",
+            "propagate": False,
         },
-        'energy': {
-            'handlers': ['console', 'general_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "energy": {
+            "handlers": ["console", "general_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'energy.mqtt': {
-            'handlers': ['console', 'mqtt_file'],
-            'level': 'WARNING',
-            'propagate': False,
+        "energy.mqtt": {
+            "handlers": ["console", "mqtt_file"],
+            "level": "WARNING",
+            "propagate": False,
         },
-        'energy.measurements': {
-            'handlers': ['console', 'measurement_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "energy.measurements": {
+            "handlers": ["console", "measurement_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'energy.devices': {
-            'handlers': ['console', 'device_file'],
-            'level': 'WARNING',
-            'propagate': False,
+        "energy.devices": {
+            "handlers": ["console", "device_file"],
+            "level": "WARNING",
+            "propagate": False,
         },
-        'geocoding': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': False,
+        "geocoding": {
+            "handlers": ["file", "console"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'documents': {
-            'handlers': ['console', 'document_file', 'document_error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "documents": {
+            "handlers": ["console", "document_file", "document_error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'documents.processors': {
-            'handlers': ['console', 'document_file', 'document_error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "documents.processors": {
+            "handlers": ["console", "document_file", "document_error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'documents.processors.gaudi': {
-            'handlers': ['console', 'document_file', 'document_error_file', 'gaudi_file'],
-            'level': 'DEBUG',
-            'propagate': False,  # Modificato da True a False
-        }
+        "documents.processors.gaudi": {
+            "handlers": [
+                "console",
+                "document_file",
+                "document_error_file",
+                "gaudi_file",
+            ],
+            "level": "DEBUG",
+            "propagate": False,  # Modificato da True a False
+        },
     },
-    'root': {
-        'handlers': ['console', 'general_file'],
-        'level': 'WARNING',
-    }
+    "root": {
+        "handlers": ["console", "general_file"],
+        "level": "WARNING",
+    },
 }
 
 
@@ -252,34 +255,34 @@ LOG_BACKUP_COUNT = 5
 
 # MQTT Settings
 MQTT_SETTINGS = {
-    'BROKER_HOST': os.getenv('MQTT_HOST', '195.43.182.22'),
-    'BROKER_PORT': int(os.getenv('MQTT_PORT', 2607)),
-    'USERNAME': os.getenv('MQTT_USER', 'IoT_01'),
-    'PASSWORD': os.getenv('MQTT_PASS', 'mqtt_password_here'),
-    'QOS_LEVEL': 1,
-    'KEEPALIVE': 60,
-    'MAX_RETRIES': 5,
-    'RECONNECT_DELAY': 5,
-    'CONNECTION_TIMEOUT': 10,
-    'CLEAN_SESSION': True,
-    'TLS_ENABLED': False,
-    'TOPIC_PREFIX': 'CerCollettiva/',
-    'STATUS_TOPIC': 'CerCollettiva/status',
-    'ERROR_TOPIC': 'CerCollettiva/errors',
-    'DEBUG': True,
+    "BROKER_HOST": os.getenv("MQTT_HOST", "195.43.182.22"),
+    "BROKER_PORT": int(os.getenv("MQTT_PORT", 2607)),
+    "USERNAME": os.getenv("MQTT_USER", "IoT_01"),
+    "PASSWORD": os.getenv("MQTT_PASS", "mqtt_password_here"),
+    "QOS_LEVEL": 1,
+    "KEEPALIVE": 60,
+    "MAX_RETRIES": 5,
+    "RECONNECT_DELAY": 5,
+    "CONNECTION_TIMEOUT": 10,
+    "CLEAN_SESSION": True,
+    "TLS_ENABLED": False,
+    "TOPIC_PREFIX": "CerCollettiva/",
+    "STATUS_TOPIC": "CerCollettiva/status",
+    "ERROR_TOPIC": "CerCollettiva/errors",
+    "DEBUG": True,
 }
 
 # Media e Static files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
 
-os.makedirs(os.path.join(MEDIA_ROOT, 'documents', 'gaudi'), exist_ok=True)
+os.makedirs(os.path.join(MEDIA_ROOT, "documents", "gaudi"), exist_ok=True)
 
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / "static",
 ]
 
 # Security settings per development

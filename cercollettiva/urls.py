@@ -1,34 +1,31 @@
 # cercollettiva/urls.py
-from django.contrib import admin
-from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.shortcuts import redirect
+from django.urls import include, path
+
 from core.admin import admin_site
 
 urlpatterns = [
     # Core URLs
-    path('', include('core.urls')),
-
+    path("", include("core.urls")),
     # Admin URLs
-    path('ceradmin/', admin_site.urls),
-
-     # App URLs
-    path('energy/', include('energy.urls')),  # Template URLs sotto /energy/
-    path('api/energy/', include('energy.urls', namespace='energy-api')),  # API URLs sotto /api/energy/
-    path('users/', include('users.urls')),
-    path('documents/', include('documents.urls')),
-    path('cer/', include('cer.urls')),
-    
+    path("ceradmin/", admin_site.urls),
+    # App URLs
+    path("energy/", include("energy.urls")),  # Template URLs sotto /energy/
+    path(
+        "api/energy/", include("energy.urls", namespace="energy-api")
+    ),  # API URLs sotto /api/energy/
+    path("users/", include("users.urls")),
+    path("documents/", include("documents.urls")),
+    path("cer/", include("cer.urls")),
     # Monitoring and health checks
-    path('monitoring/', include('monitoring.urls')),
-    
+    path("monitoring/", include("monitoring.urls")),
     # Monitoring API endpoints
-    path('', include('core.urls_monitoring')),
-
+    path("", include("core.urls_monitoring")),
     # Authentication
-    path('accounts/login/', lambda request: redirect('users:login')),
-
+    path("accounts/login/", lambda request: redirect("users:login")),
 ]
 
 # Static/Media files in development
