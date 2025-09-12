@@ -3,7 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
 from .base import BaseTimestampModel, BaseMeasurementModel
-#from core.models import Plant
+#from core.main_models import Plant
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
@@ -20,6 +20,9 @@ class DeviceType(models.Model):
     """
     Modello per la definizione dei tipi di dispositivo supportati
     """
+    class Meta:
+        app_label = 'energy'
+    
     name = models.CharField("Nome", max_length=100, unique=True)
     vendor = models.CharField("Produttore", max_length=100)
     model = models.CharField("Modello", max_length=100)
@@ -58,6 +61,9 @@ class Device(models.Model):
     """
     Modello per i dispositivi installati
     """
+    class Meta:
+        app_label = 'energy'
+    
     device_type = models.ForeignKey(
         DeviceType,
         on_delete=models.PROTECT,
@@ -112,6 +118,9 @@ class Device(models.Model):
 class DeviceConfiguration(BaseTimestampModel):
     """Configurazione dei dispositivi"""
     
+    class Meta:
+        app_label = 'energy'
+    
     # Costanti per vendor
     VENDOR_SHELLY = 'SHELLY'
     VENDOR_CUSTOM = 'CUSTOM'
@@ -141,6 +150,7 @@ class DeviceConfiguration(BaseTimestampModel):
     
     # Campi base
     device_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField("Nome", max_length=100, default='')
     device_type = models.CharField(
         max_length=50, 
         choices=DEVICE_TYPES,
@@ -290,6 +300,9 @@ class DeviceConfiguration(BaseTimestampModel):
 
 class DeviceMeasurement(BaseMeasurementModel):
     """Misurazione principale del dispositivo"""
+    
+    class Meta:
+        app_label = 'energy'
 
     MEASUREMENT_TYPES = [
         ('DRAWN_POWER', 'Potenza Prelevata'),
@@ -333,6 +346,23 @@ class DeviceMeasurement(BaseMeasurementModel):
         help_text="Energia totale in kWh",
         validators=[MinValueValidator(0)],
         default=0
+    )
+    energy = models.FloatField(
+        help_text="Energia in kWh",
+        validators=[MinValueValidator(0)],
+        default=0
+    )
+    frequency = models.FloatField(
+        help_text="Frequenza in Hz",
+        validators=[MinValueValidator(45), MaxValueValidator(65)],
+        default=50,
+        null=True,
+        blank=True
+    )
+    raw_data = models.JSONField(
+        help_text="Dati grezzi in formato JSON",
+        default=dict,
+        blank=True
     )
     power_factor = models.FloatField(
         help_text="Fattore di potenza",
@@ -400,6 +430,9 @@ class DeviceMeasurement(BaseMeasurementModel):
 
 class DeviceMeasurementDetail(BaseMeasurementModel):
     """Dettagli per fase della misurazione"""
+    
+    class Meta:
+        app_label = 'energy'
     
     PHASE_CHOICES = [
         ('a', 'Fase A'),

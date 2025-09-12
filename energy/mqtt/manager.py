@@ -1,6 +1,7 @@
 # energy/mqtt/manager.py
 import json
 import threading
+import time
 from datetime import datetime, timedelta
 import logging
 from typing import Dict, Any, Optional, List
@@ -13,12 +14,16 @@ from ..devices.registry import DeviceRegistry
 from ..devices.base.device import MeasurementData, BaseDevice
 from ..models import DeviceMeasurement, DeviceConfiguration, DeviceMeasurementDetail
 from .core import get_mqtt_service, MQTTMessage, TopicMatcher
-from core.models import Plant
+from .router import get_mqtt_router
+from .event_bus import get_event_bus, Event
+from .handlers.device import DeviceHandler
+from .handlers.measurement import MeasurementHandler
+from core.main_models import Plant
 
 logger = logging.getLogger('energy.mqtt')
 
 class DeviceManager:
-    """Gestore dei dispositivi e delle loro misurazioni"""
+    """Gestore dei dispositivi e delle loro misurazioni - Event-driven architecture"""
     
     def __init__(self):
         # Inizializzazione thread safety
@@ -32,6 +37,11 @@ class DeviceManager:
         # Servizi e registry
         self._mqtt_service = get_mqtt_service()
         self._device_registry = DeviceRegistry()
+        self._event_bus = get_event_bus()
+        
+        # Event-driven handlers
+        self._device_handler = DeviceHandler()
+        self._measurement_handler = MeasurementHandler()
         
         # Collections e cache
         self._devices = {}
@@ -40,10 +50,10 @@ class DeviceManager:
         self._message_buffer = deque(maxlen=1000)
         self._cache_timeout = 3600
         
-        # Caricamento configurazioni e setup handlers
+        # Caricamento configurazioni e setup event-driven handlers
         with self._lock:
             self._load_configurations()
-            self._setup_message_handlers()
+            self._setup_event_handlers()
 
     def _is_duplicate(self, device_id: str, timestamp: datetime) -> bool:
         """Verifica duplicati con cache"""
@@ -59,24 +69,49 @@ class DeviceManager:
         cache.set(cache_key, timestamp, timeout=self._cache_timeout)
         return False
 
-    def _setup_message_handlers(self):
-        """Configura gli handler per i messaggi MQTT"""
+    def _setup_event_handlers(self):
+        """Configura gli event handlers per l'Event Bus"""
+        # Registra handlers per eventi di potenza
+        self._event_bus.register_handler(
+            "power_measurement",
+            self._device_handler.handle_device_status
+        )
+        
+        # Registra handlers per eventi di energia
+        self._event_bus.register_handler(
+            "energy_measurement", 
+            self._measurement_handler.handle_energy_measurement
+        )
+        
+        # Registra handlers per eventi di status dispositivo
+        self._event_bus.register_handler(
+            "device_status",
+            self._device_handler.handle_device_status
+        )
+        
+        # Setup MQTT handlers che pubblicano eventi
+        self._setup_mqtt_to_event_bridge()
+    
+    def _setup_mqtt_to_event_bridge(self):
+        """Configura il bridge MQTT -> Event Bus per compatibilità"""
+        # Handler per messaggi di potenza - pubblica eventi
         self._mqtt_service.register_handler(
             "cercollettiva/+/+/status/em:0",
-             self._handle_power_message
+            self._bridge_power_message_to_event
         )
-        self._mqtt_service.register_handler(
-             "cercollettiva/+/+/status/emdata:0",
-             self._handle_energy_message
-        )
-
         self._mqtt_service.register_handler(
             "VePro/+/+/status/em:0",
-            self._handle_power_message
+            self._bridge_power_message_to_event
+        )
+        
+        # Handler per messaggi di energia - pubblica eventi
+        self._mqtt_service.register_handler(
+            "cercollettiva/+/+/status/emdata:0",
+            self._bridge_energy_message_to_event
         )
         self._mqtt_service.register_handler(
             "VePro/+/+/status/emdata:0",
-            self._handle_energy_message
+            self._bridge_energy_message_to_event
         )
 
     def _setup_cache_policy(self):
@@ -144,110 +179,59 @@ class DeviceManager:
         except Exception as e:
             logger.error(f"Errore caricamento dispositivo {config.device_id}: {e}")
 
-    def _handle_power_message(self, device_config, payload, topic):
+    def _bridge_power_message_to_event(self, device_config, payload, topic):
+        """Bridge: converte messaggio MQTT potenza in evento Event Bus"""
         try:
-            current_timestamp = timezone.now()
+            # Crea evento per Event Bus
+            event = Event(
+                event_type="power_measurement",
+                topic=topic,
+                payload=payload,
+                timestamp=timezone.now(),
+                source="mqtt_bridge",
+                metadata={
+                    "device_id": device_config.device_id,
+                    "plant_id": device_config.plant.id if device_config.plant else None,
+                    "device_type": device_config.device_type
+                }
+            )
             
-            # Verifica duplicati usando una chiave più precisa
-            msg_key = f"{device_config.device_id}_{current_timestamp.timestamp()}"
-            if cache.get(msg_key):
-                logger.debug(f"Messaggio duplicato ignorato: {msg_key}")
-                return True
-
-            # Estrai i valori con validazione
-            power_value = float(payload.get('total_act_power', 0))
-            energy_total = float(payload.get('total_act', 0))
-            voltage = float(payload.get('a_voltage', 0))
-            current_amp = float(payload.get('a_current', 0))
-            power_factor = float(payload.get('total_pf', 1.0))
-
-            # Salva con transazione atomica
-            with transaction.atomic():
-                measurement = DeviceMeasurement.objects.create(
-                    device=device_config,
-                    plant=device_config.plant,
-                    timestamp=current_timestamp,
-                    power=power_value,
-                    voltage=voltage,
-                    current=current_amp,
-                    power_factor=power_factor,
-                    energy_total=energy_total,
-                    measurement_type='POWER',
-                    quality='GOOD'
-                )
-
-                # Salva i dettagli delle fasi
-                self._create_phase_details(measurement, payload)
-
-                # Aggiorna last_seen
-                device_config.last_seen = current_timestamp
-                device_config.save(update_fields=['last_seen'])
-
-                # Cache del messaggio processato
-                cache.set(msg_key, True, timeout=300)
-
+            # Pubblica evento asincrono
+            self._event_bus.publish_event(event)
+            
+            logger.debug(f"Power message bridged to event: {device_config.device_id}")
             return True
-
+            
         except Exception as e:
-            logger.error(f"Error in _handle_power_message: {str(e)}", exc_info=True)
+            logger.error(f"Error bridging power message to event: {e}")
             return False
 
-    def _handle_energy_message(self, device_config, payload, topic):
-        """Gestisce i messaggi di energia calcolando il delta tra letture consecutive"""
+    def _bridge_energy_message_to_event(self, device_config, payload, topic):
+        """Bridge: converte messaggio MQTT energia in evento Event Bus"""
         try:
-            current_timestamp = timezone.now()
+            # Crea evento per Event Bus
+            event = Event(
+                event_type="energy_measurement",
+                topic=topic,
+                payload=payload,
+                timestamp=timezone.now(),
+                source="mqtt_bridge",
+                metadata={
+                    "device_id": device_config.device_id,
+                    "plant_id": device_config.plant.id if device_config.plant else None,
+                    "device_type": device_config.device_type,
+                    "last_energy_value": self._last_energy_values.get(device_config.device_id)
+                }
+            )
             
-            # Estrai il valore di energia totale dal payload (in Wh)
-            current_energy_total = float(payload.get('total_act', 0))
+            # Pubblica evento asincrono
+            self._event_bus.publish_event(event)
             
-            # Recupera l'ultimo valore di energia per questo dispositivo
-            last_energy = self._last_energy_values.get(device_config.device_id)
-            
-            # Calcola il delta solo se abbiamo un valore precedente
-            if last_energy is not None:
-                energy_delta = current_energy_total - last_energy
-                
-                # Verifica che il delta sia positivo e ragionevole (es. max 100000 Wh = 100 kWh in 15 min)
-                if 0 <= energy_delta <= 100000:  
-                    # Crea la misurazione con il delta calcolato
-                    measurement = DeviceMeasurement.objects.create(
-                        device=device_config,
-                        plant=device_config.plant,
-                        timestamp=current_timestamp,
-                        power=0,  # Per i messaggi di energia, la potenza istantanea non è disponibile
-                        voltage=0,  # Valore di default
-                        current=0,  # Valore di default
-                        energy_total=energy_delta / 1000.0,  # Convertiamo da Wh a kWh prima di salvare
-                        measurement_type='ENERGY',
-                        quality='GOOD'
-                    )
-                    
-                    logger.info(f"""
-                        Energy delta calculated for device {device_config.device_id}:
-                        - Previous reading: {last_energy:.3f} Wh
-                        - Current reading: {current_energy_total:.3f} Wh
-                        - Delta: {energy_delta:.3f} Wh ({energy_delta/1000.0:.3f} kWh)
-                    """)
-                else:
-                    logger.warning(f"""
-                        Invalid energy delta for device {device_config.device_id}:
-                        - Previous reading: {last_energy:.3f} Wh
-                        - Current reading: {current_energy_total:.3f} Wh
-                        - Delta: {energy_delta:.3f} Wh
-                    """)
-            else:
-                logger.info(f"First energy reading for device {device_config.device_id}: {current_energy_total:.3f} Wh")
-            
-            # Aggiorna l'ultimo valore per la prossima lettura (manteniamo il valore in Wh)
-            self._last_energy_values[device_config.device_id] = current_energy_total
-            
-            # Aggiorna il timestamp dell'ultimo dato ricevuto
-            device_config.update_last_seen()
-            
+            logger.debug(f"Energy message bridged to event: {device_config.device_id}")
             return True
-
+            
         except Exception as e:
-            logger.error(f"Error processing energy message: {str(e)}")
+            logger.error(f"Error bridging energy message to event: {e}")
             return False
 
     def _create_phase_details(self, measurement: DeviceMeasurement, payload: Dict[str, Any]):
@@ -285,12 +269,13 @@ class DeviceManager:
         return list(set(topics))
 
     def refresh_configurations(self) -> None:
-        """Aggiorna le configurazioni dei dispositivi"""
-        self._load_configurations()
-        if self._mqtt_service.is_connected:
-            topics = self.get_subscription_topics()
-            for topic in topics:
-                self._mqtt_service.register_handler(topic, self._handle_power_message)
+        """Aggiorna le configurazioni dei dispositivi e ri-registra event handlers"""
+        with self._lock:
+            self._configs_loaded = False  # Force reload
+            self._load_configurations()
+            self._setup_event_handlers()  # Re-register event handlers
+            
+        logger.info("Device configurations refreshed and event handlers re-registered")
     
     def _find_device_for_topic(self, topic: str) -> Optional[DeviceConfiguration]:
         try:
@@ -335,51 +320,43 @@ class DeviceManager:
             return None
     
     def process_message(self, topic: str, data: Any) -> bool:
+        """
+        Processa un messaggio MQTT usando Event Bus (event-driven)
+        """
         try:
-            #logger.info(f"\n=== PROCESS MESSAGE START ===")
-            #logger.info(f"Processing topic: {topic}")
-            
+            # Trova il dispositivo per il topic
             device_config = self._find_device_for_topic(topic)
             if not device_config:
                 logger.warning(f"No device found for topic: {topic}")
                 return False
-
+            
+            # Parse del payload
             payload = self._parse_payload(data)
             if not payload:
+                logger.error(f"Invalid payload for topic: {topic}")
                 return False
-                    
-            msg_key = f"{topic}_{device_config.device_id}__{hash(str(payload))}"
             
-            # Verifica duplicati con chiave univoca
-            if cache.get(msg_key):
-                logger.debug(f"Duplicate message detected: {msg_key}")
+            # Determina il tipo di messaggio e pubblica evento appropriato
+            if "/status/em:0" in topic:
+                return self._bridge_power_message_to_event(device_config, payload, topic)
+            elif "/status/emdata:0" in topic:
+                return self._bridge_energy_message_to_event(device_config, payload, topic)
+            else:
+                # Evento generico di status dispositivo
+                event = Event(
+                    event_type="device_status",
+                    topic=topic,
+                    payload=payload,
+                    timestamp=timezone.now(),
+                    source="mqtt_manager",
+                    metadata={
+                        "device_id": device_config.device_id,
+                        "plant_id": device_config.plant.id if device_config.plant else None
+                    }
+                )
+                self._event_bus.publish(event)
                 return True
-
-            # Salvo il messaggio e processo
-            with transaction.atomic():
-                success = False
-                if 'em:0' in topic:
-                    success = self._handle_power_message(device_config, payload, topic)
-                elif 'emdata:0' in topic:
-                    success = self._handle_energy_message(device_config, payload, topic)
-                else:
-                    logger.warning(f"Unsupported topic format: {topic}")
-                    return False
-                        
-                if success:
-                    # Marca il messaggio come processato
-                    cache.set(msg_key, True, timeout=300) 
-                    #logger.info(f"Message processed successfully: {msg_key}") 
-                    
-                    # Aggiorna solo last_seen, senza refresh delle configurazioni
-                    with self._lock:
-                        device_config.last_seen = timezone.now()
-                        device_config.save(update_fields=['last_seen'])
-                    
-                    return True
-                        
-                return False
-
+            
         except Exception as e:
             logger.error(f"Error processing message: {str(e)}", exc_info=True)
             return False
@@ -405,3 +382,31 @@ class DeviceManager:
                 # Maschera l'identificativo del dispositivo/POD
                 parts[2] = f"{parts[2][:3]}...{parts[2][-3:]}"
             return '/'.join(parts)
+    
+    def get_event_bus_stats(self) -> Dict[str, Any]:
+        """Ottiene statistiche dell'Event Bus per monitoring"""
+        try:
+            return {
+                "event_bus_stats": self._event_bus.get_stats(),
+                "active_handlers": len(self._event_bus._handlers),
+                "devices_loaded": len(self._devices),
+                "configs_loaded": len(self._configs),
+                "last_energy_values": len(self._last_energy_values),
+                "message_buffer_size": len(self._message_buffer)
+            }
+        except Exception as e:
+            logger.error(f"Error getting event bus stats: {e}")
+            return {}
+    
+    def shutdown(self) -> None:
+        """Shutdown graceful dell'Event Bus e cleanup"""
+        try:
+            logger.info("Shutting down DeviceManager...")
+            # Event Bus si chiude automaticamente
+            self._message_buffer.clear()
+            self._devices.clear()
+            self._configs.clear()
+            self._last_energy_values.clear()
+            logger.info("DeviceManager shutdown completed")
+        except Exception as e:
+            logger.error(f"Error during shutdown: {e}")

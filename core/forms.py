@@ -7,6 +7,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from .models import CERConfiguration, CERMembership, Plant, PlantDocument
+from .validators import (
+    ValidationMixin, POD_VALIDATOR, POWER_VALIDATOR, 
+    EMAIL_UNIQUE_VALIDATOR, USERNAME_UNIQUE_VALIDATOR,
+    PDF_VALIDATOR, IMAGE_VALIDATOR, ConditionalRequiredValidator
+)
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, HTML, Div
 from crispy_forms.bootstrap import FormActions
@@ -14,19 +19,11 @@ from crispy_forms.bootstrap import FormActions
 User = get_user_model()
 
 
-class InitialSuperUserForm(UserCreationForm):
+class InitialSuperUserForm(ValidationMixin, UserCreationForm):
     """
     Form per creare il primo superuser durante il setup iniziale
     """
-    username = forms.CharField(
-        label="Nome utente",
-        max_length=150,
-        help_text="Username per l'accesso amministrativo",
-        widget=forms.TextInput(attrs={
-            'placeholder': 'admin',
-            'class': 'form-control'
-        })
-    )
+    # Username rimosso - ora si usa email come username
     
     first_name = forms.CharField(
         label="Nome",
@@ -79,7 +76,7 @@ class InitialSuperUserForm(UserCreationForm):
     cer_name = forms.CharField(
         label="Nome CER",
         max_length=255,
-        required=True,
+        required=False,  # Diventa required solo se create_demo_cer è True
         help_text="Nome della Comunità Energetica Rinnovabile",
         widget=forms.TextInput(attrs={
             'placeholder': 'CER Demo',
@@ -90,7 +87,7 @@ class InitialSuperUserForm(UserCreationForm):
     cer_code = forms.CharField(
         label="Codice CER",
         max_length=50,
-        required=True,
+        required=False,  # Diventa required solo se create_demo_cer è True
         help_text="Codice identificativo della CER",
         widget=forms.TextInput(attrs={
             'placeholder': 'CER001',
@@ -108,7 +105,7 @@ class InitialSuperUserForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -132,10 +129,7 @@ class InitialSuperUserForm(UserCreationForm):
                             Benvenuto! Per iniziare a usare CerCollettiva, crea il primo account amministratore.
                         </div>
             """),
-            Row(
-                Column(Field('username'), css_class='col-md-6'),
-                Column(Field('email'), css_class='col-md-6'),
-            ),
+            Field('email'),
             Row(
                 Column(Field('first_name'), css_class='col-md-6'),
                 Column(Field('last_name'), css_class='col-md-6'),
@@ -194,20 +188,29 @@ class InitialSuperUserForm(UserCreationForm):
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise ValidationError("Un utente con questa email esiste già.")
-        return email
+        return EMAIL_UNIQUE_VALIDATOR(email, self.cleaned_data)
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if User.objects.filter(username=username).exists():
-            raise ValidationError("Un utente con questo nome utente esiste già.")
-        return username
+        return USERNAME_UNIQUE_VALIDATOR(username, self.cleaned_data)
+    
+    def clean_cer_name(self):
+        """Valida il nome CER solo se la creazione CER è abilitata"""
+        cer_name = self.cleaned_data.get('cer_name')
+        create_demo_cer = self.cleaned_data.get('create_demo_cer')
+        
+        if create_demo_cer and not cer_name:
+            raise ValidationError("Il nome CER è obbligatorio quando si crea una CER di esempio.")
+        
+        return cer_name
     
     def clean_cer_code(self):
         """Valida il codice CER solo se la creazione CER è abilitata"""
         cer_code = self.cleaned_data.get('cer_code')
         create_demo_cer = self.cleaned_data.get('create_demo_cer')
+        
+        if create_demo_cer and not cer_code:
+            raise ValidationError("Il codice CER è obbligatorio quando si crea una CER di esempio.")
         
         if create_demo_cer and cer_code:
             if CERConfiguration.objects.filter(code=cer_code).exists():
@@ -218,6 +221,9 @@ class InitialSuperUserForm(UserCreationForm):
     def save(self, commit=True):
         """Salva l'utente e crea la CER se richiesto"""
         user = super().save(commit=False)
+        
+        # Imposta username = email per CustomUser
+        user.username = user.email
         
         # Imposta come superuser e staff
         user.is_superuser = True
@@ -288,7 +294,7 @@ class CERConfigurationForm(forms.ModelForm):
             'primary_substation': 'Nome della cabina primaria di riferimento'
         }
 
-class CERMembershipForm(forms.ModelForm):
+class CERMembershipForm(ValidationMixin, forms.ModelForm):
     """Form per la gestione dell'adesione a una CER con documenti dinamici"""
     
     # Campi aggiuntivi per tutti
@@ -566,9 +572,27 @@ class CERMembershipForm(forms.ModelForm):
 
     def clean_conformity_declaration(self):
         file = self.cleaned_data.get('conformity_declaration')
-        if file and not file.name.endswith('.pdf'):
-            raise forms.ValidationError("Il file deve essere in formato PDF")
-        return file
+        return PDF_VALIDATOR(file, self.cleaned_data)
+    
+    def clean_gaudi_document(self):
+        file = self.cleaned_data.get('gaudi_document')
+        return PDF_VALIDATOR(file, self.cleaned_data)
+    
+    def clean_plant_authorization(self):
+        file = self.cleaned_data.get('plant_authorization')
+        return PDF_VALIDATOR(file, self.cleaned_data)
+    
+    def clean_gse_practice(self):
+        file = self.cleaned_data.get('gse_practice')
+        return PDF_VALIDATOR(file, self.cleaned_data)
+    
+    def clean_panels_photo(self):
+        file = self.cleaned_data.get('panels_photo')
+        return IMAGE_VALIDATOR(file, self.cleaned_data)
+    
+    def clean_inverter_photo(self):
+        file = self.cleaned_data.get('inverter_photo')
+        return IMAGE_VALIDATOR(file, self.cleaned_data)
 
 class ConsumerMembershipForm(forms.ModelForm):
     """Form semplificato per consumatori senza impianti di produzione"""
@@ -599,7 +623,7 @@ class ConsumerMembershipForm(forms.ModelForm):
             membership.auto_approve_consumer()
         return membership
 
-class PlantForm(forms.ModelForm):
+class PlantForm(ValidationMixin, forms.ModelForm):
     """Form per la gestione degli impianti con supporto dati Gaudì"""
     
     class Meta:
@@ -704,18 +728,16 @@ class PlantForm(forms.ModelForm):
     def clean_pod_code(self):
         pod_code = self.cleaned_data.get('pod_code')
         if pod_code:
-            pod_code = pod_code.upper()
-            if not pod_code.startswith('IT'):
-                raise forms.ValidationError(_("Il codice POD deve iniziare con 'IT'"))
+            # Usa il validatore POD standardizzato
+            pod_code = POD_VALIDATOR(pod_code, self.cleaned_data)
+            # Verifica unicità
             if Plant.objects.filter(pod_code=pod_code).exclude(id=self.instance.id if self.instance else None).exists():
                 raise forms.ValidationError(_("Questo codice POD è già in uso"))
         return pod_code
 
     def clean_nominal_power(self):
         power = self.cleaned_data.get('nominal_power')
-        if power and power <= 0:
-            raise forms.ValidationError(_("La potenza nominale deve essere maggiore di 0"))
-        return power
+        return POWER_VALIDATOR(power, self.cleaned_data)
 
     def clean_expected_yearly_production(self):
         production = self.cleaned_data.get('expected_yearly_production')
@@ -872,12 +894,7 @@ class InitialGaudiUploadForm(forms.Form):
 
     def clean_gaudi_file(self):
         file = self.cleaned_data.get('gaudi_file')
-        if file:
-            if not file.name.endswith('.pdf'):
-                raise forms.ValidationError(_("È possibile caricare solo file PDF"))
-            if file.size > 10 * 1024 * 1024:  # 10MB
-                raise forms.ValidationError(_("Il file non può superare i 10MB"))
-        return file
+        return PDF_VALIDATOR(file, self.cleaned_data)
 
 class PlantGaudiUpdateForm(forms.Form):
     """Form per l'aggiornamento di un impianto da attestato Gaudì"""
@@ -894,12 +911,7 @@ class PlantGaudiUpdateForm(forms.Form):
 
     def clean_gaudi_file(self):
         file = self.cleaned_data.get('gaudi_file')
-        if file:
-            if not file.name.endswith('.pdf'):
-                raise forms.ValidationError(_("È possibile caricare solo file PDF"))
-            if file.size > 10 * 1024 * 1024:  # 10MB
-                raise forms.ValidationError(_("Il file non può superare i 10MB"))
-        return file
+        return PDF_VALIDATOR(file, self.cleaned_data)
 
 class MembershipFeeForm(forms.Form):
     """Form per la gestione delle quote associative"""

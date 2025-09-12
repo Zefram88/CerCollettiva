@@ -47,6 +47,8 @@ urlpatterns = [
     # Home e Dashboard
     path('', HomeView.as_view(), name='home'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    
+    # Admin Dashboard
 
     # CER URLs
     path('cer/', CERListView.as_view(), name='cer_list'),

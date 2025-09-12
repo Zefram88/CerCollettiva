@@ -5,6 +5,7 @@ import threading
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+import sys
 from functools import partial
 
 logger = logging.getLogger('energy.apps')
@@ -43,8 +44,14 @@ class EnergyConfig(AppConfig):
                 self.setup_log_rotation()
                 print(" | ✓ Log rotation configurata      |")
                 
-                # Inizializza MQTT una sola volta
-                is_testing = getattr(settings, 'TESTING', False)
+                # Controlla se siamo in modalità test
+                is_testing = (
+                    'test' in sys.argv or 
+                    'pytest' in sys.modules or
+                    os.environ.get('DJANGO_SETTINGS_MODULE', '').endswith('test') or
+                    getattr(settings, 'TESTING', False)
+                )
+                
                 if not is_testing:
                     # Import qui per evitare import circolari
                     from .mqtt.client import init_mqtt_connection

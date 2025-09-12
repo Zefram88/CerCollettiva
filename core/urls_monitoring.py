@@ -14,7 +14,7 @@ from .views.api.monitoring import (
     ABTestingEventView
 )
 
-app_name = 'monitoring'
+app_name = 'core_monitoring'
 
 urlpatterns = [
     # Performance Monitoring

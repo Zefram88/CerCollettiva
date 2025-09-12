@@ -1,5 +1,6 @@
 # energy/api/serializers.py
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 from ..models import (
     DeviceMeasurement, 
     DeviceMeasurementDetail, 
@@ -9,8 +10,15 @@ from ..models import (
 )
 #from ..devices.models import DeviceConfiguration
 from core.models import Plant  # Import diretto da core
+from core.validators import (
+    POD_VALIDATOR, POWER_VALIDATOR, ValidationMixin, APIValidationMixin
+)
+from ..validators import (
+    EnergyValidationMixin, EnergyAPIValidationMixin,
+    DEVICE_VALIDATOR, MEASUREMENT_VALIDATOR, API_REQUEST_VALIDATOR
+)
 
-class PlantSerializer(serializers.ModelSerializer):
+class PlantSerializer(serializers.ModelSerializer, ValidationMixin, APIValidationMixin):
     device_count = serializers.SerializerMethodField()
     
     class Meta:
@@ -43,6 +51,26 @@ class PlantSerializer(serializers.ModelSerializer):
             'device_count'
         ]
 
+    def validate_pod_code(self, value):
+        """Validate POD code using centralized validator"""
+        if value:
+            return POD_VALIDATOR(value)
+        return value
+
+    def validate_nominal_power(self, value):
+        """Validate nominal power using centralized validator"""
+        if value is not None:
+            return POWER_VALIDATOR(value)
+        return value
+
+    def validate(self, data):
+        """Additional cross-field validation"""
+        # Validate required fields based on plant type
+        if data.get('plant_type') == 'PRODUCER' and not data.get('nominal_power'):
+            self.add_validation_error('nominal_power', 'La potenza nominale è obbligatoria per impianti di produzione')
+        
+        return data
+
     def get_device_count(self, obj):
         return obj.devices.count() if hasattr(obj, 'devices') else 0
 
@@ -65,6 +93,14 @@ class DeviceConfigurationSerializer(serializers.ModelSerializer):
             'mqtt_topic_template', 'is_active', 'plant', 'last_seen'
         ]
 
+    def validate_device_id(self, value):
+        """Validate device ID format using unified validator"""
+        return DEVICE_VALIDATOR.validate_device_id(value, self.cleaned_data)
+
+    def validate_mqtt_topic_template(self, value):
+        """Validate MQTT topic template format using unified validator"""
+        return DEVICE_VALIDATOR.validate_mqtt_topic(value, self.cleaned_data)
+
 class DeviceMeasurementDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeviceMeasurementDetail
@@ -75,7 +111,7 @@ class DeviceMeasurementDetailSerializer(serializers.ModelSerializer):
 
 class DeviceMeasurementSerializer(serializers.ModelSerializer):
     phase_details = DeviceMeasurementDetailSerializer(many=True, read_only=True)
-    device = DeviceConfigurationSerializer(read_only=True)
+    device_detail = DeviceConfigurationSerializer(source='device', read_only=True)
     apparent_power = serializers.FloatField(read_only=True)
     reactive_power = serializers.FloatField(read_only=True)
     
@@ -85,8 +121,24 @@ class DeviceMeasurementSerializer(serializers.ModelSerializer):
             'id', 'timestamp', 'power', 'voltage', 'current',
             'energy_total', 'power_factor', 'quality', 
             'phase_details', 'apparent_power', 'reactive_power',
-            'device'
+            'device', 'plant', 'measurement_type', 'device_detail'
         ]
+
+    def validate_power(self, value):
+        """Validate power measurement using unified validator"""
+        return MEASUREMENT_VALIDATOR.validate_power(value, self.initial_data)
+
+    def validate_voltage(self, value):
+        """Validate voltage measurement using unified validator"""
+        return MEASUREMENT_VALIDATOR.validate_voltage(value, self.initial_data)
+
+    def validate_current(self, value):
+        """Validate current measurement using unified validator"""
+        return MEASUREMENT_VALIDATOR.validate_current(value, self.initial_data)
+
+    def validate_power_factor(self, value):
+        """Validate power factor using unified validator"""
+        return MEASUREMENT_VALIDATOR.validate_power_factor(value, self.initial_data)
 
 class EnergyMeasurementSerializer(serializers.ModelSerializer):
     device = serializers.CharField(source='device_measurement.device.device_id')
@@ -120,3 +172,29 @@ class EnergyAggregateRequestSerializer(serializers.Serializer):
         choices=['15M', '1H', '1D', '1W', '1M'],
         default='1H'
     )
+
+    def validate_device_id(self, value):
+        """Validate device ID format using unified validator"""
+        return API_REQUEST_VALIDATOR.validate_device_id(value, self.cleaned_data)
+
+    def validate(self, data):
+        """Validate date range and period consistency using unified validator"""
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        period = data.get('period')
+        
+        if start_date and end_date:
+            # Use unified validator for date range validation
+            try:
+                API_REQUEST_VALIDATOR.validate_date_range(start_date, end_date, data)
+            except ValidationError as e:
+                self.add_validation_error('end_date', str(e))
+            
+            # Use unified validator for period appropriateness
+            if period:
+                try:
+                    API_REQUEST_VALIDATOR.validate_period_appropriateness(period, start_date, end_date, data)
+                except ValidationError as e:
+                    self.add_validation_error('period', str(e))
+        
+        return data

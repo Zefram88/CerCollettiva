@@ -10,6 +10,9 @@ class MQTTBroker(models.Model):
     Configurazione del broker MQTT centrale.
     Utilizzato dal sistema per connettersi al broker che riceve i dati dai dispositivi.
     """
+    class Meta:
+        app_label = 'energy'
+    
     name = models.CharField(
         "Nome configurazione", 
         max_length=100
@@ -56,6 +59,22 @@ class MQTTBroker(models.Model):
         null=True,
         blank=True
     )
+    keepalive = models.IntegerField(
+        "Keep Alive (secondi)",
+        default=60,
+        validators=[MinValueValidator(10), MaxValueValidator(600)]
+    )
+    qos_level = models.IntegerField(
+        "Livello QoS",
+        default=1,
+        validators=[MinValueValidator(0), MaxValueValidator(2)]
+    )
+    tls_cert = models.CharField(
+        "Certificato TLS",
+        max_length=500,
+        blank=True,
+        null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     notes = models.TextField(
@@ -88,6 +107,9 @@ class MQTTConfiguration(models.Model):
     Configurazione di una connessione MQTT per un dispositivo specifico.
     Utilizzato per gestire le credenziali e le impostazioni di connessione per singoli dispositivi.
     """
+    class Meta:
+        app_label = 'energy'
+    
     device = models.OneToOneField(
         'energy.DeviceConfiguration',
         on_delete=models.CASCADE,

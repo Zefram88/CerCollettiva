@@ -48,5 +48,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/monitoring/health/ || exit 1
 
-# Comando di default
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "cercollettiva.wsgi:application"]
+# Comando di default - usa runserver_plus in sviluppo, gunicorn in produzione
+CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then python manage.py runserver_plus 0.0.0.0:8000; else gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 cercollettiva.wsgi:application; fi"]

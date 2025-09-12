@@ -166,30 +166,5 @@
         </div>
     </section>
 
-    <!-- Call to Action Section -->
-    <section class="py-5">
-        <div class="cer-card text-center p-5">
-            <div class="cer-card-header mb-4">
-                <h3 class="mb-0 fw-bold">Pronto a Iniziare?</h3>
-            </div>
-            <p class="lead mb-4">
-                Unisciti alla rivoluzione energetica e crea la tua Comunità Energetica Rinnovabile oggi stesso.
-            </p>
-            {% if not user.is_authenticated %}
-                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                    <a href="{% url 'users:register' %}" class="btn btn-cer-primary btn-lg">
-                        <i class="fas fa-rocket me-2"></i>Inizia Gratis
-                    </a>
-                    <a href="#" class="btn btn-outline-primary btn-lg">
-                        <i class="fas fa-book me-2"></i>Scopri di Più
-                    </a>
-                </div>
-            {% else %}
-                <a href="{% url 'core:cer_list' %}" class="btn btn-cer-primary btn-lg">
-                    <i class="fas fa-plus-circle me-2"></i>Crea una CER
-                </a>
-            {% endif %}
-        </div>
-    </section>
 </div>
 {% endblock %}

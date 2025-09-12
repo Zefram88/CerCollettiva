@@ -11,7 +11,7 @@ from datetime import timedelta
 from django.db.models import Sum, Max
 from django.contrib.auth import get_user_model
 from django import forms
-from core.models import Plant
+from core.main_models import Plant
 from ..models import DeviceConfiguration, DeviceMeasurement
 from django.views.generic import ListView, CreateView, DetailView
 

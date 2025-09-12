@@ -1,0 +1,46 @@
+{% extends 'cer/onboarding/base.html' %}
+{% load i18n %}
+
+{% block step_title %}Motivazioni{% endblock %}
+{% block step_subtitle %}Condividi le tue motivazioni per aderire alla CER{% endblock %}
+
+{% block step_content %}
+<form id="onboarding-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="alert alert-info alert-permanent">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Step 5 - Motivazioni</strong><br>
+        Questa sezione sarà implementata in futuro per raccogliere le motivazioni di adesione.
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Motivazioni Principali</label>
+        <textarea class="form-control" name="motivations" rows="4" placeholder="Descrivi le tue motivazioni per aderire alla Comunità Energetica Rinnovabile..."></textarea>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Aspettative</label>
+        <textarea class="form-control" name="expectations" rows="3" placeholder="Quali sono le tue aspettative dalla partecipazione alla CER?"></textarea>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Contributo Proposto</label>
+        <textarea class="form-control" name="contribution" rows="3" placeholder="Come pensi di poter contribuire alla CER?"></textarea>
+    </div>
+    
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="newsletter" id="newsletter">
+        <label class="form-check-label" for="newsletter">
+            Desidero ricevere aggiornamenti e newsletter dalla CER
+        </label>
+    </div>
+    
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="privacy_consent" id="privacy_consent" required>
+        <label class="form-check-label" for="privacy_consent">
+            Acconsento al trattamento dei dati personali secondo la privacy policy *
+        </label>
+    </div>
+</form>
+{% endblock %}

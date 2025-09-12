@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from .models import Document, DocumentAccess
 from .forms import DocumentUploadForm
-from core.models import Plant
+from core.main_models import Plant
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
@@ -24,8 +24,90 @@ from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 import logging
+import os
+import re
+
+from core.validators import ValidationMixin, APIValidationMixin, PDF_VALIDATOR, IMAGE_VALIDATOR, FileTypeValidator
 
 logger = logging.getLogger(__name__)
+
+
+def validate_file_upload_security(file):
+    """Valida il file caricato per tipo, dimensione e nome - funzione riutilizzabile"""
+    # Costanti di validazione
+    ALLOWED_EXTENSIONS = ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx', 'txt']
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+    MAX_FILENAME_LENGTH = 255
+    
+    # Validazione dimensione
+    if file.size > MAX_FILE_SIZE:
+        raise ValidationError(
+            f"File troppo grande. Dimensione massima: {MAX_FILE_SIZE / (1024*1024):.1f}MB"
+        )
+    
+    # Validazione estensione
+    ext = os.path.splitext(file.name)[1].lower().lstrip('.')
+    if ext not in ALLOWED_EXTENSIONS:
+        raise ValidationError(
+            f"Tipo di file non consentito. Tipi consentiti: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Validazione nome file
+    if len(file.name) > MAX_FILENAME_LENGTH:
+        raise ValidationError(
+            f"Nome file troppo lungo. Massimo {MAX_FILENAME_LENGTH} caratteri"
+        )
+    
+    # Validazione caratteri speciali nel nome
+    if not re.match(r'^[a-zA-Z0-9._-]+$', file.name):
+        raise ValidationError(
+            "Il nome del file contiene caratteri non validi. Utilizzare solo lettere, numeri, punti, trattini e underscore"
+        )
+    
+    # Validazione nome file pericoloso
+    dangerous_patterns = ['..', '/', '\\', '<script', 'javascript:', 'data:']
+    for pattern in dangerous_patterns:
+        if pattern in file.name.lower():
+            raise ValidationError(
+                "Nome file non sicuro rilevato"
+            )
+    
+    return True
+
+
+class APIResponseHelper(ValidationMixin, APIValidationMixin):
+    """Helper class for standardized API responses"""
+    
+    @staticmethod
+    def success_response(data, status=200):
+        """Return standardized success response"""
+        return JsonResponse({
+            'status': 'success',
+            'data': data,
+            'timestamp': timezone.now().isoformat()
+        }, status=status)
+    
+    @staticmethod
+    def error_response(message, detail=None, status=400):
+        """Return standardized error response"""
+        response_data = {
+            'status': 'error',
+            'message': message,
+            'timestamp': timezone.now().isoformat()
+        }
+        if detail:
+            response_data['detail'] = detail
+        return JsonResponse(response_data, status=status)
+    
+    @staticmethod
+    def validation_error_response(errors, status=400):
+        """Return standardized validation error response"""
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Validation failed',
+            'validation_errors': errors,
+            'timestamp': timezone.now().isoformat()
+        }, status=status)
 
 class DocumentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Document
@@ -175,10 +257,7 @@ class GaudiUploadView(DocumentUploadView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'errors': form.errors
-        }, status=400)
+        return APIResponseHelper.validation_error_response(form.errors)
 
 class GaudiDetailView(DocumentDetailView):
     """View specializzata per i dettagli degli attestati Gaudì"""
@@ -211,27 +290,30 @@ def process_gaudi_attestation(request, pk):
     
     # Verifica permessi
     if not request.user.is_staff and document.plant.owner != request.user:
-        return JsonResponse({
-            'success': False,
-            'error': "Non hai i permessi per elaborare questo documento"
-        }, status=403)
+        return APIResponseHelper.error_response(
+            "Non hai i permessi per elaborare questo documento",
+            status=403
+        )
 
     try:
         success = document.process_gaudi_attestation()
         if success:
             messages.success(request, "Attestato Gaudì elaborato con successo")
-            return JsonResponse({'success': True})
+            return APIResponseHelper.success_response({'processed': True})
         else:
-            return JsonResponse({
-                'success': False,
-                'error': document.processing_errors
-            }, status=400)
+            return APIResponseHelper.error_response(
+                "Elaborazione fallita",
+                document.processing_errors,
+                status=400
+            )
 
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+        logger.error(f"Error processing GAUDI attestation {pk}: {str(e)}")
+        return APIResponseHelper.error_response(
+            "Errore interno durante l'elaborazione",
+            str(e) if settings.DEBUG else None,
+            status=500
+        )
 
 @login_required
 def upload_gaudi_attestation(request, plant_id):
@@ -244,30 +326,38 @@ def upload_gaudi_attestation(request, plant_id):
     
     if request.method != 'POST':
         logger.warning("Metodo non consentito")
-        return JsonResponse({
-            'success': False,
-            'error': 'Metodo non consentito'
-        }, status=405)
+        return APIResponseHelper.error_response(
+            'Metodo non consentito',
+            status=405
+        )
     
     if 'attestation' not in request.FILES:
         logger.warning("File attestation non trovato nella richiesta")
         logger.warning(f"Files ricevuti: {request.FILES}")
-        return JsonResponse({
-            'success': False,
-            'error': 'Nessun file caricato'
-        }, status=400)
+        return APIResponseHelper.error_response(
+            'Nessun file caricato',
+            status=400
+        )
 
     try:
         file = request.FILES['attestation']
         logger.info(f"File ricevuto: {file.name} ({file.content_type}, {file.size} bytes)")
         
+        # Validate file using comprehensive validator
+        try:
+            validate_file_upload_security(file)
+        except ValidationError as e:
+            return APIResponseHelper.validation_error_response({
+                'attestation': [str(e)]
+            })
+        
         plant = get_object_or_404(Plant, id=plant_id)
         
         if not request.user.is_staff and plant.owner != request.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'Non hai i permessi per questo impianto'
-            }, status=403)
+            return APIResponseHelper.error_response(
+                'Non hai i permessi per questo impianto',
+                status=403
+            )
 
         document = Document.objects.create(
             type='GAUDI',
@@ -281,18 +371,18 @@ def upload_gaudi_attestation(request, plant_id):
 
         logger.info(f"Documento creato con successo (ID: {document.id})")
 
-        return JsonResponse({
-            'success': True,
+        return APIResponseHelper.success_response({
             'document_id': document.id,
             'message': 'Attestato caricato con successo'
         })
 
     except Exception as e:
         logger.error(f"Errore durante l'upload: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+        return APIResponseHelper.error_response(
+            "Errore durante l'upload",
+            str(e) if settings.DEBUG else None,
+            status=500
+        )
 
 @login_required
 def gaudi_processing_status(request, pk):
@@ -301,17 +391,18 @@ def gaudi_processing_status(request, pk):
     
     # Verifica permessi
     if not request.user.is_staff and document.plant.owner != request.user:
-        return JsonResponse({
-            'success': False,
-            'error': _('Non hai i permessi per questo documento')
-        }, status=403)
+        return APIResponseHelper.error_response(
+            _('Non hai i permessi per questo documento'),
+            status=403
+        )
 
-    return JsonResponse({
-        'success': True,
+    response_data = {
         'status': document.processing_status,
         'errors': document.processing_errors if document.processing_status == 'FAILED' else None,
         'processed_at': document.processed_at.isoformat() if document.processed_at else None
-    })
+    }
+    
+    return APIResponseHelper.success_response(response_data)
 
 @login_required
 def gaudi_attestation_details(request, pk):
@@ -320,16 +411,15 @@ def gaudi_attestation_details(request, pk):
     
     # Verifica permessi
     if not request.user.is_staff and document.plant.owner != request.user:
-        return JsonResponse({
-            'success': False,
-            'error': _('Non hai i permessi per questo documento')
-        }, status=403)
+        return APIResponseHelper.error_response(
+            _('Non hai i permessi per questo documento'),
+            status=403
+        )
 
     # Registra l'accesso al documento
     document.record_access(request.user)
 
-    return JsonResponse({
-        'success': True,
+    response_data = {
         'document': {
             'id': document.id,
             'uploaded_at': document.uploaded_at.isoformat(),
@@ -346,4 +436,6 @@ def gaudi_attestation_details(request, pk):
                 'verified': document.plant.gaudi_verified
             } if document.plant else None
         }
-    })
+    }
+    
+    return APIResponseHelper.success_response(response_data)

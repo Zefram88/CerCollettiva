@@ -111,15 +111,24 @@ class MQTTService:
         self._initialize_default_handlers()
         
     def _initialize_default_handlers(self):
-        """Inizializza gli handler predefiniti basati sul device registry"""
-        self.register_handler(
-            "cercollettiva/+/+/status/em:0",
-            self._handle_power_measurement
-        )
-        self.register_handler(
-            "cercollettiva/+/+/status/emdata:0", 
-            self._handle_energy_measurement
-        )
+        """Inizializza gli handler predefiniti basati sul device registry - Event-driven"""
+        # Registra event handlers con EventBus
+        from .event_bus import get_event_bus
+        from .handlers.measurement import MeasurementHandler
+        from .handlers.device import DeviceHandler
+        
+        event_bus = get_event_bus()
+        
+        # Crea istanze degli handler
+        measurement_handler = MeasurementHandler()
+        device_handler = DeviceHandler()
+        
+        # Registra handler per eventi di misurazione
+        event_bus.register_handler('power_measurement', measurement_handler.handle_power_measurement)
+        event_bus.register_handler('energy_measurement', measurement_handler.handle_energy_measurement)
+        event_bus.register_handler('device_status', device_handler.handle_device_status)
+        
+        logger.info("Event-driven handlers registered with EventBus")
 
     def configure(self, host: str, port: int, username: Optional[str] = None, 
                  password: Optional[str] = None, use_tls: bool = False) -> None:
@@ -150,6 +159,13 @@ class MQTTService:
                 
                 # Connessione con retry
                 self._connect_with_retry(host, port)
+                
+                # Avvia EventBus per processing asincrono
+                from .event_bus import get_event_bus
+                event_bus = get_event_bus()
+                if not event_bus._running:
+                    event_bus.start()
+                    logger.info("EventBus started for MQTT message processing")
                 
         except Exception as e:
             logger.error(f"Errore configurazione MQTT: {str(e)}")
@@ -212,7 +228,7 @@ class MQTTService:
             self._circuit_breaker.record_failure()
 
     def _on_message(self, client, userdata, msg):
-        """Gestione centralizzata dei messaggi MQTT"""
+        """Gestione centralizzata dei messaggi MQTT - Event-driven"""
         try:
             #logger.info(f"\n=== MQTT Message Received ===")
             #logger.info(f"Topic: {msg.topic}")
@@ -220,18 +236,24 @@ class MQTTService:
             
             payload = json.loads(msg.payload.decode())
             
-            # Gestione diretta dei messaggi di potenza ed energia
-            if 'em:0' in msg.topic:
-                logger.info("Processing power message")
-                device_config = self._find_device_for_topic(msg.topic)
-                if device_config:
-                    self._handle_power_measurement(payload, device_config, msg.topic)
-                    
-            elif 'emdata:0' in msg.topic:
-                #logger.info("Processing energy message")
-                device_config = self._find_device_for_topic(msg.topic)
-                if device_config:
-                    self._handle_energy_measurement(payload, device_config, msg.topic)
+            # Pubblica evento nell'EventBus invece di gestione diretta
+            from .event_bus import get_event_bus
+            event_bus = get_event_bus()
+            
+            # Crea contesto del messaggio
+            from .router import MessageContext
+            context = MessageContext(
+                topic=msg.topic,
+                payload=payload,
+                qos=msg.qos,
+                retain=msg.retain,
+                timestamp=timezone.now()
+            )
+            
+            # Pubblica evento per processing asincrono
+            success = event_bus.publish_mqtt_message(msg.topic, payload, context)
+            if not success:
+                logger.warning(f"Failed to publish MQTT message to EventBus: {msg.topic}")
                     
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON from {msg.topic}: {e}")
@@ -239,82 +261,7 @@ class MQTTService:
             logger.error(f"Error processing message: {str(e)}")
             logger.exception(e)
 
-    def _handle_power_measurement(self, message: MQTTMessage):
-        """Gestisce le misurazioni di potenza"""
-        try:
-            device_info = TopicMatcher.extract_device_info(message.topic)
-            if not device_info:
-                return
-                
-            device = DeviceConfiguration.objects.select_related('plant').get(
-                device_id=device_info['device_id'],
-                is_active=True
-            )
-            
-            device_instance = self._device_registry.get_device_by_vendor_model(
-                device.vendor,
-                device.model
-            )
-            
-            if device_instance:
-                # Crea misurazione principale
-                measurement = DeviceMeasurement.objects.create(
-                    device=device,
-                    plant=device.plant,
-                    timestamp=message.timestamp,
-                    power=message.payload.get('total_act_power', 0),
-                    voltage=message.payload.get('a_voltage', 0),
-                    current=message.payload.get('a_current', 0),
-                    power_factor=message.payload.get('total_pf', 1.0),
-                    energy_total=message.payload.get('total_act', 0),
-                    quality='GOOD'
-                )
-                
-                # Crea dettagli per fase se disponibili
-                phases = ['a', 'b', 'c']
-                for phase in phases:
-                    if all(key in message.payload for key in [f'{phase}_voltage', f'{phase}_current', f'{phase}_act_power']):
-                        DeviceMeasurementDetail.objects.create(
-                            measurement=measurement,
-                            phase=phase,
-                            voltage=message.payload.get(f'{phase}_voltage', 0),
-                            current=message.payload.get(f'{phase}_current', 0),
-                            power=message.payload.get(f'{phase}_act_power', 0),
-                            power_factor=message.payload.get(f'{phase}_pf', 1.0),
-                            frequency=message.payload.get(f'{phase}_freq', 50.0)
-                        )
-                
-                # Aggiorna timestamp ultimo contatto
-                device.update_last_seen()
-                
-        except Exception as e:
-            logger.error(f"Errore nella gestione della misurazione di potenza: {str(e)}")
-
-    def _handle_energy_measurement(self, message: MQTTMessage):
-        """Gestisce le misurazioni di energia"""
-        try:
-            device_info = TopicMatcher.extract_device_info(message.topic)
-            if not device_info:
-                return
-                
-            device = DeviceConfiguration.objects.select_related('plant').get(
-                device_id=device_info['device_id'],
-                is_active=True
-            )
-            
-            DeviceMeasurement.objects.create(
-                device=device,
-                plant=device.plant,
-                timestamp=message.timestamp,
-                energy_total=message.payload.get('total_act', 0),
-                measurement_type='DRAWN_ENERGY',
-                quality='GOOD'
-            )
-            
-            device.update_last_seen()
-            
-        except Exception as e:
-            logger.error(f"Errore nella gestione della misurazione di energia: {str(e)}")
+    # Old synchronous handlers removed - now using event-driven architecture
 
     def _handle_state_transition(self, from_state: str, to_state: str) -> None:
         """Gestisce in modo atomico le transizioni di stato"""

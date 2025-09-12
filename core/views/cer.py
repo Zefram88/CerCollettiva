@@ -98,6 +98,11 @@ class CERDetailView(BaseCERView):
         """Check if user is member, otherwise redirect to public view"""
         cer = get_object_or_404(CERConfiguration, pk=kwargs['pk'])
         
+        if not request.user.is_authenticated:
+            # Redirect unauthenticated users to public view
+            from django.urls import reverse
+            return redirect(reverse('core:cer_public_detail', kwargs={'pk': cer.pk}))
+        
         if not request.user.is_staff:
             is_member = CERMembership.objects.filter(
                 user=request.user,

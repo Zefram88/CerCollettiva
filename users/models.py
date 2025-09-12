@@ -1,10 +1,47 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, username=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+            
+        return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractUser):
+    objects = CustomUserManager()
+    
+    # Configurazione per usare email come username
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+    
+    # Sovrascrivi il campo email per renderlo univoco
+    email = models.EmailField(
+        _('email address'),
+        unique=True,
+        help_text=_('Required. Enter a valid email address.')
+    )
+    
     LEGAL_TYPES = [
         ('PRIVATE', 'Privato'),
         ('BUSINESS', 'Azienda'),
@@ -115,6 +152,64 @@ class CustomUser(AbstractUser):
         blank=True
     )
     
+    # Consensi GDPR estesi
+    privacy_policy = models.BooleanField(
+        "Privacy Policy",
+        default=False,
+        help_text="Consenso alla privacy policy"
+    )
+    data_processing = models.BooleanField(
+        "Trattamento Dati",
+        default=False,
+        help_text="Consenso al trattamento dei dati personali"
+    )
+    privacy_policy_timestamp = models.DateTimeField(
+        "Timestamp Privacy Policy",
+        null=True,
+        blank=True,
+        help_text="Data e ora di lettura della privacy policy"
+    )
+    data_processing_timestamp = models.DateTimeField(
+        "Timestamp Trattamento Dati",
+        null=True,
+        blank=True,
+        help_text="Data e ora di lettura dell'accordo trattamento dati"
+    )
+    
+    # Stato Onboarding CER
+    class OnboardingStatus(models.TextChoices):
+        REGISTRATO = 'REGISTRATO', 'Registrato'
+        ANAGRAFICA_COMPLETA = 'ANAGRAFICA_COMPLETA', 'Anagrafica Completa'
+        CER_COMPLETA = 'CER_COMPLETA', 'CER Completa'
+        ONBOARDING_COMPLETATO = 'ONBOARDING_COMPLETATO', 'Onboarding Completato'
+    
+    onboarding_status = models.CharField(
+        max_length=25,
+        choices=OnboardingStatus.choices,
+        default=OnboardingStatus.REGISTRATO,
+        verbose_name="Stato Onboarding"
+    )
+    
+    # Flag per sostenitori (non membri CER)
+    is_supporter = models.BooleanField(
+        default=False,
+        verbose_name="Sostenitore",
+        help_text="Indica se l'utente è un sostenitore (non membro CER)"
+    )
+    
+    # Ruolo CER
+    class CERRole(models.TextChoices):
+        ISCRITTO = 'ISCRITTO', 'Iscritto'
+        SOCIO_ORDINARIO = 'SOCIO_ORDINARIO', 'Socio Ordinario'
+        SOCIO_SOSTENITORE = 'SOCIO_SOSTENITORE', 'Socio Sostenitore'
+    
+    cer_role = models.CharField(
+        max_length=20,
+        choices=CERRole.choices,
+        default=CERRole.ISCRITTO,
+        verbose_name="Ruolo CER"
+    )
+    
     # Property per verifica tipo utente
     @property
     def is_business(self):
@@ -140,6 +235,21 @@ class CustomUser(AbstractUser):
     def is_public(self):
         """Verifica se l'utente è un ente pubblico"""
         return self.legal_type == 'PUBLIC'
+    
+    @property
+    def is_onboarding_complete(self):
+        """Verifica se l'onboarding è completato"""
+        return self.onboarding_status == self.OnboardingStatus.ONBOARDING_COMPLETATO
+    
+    @property
+    def needs_profile_completion(self):
+        """Verifica se l'utente deve completare il profilo anagrafico"""
+        return self.onboarding_status == self.OnboardingStatus.REGISTRATO
+    
+    @property
+    def needs_cer_setup(self):
+        """Verifica se l'utente deve configurare la partecipazione CER"""
+        return self.onboarding_status == self.OnboardingStatus.ANAGRAFICA_COMPLETA
     
     @property
     def requires_vat(self):
@@ -177,12 +287,21 @@ class CustomUser(AbstractUser):
         if self.legal_type == 'PRIVATE':
             if not all([self.first_name, self.last_name]):
                 raise ValidationError('Nome e cognome sono obbligatori per gli utenti privati.')
-        elif self.legal_type in ['BUSINESS', 'ASSOCIATION']:
+        elif self.legal_type in ['BUSINESS', 'ASSOCIATION', 'CHURCH', 'PUBLIC']:
             if not all([self.vat_number, self.legal_name, self.pec]):
-                raise ValidationError('Partita IVA, denominazione e PEC sono obbligatori per aziende e associazioni.')
+                raise ValidationError('Partita IVA, denominazione e PEC sono obbligatori per aziende, associazioni, enti religiosi e pubblici.')
 
     def save(self, *args, **kwargs):
-        self.clean()
+        # Non validare durante il login o aggiornamenti automatici
+        skip_validation = kwargs.pop('skip_validation', False)
+        if not skip_validation:
+            # Controlla se è un aggiornamento di last_login
+            if hasattr(self, '_state') and self._state.adding is False:
+                # Se è un aggiornamento, controlla se solo last_login è cambiato
+                if hasattr(self, '_last_login_only'):
+                    skip_validation = True
+            if not skip_validation:
+                self.clean()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -207,6 +326,10 @@ class CustomUser(AbstractUser):
             models.CheckConstraint(
                 check=models.Q(profit_type__in=['PROFIT', 'NON_PROFIT']),
                 name='valid_profit_type'
+            ),
+            models.CheckConstraint(
+                check=models.Q(onboarding_status__in=['REGISTRATO', 'ANAGRAFICA_COMPLETA', 'CER_COMPLETA', 'ONBOARDING_COMPLETATO']),
+                name='valid_onboarding_status'
             ),
         ]
 

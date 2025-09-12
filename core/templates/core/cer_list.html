@@ -4,61 +4,53 @@
 {% block content %}
 <div class="container">
 
-   <!-- Breadcrumb -->
-   <nav aria-label="breadcrumb" class="mb-4">
-       <ol class="breadcrumb bg-light rounded-cer p-3">
-           <li class="breadcrumb-item">
-               <a href="{% url 'core:dashboard' %}" class="text-decoration-none">
-                   <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-               </a>
-           </li>
-           <li class="breadcrumb-item active text-energy">
-               <i class="fas fa-users me-2"></i>CER
-           </li>
-       </ol>
-   </nav>
 
-   <div class="cer-card animate-fade-in-up mb-4">
-       <div class="cer-card-header text-center">
-           <h4 class="mb-0 fw-bold">
-               <i class="fas fa-solar-panel me-2"></i>
-               Comunità Energetiche Disponibili
-           </h4>
+   <!-- Header principale uniformato con dashboard -->
+   <div class="row mb-4">
+       <div class="col-12">
+           <div class="cer-card-header text-center">
+               <h4 class="mb-0 fw-bold">
+                   <i class="fas fa-solar-panel me-2"></i>
+                   Comunità Energetiche Disponibili
+               </h4>
+           </div>
        </div>
-       <div class="p-4">
-           {% if available_cers %}
-           <div class="row g-4">
-               {% for cer in available_cers %}
-               <div class="col-lg-6 col-xl-4">
-                   <div class="cer-card h-100 animate-fade-in-up">
+   </div>
+
+   <!-- Contenuto principale -->
+   {% if available_cers %}
+   <div class="row g-4">
+       {% for cer in available_cers %}
+       <div class="col-md-6 col-lg-4 col-xl-3">
+                   <div class="cer-card cer-list-card h-100">
                        <div class="cer-card-header">
                            <h5 class="mb-0 fw-bold">
                                <i class="fas fa-leaf me-2"></i>{{ cer.name }}
                            </h5>
                        </div>
                        <div class="p-4">
-                           <div class="row g-3 mb-4">
-                               <div class="col-12">
-                                   <div class="d-flex align-items-center">
-                                       <i class="fas fa-code text-energy me-2"></i>
-                                       <strong class="text-muted me-2">Codice:</strong>
+                           <div class="mb-4">
+                               <div class="d-flex align-items-center mb-3 cer-info-item">
+                                   <i class="fas fa-code cer-info-icon me-3" style="width: 20px;"></i>
+                                   <div class="flex-grow-1">
+                                       <small class="text-muted d-block">Codice</small>
                                        <span class="fw-semibold">{{ cer.code }}</span>
                                    </div>
                                </div>
 
-                               <div class="col-12">
-                                   <div class="d-flex align-items-center">
-                                       <i class="fas fa-plug text-energy me-2"></i>
-                                       <strong class="text-muted me-2">Cabina Primaria:</strong>
+                               <div class="d-flex align-items-center mb-3 cer-info-item">
+                                   <i class="fas fa-plug cer-info-icon me-3" style="width: 20px;"></i>
+                                   <div class="flex-grow-1">
+                                       <small class="text-muted d-block">Cabina Primaria</small>
                                        <span class="fw-semibold">{{ cer.primary_substation }}</span>
                                    </div>
                                </div>
 
-                               <div class="col-12">
-                                   <div class="d-flex align-items-center">
-                                       <i class="fas fa-users text-energy me-2"></i>
-                                       <strong class="text-muted me-2">Membri:</strong>
-                                       <span class="status-badge status-active">
+                               <div class="d-flex align-items-center cer-info-item">
+                                   <i class="fas fa-users cer-info-icon me-3" style="width: 20px;"></i>
+                                   <div class="flex-grow-1">
+                                       <small class="text-muted d-block">Membri</small>
+                                       <span class="status-badge status-active cer-members-badge">
                                            <i class="fas fa-users"></i>
                                            {{ cer.members_count }}
                                        </span>
@@ -66,7 +58,7 @@
                                </div>
                            </div>
 
-                           <div class="d-flex gap-2 flex-wrap">
+                           <div class="d-flex cer-card-buttons">
                                <a href="{% url 'core:cer_detail' cer.pk %}" class="btn btn-cer-outline-primary flex-grow-1">
                                    <i class="fas fa-info-circle me-2"></i>Dettagli
                                </a>
@@ -82,10 +74,12 @@
                            </div>
                        </div>
                    </div>
-               </div>
-               {% endfor %}
-           </div>
-           {% else %}
+       </div>
+       {% endfor %}
+   </div>
+   {% else %}
+   <div class="col-12">
+       <div class="cer-card animate-fade-in-up">
            <div class="text-center py-5">
                <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 100px; height: 100px;">
                    <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
@@ -98,8 +92,157 @@
                    </a>
                </div>
            </div>
-           {% endif %}
        </div>
    </div>
+   {% endif %}
+   </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    /* Miglioramenti estetici per card CER */
+    .cer-list-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--cer-gray-200);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cer-list-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--energy-gradient);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .cer-list-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: var(--cer-primary);
+    }
+
+    .cer-list-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    /* Miglioramenti per le informazioni */
+    .cer-info-item {
+        transition: all 0.2s ease;
+        padding: 0.5rem 0;
+        border-radius: 0.375rem;
+    }
+
+    .cer-info-item:hover {
+        background-color: var(--cer-gray-50);
+        transform: translateX(4px);
+    }
+
+    .cer-info-icon {
+        transition: all 0.3s ease;
+        color: var(--cer-primary);
+    }
+
+    .cer-list-card:hover .cer-info-icon {
+        color: var(--cer-primary-dark);
+        transform: scale(1.1);
+    }
+
+    /* Miglioramenti per i bottoni */
+    .cer-card-buttons {
+        gap: 0.75rem;
+    }
+
+    .cer-card-buttons .btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cer-card-buttons .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .cer-card-buttons .btn:hover::before {
+        left: 100%;
+    }
+
+    .cer-card-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Miglioramenti per il badge membri */
+    .cer-members-badge {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .cer-list-card:hover .cer-members-badge {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Animazione di entrata per le card */
+    .cer-list-card {
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .cer-list-card:nth-child(1) { animation-delay: 0.1s; }
+    .cer-list-card:nth-child(2) { animation-delay: 0.2s; }
+    .cer-list-card:nth-child(3) { animation-delay: 0.3s; }
+    .cer-list-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Miglioramenti responsive */
+    @media (max-width: 768px) {
+        .cer-list-card:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+        
+        .cer-info-item:hover {
+            transform: translateX(2px);
+        }
+    }
+
+    /* Miglioramenti per accessibilità */
+    @media (prefers-reduced-motion: reduce) {
+        .cer-list-card,
+        .cer-info-item,
+        .cer-info-icon,
+        .cer-card-buttons .btn,
+        .cer-members-badge {
+            transition: none;
+            animation: none;
+        }
+        
+        .cer-list-card:hover {
+            transform: none;
+        }
+    }
+</style>
 {% endblock %}

@@ -11,8 +11,11 @@ from django.utils import timezone
 from django.views import View
 from django.db.models import Q
 from django.views.generic import UpdateView, TemplateView, ListView, DetailView
+from django.http import JsonResponse
+from django.core.exceptions import ValidationError
 # Local imports
 from .forms import (
+    MinimalRegistrationForm,
     UserRegistrationForm, 
     UserLoginForm, 
     UserUpdateForm,
@@ -21,65 +24,106 @@ from .forms import (
     UserProfileForm
 )
 from .models import CustomUser
+from core.validators import ValidationMixin, APIValidationMixin, EMAIL_UNIQUE_VALIDATOR, USERNAME_UNIQUE_VALIDATOR
 
 # Logging
 import logging
 logger = logging.getLogger('access_logger')
 
 
+class APIResponseHelper(ValidationMixin, APIValidationMixin):
+    """Helper class for standardized API responses"""
+    
+    @staticmethod
+    def success_response(data, status=200):
+        """Return standardized success response"""
+        return JsonResponse({
+            'status': 'success',
+            'data': data,
+            'timestamp': timezone.now().isoformat()
+        }, status=status)
+    
+    @staticmethod
+    def error_response(message, detail=None, status=400):
+        """Return standardized error response"""
+        response_data = {
+            'status': 'error',
+            'message': message,
+            'timestamp': timezone.now().isoformat()
+        }
+        if detail:
+            response_data['detail'] = detail
+        return JsonResponse(response_data, status=status)
+    
+    @staticmethod
+    def validation_error_response(errors, status=400):
+        """Return standardized validation error response"""
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Validation failed',
+            'validation_errors': errors,
+            'timestamp': timezone.now().isoformat()
+        }, status=400)
+
+
 def register(request):
-    """Vista per la registrazione di nuovi utenti"""
+    """Vista per la registrazione di nuovi utenti con form minimale"""
     if request.method == 'POST':
-        print("=== DEBUG REGISTRAZIONE ===")
-        print(f"Dati POST ricevuti: {list(request.POST.keys())}")
-        print(f"Password1 presente: {'password1' in request.POST}")
-        print(f"Password2 presente: {'password2' in request.POST}")
-        if 'password1' in request.POST and 'password2' in request.POST:
-            print(f"Password1 length: {len(request.POST['password1'])}")
-            print(f"Password2 length: {len(request.POST['password2'])}")
-            print(f"Passwords match: {request.POST['password1'] == request.POST['password2']}")
-        
-        form = UserRegistrationForm(request.POST)
-        print(f"Form is valid: {form.is_valid()}")
-        
-        if not form.is_valid():
-            print("Form errors:", form.errors)
-            for field, errors in form.errors.items():
-                print(f"  {field}: {errors}")
+        form = MinimalRegistrationForm(request.POST)
         
         if form.is_valid():
-            # Verifica che la privacy policy sia stata accettata
-            if form.cleaned_data.get('privacy_policy', False):
-                user = form.save(commit=False)
-                user.set_password(form.cleaned_data['password1'])
-                # Imposta esplicitamente i campi relativi alla privacy
-                user.privacy_accepted = True  # Aggiungi questa riga
-                user.privacy_acceptance_date = timezone.now()
-                user.save()
-                messages.success(request, 'Registrazione completata. Puoi ora effettuare il login.')
-                return redirect('users:login')
-            else:
-                messages.error(request, 'Devi accettare la privacy policy per registrarti.')
+            # Additional validation using centralized validators
+            try:
+                # Validate email uniqueness
+                EMAIL_UNIQUE_VALIDATOR(form.cleaned_data['email'])
+                
+                user = form.save()
+                
+                logger.info(f"Nuovo utente registrato (minimale) - Username: {user.username} - Email: {user.email} - Onboarding: {user.onboarding_status} - Timestamp: {timezone.now()}")
+                
+                # Login automatico dopo registrazione
+                from django.contrib.auth import login
+                login(request, user)
+                
+                messages.success(request, 'Registrazione completata! Ora completa il tuo profilo per procedere.')
+                return redirect('users:profile_complete')  # Redirect a completamento anagrafico
+                
+            except ValidationError as e:
+                form.add_error('email', str(e))
+                messages.error(request, 'Email già esistente.')
         else:
             messages.error(request, 'Ci sono errori nel form. Controlla i campi evidenziati.')
     else:
-        form = UserRegistrationForm()
+        form = MinimalRegistrationForm()
         
     context = {
         'form': form,
-        'form_errors': form.errors if hasattr(form, 'errors') else None
+        'form_errors': form.errors if hasattr(form, 'errors') else None,
+        'is_minimal': True  # Flag per template
     }
     return render(request, 'users/register.html', context)
+
+@login_required
+def profile_complete(request):
+    """Redirect al completamento profilo anagrafico nell'app cer"""
+    if request.user.onboarding_status != CustomUser.OnboardingStatus.REGISTRATO:
+        return redirect('core:dashboard')
+    
+    return redirect('cer:profile_completion')
 
 def login_view(request):
     """Vista per il login degli utenti"""
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = UserLoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            user = authenticate(username=email, password=password)
             if user is not None:
+                # Aggiorna last_login senza validazione
+                user._last_login_only = True
+                user.last_login = timezone.now()
+                user.save(skip_validation=True)
                 login(request, user)
                 return redirect('core:home')  # o qualsiasi altra pagina dopo il login
         else:
@@ -87,7 +131,7 @@ def login_view(request):
             # Rimuovi qualsiasi chiamata a messages.error o messages.add_message
             pass
     else:
-        form = AuthenticationForm()
+        form = UserLoginForm()
     
     return render(request, 'users/login.html', {'form': form})
 
@@ -173,15 +217,33 @@ class ProfileView(LoginRequiredMixin, View):
         if request.user.legal_type == 'BUSINESS':
             business_form = BusinessProfileForm(request.POST, instance=request.user)
             if user_form.is_valid() and business_form.is_valid():
-                user_form.save()
-                business_form.save()
-                messages.success(request, 'Profilo aziendale aggiornato con successo.')
-                return redirect('users:profile')
+                # Additional validation using centralized validators
+                try:
+                    # Validate email uniqueness (excluding current user)
+                    if user_form.cleaned_data['email'] != request.user.email:
+                        EMAIL_UNIQUE_VALIDATOR(user_form.cleaned_data['email'])
+                    
+                    user_form.save()
+                    business_form.save()
+                    messages.success(request, 'Profilo aziendale aggiornato con successo.')
+                    return redirect('users:profile')
+                except ValidationError as e:
+                    user_form.add_error('email', str(e))
+                    messages.error(request, 'Email già esistente.')
         else:
             if user_form.is_valid():
-                user_form.save()
-                messages.success(request, 'Profilo personale aggiornato con successo.')
-                return redirect('users:profile')
+                # Additional validation using centralized validators
+                try:
+                    # Validate email uniqueness (excluding current user)
+                    if user_form.cleaned_data['email'] != request.user.email:
+                        EMAIL_UNIQUE_VALIDATOR(user_form.cleaned_data['email'])
+                    
+                    user_form.save()
+                    messages.success(request, 'Profilo personale aggiornato con successo.')
+                    return redirect('users:profile')
+                except ValidationError as e:
+                    user_form.add_error('email', str(e))
+                    messages.error(request, 'Email già esistente.')
 
         context = {
             'user_form': user_form,

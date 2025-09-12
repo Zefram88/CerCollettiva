@@ -68,6 +68,8 @@ class PlantListView(BasePlantView):
             queryset = Plant.objects.all().select_related(
                 'cer_configuration', 
                 'owner'
+            ).prefetch_related(
+                'devices'
             )
         else:
             queryset = Plant.objects.filter(
@@ -75,6 +77,8 @@ class PlantListView(BasePlantView):
             ).select_related(
                 'cer_configuration', 
                 'owner'
+            ).prefetch_related(
+                'devices'
             )
             
         # Applica i filtri
@@ -136,8 +140,18 @@ class PlantDetailView(BasePlantView, DetailView):
         # Modifichiamo questa parte per includere tutti gli impianti per gli admin
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return Plant.objects.all()
-        return Plant.objects.filter(owner=self.request.user)
+            return Plant.objects.all().select_related(
+                'cer_configuration', 'owner'
+            ).prefetch_related(
+                'devices__measurements',
+                'documents'
+            )
+        return Plant.objects.filter(owner=self.request.user).select_related(
+            'cer_configuration', 'owner'
+        ).prefetch_related(
+            'devices__measurements',
+            'documents'
+        )
     
     def get_context_data(self, **kwargs):
         # Assicuriamoci che l'oggetto sia disponibile
@@ -224,8 +238,12 @@ class PlantUpdateView(UpdateView, BasePlantView):
         """Definisce il queryset base per il recupero dell'oggetto"""
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return Plant.objects.all()
-        return Plant.objects.filter(owner=user)
+            return Plant.objects.all().select_related(
+                'cer_configuration', 'owner'
+            )
+        return Plant.objects.filter(owner=user).select_related(
+            'cer_configuration', 'owner'
+        )
     
     def get_context_data(self, **kwargs):
         """Aggiunge dati al contesto"""

@@ -328,23 +328,23 @@
                     <i class="bi bi-exclamation-circle-fill"></i>
                     <div>
                         <strong>Credenziali non valide</strong><br>
-                        <small>Verifica username e password e riprova</small>
+                        <small>Verifica email e password e riprova</small>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- Campo Username -->
+                <!-- Campo Email -->
                 <div class="form-floating">
-                    <input type="text" 
+                    <input type="email" 
                            class="form-control" 
-                           id="id_username" 
-                           name="username" 
-                           placeholder="Username o Email"
-                           value="{{ form.username.value|default_if_none:'' }}"
-                           autocomplete="username"
+                           id="id_email" 
+                           name="email" 
+                           placeholder="Email"
+                           value="{{ form.email.value|default_if_none:'' }}"
+                           autocomplete="email"
                            required>
-                    <label for="id_username">
-                        <i class="bi bi-person me-2"></i>Username o Email
+                    <label for="id_email">
+                        <i class="bi bi-envelope me-2"></i>Email
                     </label>
                 </div>
 

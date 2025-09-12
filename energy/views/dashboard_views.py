@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView  # Import TemplateView
 from datetime import timedelta
 import logging
-from core.models import Plant
+from core.main_models import Plant
 from ..models import DeviceConfiguration, DeviceMeasurement
 from ..mqtt.client import get_mqtt_client
 
@@ -42,13 +42,13 @@ def total_power_data(request):
             time_threshold = now - timedelta(minutes=5)
             aggregation_minutes = 1
 
-        # Query base per le misurazioni
+        # Query base per le misurazioni - ottimizzata con prefetch
         measurements = DeviceMeasurement.objects.filter(
             timestamp__gte=time_threshold
-        ).select_related('device', 'device__plant').order_by('timestamp')
+        ).select_related('device', 'device__plant', 'device__plant__owner').order_by('timestamp')
 
         if not request.user.is_staff:
-            measurements = measurements.filter(plant__owner=request.user)
+            measurements = measurements.filter(device__plant__owner=request.user)
 
         # Aggregazione dei dati
         data_points = {}
@@ -116,17 +116,47 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         now = timezone.now()
         time_threshold = now - timedelta(minutes=5)
 
-        plants = Plant.objects.filter(owner=self.request.user)  # Retrieve plants for the current user
+        # Optimize: Get plants with devices and latest measurements in one query
+        plants = Plant.objects.filter(owner=self.request.user).prefetch_related(
+            'devices'
+        ).select_related('owner')
 
         logger.info("\n=== PLANT STATUS CHECK START ===")
         
         total_power = 0
         all_plant_devices = [] # List of all devices for all the plants
+        
+        # Get all device IDs first to optimize measurement queries
+        for plant in plants:
+            plant_devices = list(plant.devices.all())
+            all_plant_devices.extend(plant_devices)
+        
+        if all_plant_devices:
+            device_ids = [device.id for device in all_plant_devices]
+            
+            # Get latest measurements for all devices in one query
+            # Use subquery for SQLite compatibility instead of DISTINCT ON
+            from django.db.models import OuterRef, Subquery
+            latest_measurement_subquery = DeviceMeasurement.objects.filter(
+                device_id=OuterRef('device_id'),
+                timestamp__gte=time_threshold
+            ).order_by('-timestamp')
+            
+            latest_measurements = DeviceMeasurement.objects.filter(
+                device_id__in=device_ids,
+                timestamp__gte=time_threshold,
+                id__in=Subquery(latest_measurement_subquery.values('id')[:1])
+            ).select_related('device')
+            
+            # Create mapping for quick lookup
+            measurement_map = {m.device_id: m for m in latest_measurements}
+        else:
+            measurement_map = {}
+        
         for plant in plants:
              logger.info(f"\nPlant: {plant.name} (ID: {plant.id})")
              logger.info(f"Timestamp threshold: {time_threshold}")
-             plant_devices = DeviceConfiguration.objects.filter(plant=plant).select_related('plant')
-             all_plant_devices.extend(plant_devices)
+             plant_devices = plant.devices.all()
              logger.info(f"\nDispositivi configurati per impianto:")
              
              for device in plant_devices:
@@ -135,11 +165,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                  logger.info(f"- Topic template: {device.mqtt_topic_template}")
                  logger.info(f"- Is active: {device.is_active}")
                  
-                 # Verifica ultime misurazioni
-                 last_measurement = DeviceMeasurement.objects.filter(
-                     device=device,
-                     timestamp__gte=time_threshold
-                 ).order_by('-timestamp').first()
+                 # Get latest measurement from optimized query
+                 last_measurement = measurement_map.get(device.id)
 
                  if last_measurement:
                      logger.info(f"  Ultima misurazione:")
@@ -155,13 +182,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         try:
             # Query ottimizzata per dispositivi attivi e online
             active_devices = list(filter(lambda x: x.is_active, all_plant_devices))
-            online_devices = DeviceMeasurement.objects.filter(
-                device__in=active_devices,
-                timestamp__gte=time_threshold
-            ).values('device').distinct()
+            
+            if active_devices:
+                active_device_ids = [device.id for device in active_devices]
+                online_devices = DeviceMeasurement.objects.filter(
+                    device_id__in=active_device_ids,
+                    timestamp__gte=time_threshold
+                ).values('device_id').distinct()
+                online_count = online_devices.count()
+            else:
+                online_count = 0
 
             total_active = len(active_devices)
-            online_count = online_devices.count()
             
             logger.info(f"\nStatistiche dispositivi:")
             logger.info(f"- Totali: {len(all_plant_devices)}")

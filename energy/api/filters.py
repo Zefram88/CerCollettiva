@@ -5,7 +5,7 @@ from functools import lru_cache
 from django.apps import apps
 from ..models.device import DeviceConfiguration, DeviceMeasurement
 from ..models.energy import EnergyMeasurement, EnergyAggregate
-from core.models import Plant
+from core.main_models import Plant
 
 def create_filters():
     """
@@ -71,13 +71,13 @@ def create_filters():
             lookup_expr='lte'
         )
         device = filters.ModelChoiceFilter(
-            queryset=DeviceConfiguration.objects.all
+            queryset=DeviceConfiguration.objects.all()
         )
         device_id = filters.CharFilter(
             field_name='device__device_id'
         )
         plant = filters.ModelChoiceFilter(
-            queryset=Plant.objects.all
+            queryset=Plant.objects.all()
         )
         plant_id = filters.NumberFilter(
             field_name='plant__id'
@@ -148,7 +148,7 @@ def create_filters():
             lookup_expr='lte'
         )
         device = filters.ModelChoiceFilter(
-            queryset=DeviceConfiguration.objects.all
+            queryset=DeviceConfiguration.objects.all()
         )
         device_id = filters.CharFilter(
             field_name='device__device_id'

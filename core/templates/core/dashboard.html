@@ -5,6 +5,32 @@
 {% block content %}
 <div class="container">
 
+    <!-- Onboarding CTA -->
+    {% if show_onboarding_cta %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-{{ onboarding_class }} alert-permanent" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="{{ onboarding_icon }} me-3 fs-4"></i>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-1">Completa la tua configurazione</h5>
+                        <p class="mb-2">{{ onboarding_message }}</p>
+                        <small class="text-muted">
+                            Stato attuale: <strong>{{ user.get_onboarding_status_display }}</strong>
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <a href="{% url onboarding_action_url %}" class="btn btn-{{ onboarding_class }}">
+                            <i class="{{ onboarding_icon }} me-2"></i>
+                            {{ onboarding_action_text }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="row g-4">
         <!-- Impianti Card -->
         <div class="col-md-6">
@@ -154,6 +180,14 @@
                         </div>
                     {% endif %}
                 </div>
+                
+                <!-- Footer per uniformare il layout -->
+                <div class="card-footer bg-transparent border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Totale: {{ memberships|length }} CER</span>
+                        <span class="text-muted">Ruolo: {{ user.get_cer_role_display|default:"Nessuno" }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -236,6 +270,16 @@
         color: var(--cer-primary);
         margin-bottom: 8px;
         font-weight: 700;
+    }
+
+    /* Migliora spaziatura footer delle card */
+    .cer-card .card-footer {
+        padding: 1rem 1.5rem;
+        margin: 0;
+    }
+
+    .cer-card .card-footer .d-flex {
+        margin: 0;
     }
 </style>
 {% endblock %}

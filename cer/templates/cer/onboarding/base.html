@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Configurazione CER - Step {{ step }}/{{ total_steps }} - CerCollettiva{% endblock %}
+
+{% block extra_css %}
+<style>
+.onboarding-progress {
+    background: linear-gradient(90deg, #28a745 {{ progress_percentage }}%, #e9ecef {{ progress_percentage }}%);
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.step-card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+
+.step-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 1.5rem;
+}
+
+.step-content {
+    padding: 2rem;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.navigation-buttons > div {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex-direction: row !important;
+}
+
+.navigation-buttons .btn {
+    display: inline-block !important;
+    white-space: nowrap !important;
+}
+
+.pod-info-card {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.cer-option {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cer-option:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.cer-option.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.cer-option input[type="radio"] {
+    margin-right: 0.5rem;
+}
+
+.new-cer-section {
+    border: 2px dashed #28a745;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    background-color: #f8fff9;
+}
+
+.hidden {
+    display: none !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Progress Bar -->
+    <div class="row">
+        <div class="col-12">
+            <div class="onboarding-progress"></div>
+            <div class="text-center mb-3">
+                <small class="text-muted">Step {{ step }} di {{ total_steps }} - {{ progress_percentage|floatformat:0 }}% completato</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card step-card">
+                <div class="step-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        {% block step_title %}Configurazione CER{% endblock %}
+                    </h3>
+                    <p class="mb-0 mt-2 opacity-75">
+                        {% block step_subtitle %}Completa la configurazione della tua partecipazione alla CER{% endblock %}
+                    </p>
+                </div>
+                
+                <div class="step-content">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% block step_content %}
+                    <!-- Content will be overridden in child templates -->
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="navigation-buttons">
+                <div>
+                    {% if step == 0 %}
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+                        </a>
+                    {% elif step == 1 %}
+                        <a href="{% url 'cer:onboarding_step' step=0 %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Indietro
+                        </a>
+                    {% elif step > 1 %}
+                        <a href="{% url 'cer:onboarding_step' step=1 %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Indietro
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    {% if step == 0 %}
+                        <!-- Step 0: Solo Avanti -->
+                        <button type="submit" form="onboarding-form" name="next" class="btn btn-primary">
+                            Avanti <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    {% else %}
+                        <!-- Altri step: Salva e Avanti -->
+                        <button type="button" class="btn btn-outline-primary" onclick="saveAndExit()">
+                            <i class="fas fa-save me-2"></i>Salva e Continua Dopo
+                        </button>
+                        
+                        <button type="submit" form="onboarding-form" name="next" class="btn btn-primary ms-2">
+                            {% if step == 2 %}
+                                Completa Onboarding <i class="fas fa-arrow-right ms-2"></i>
+                            {% elif step < total_steps %}
+                                Avanti <i class="fas fa-arrow-right ms-2"></i>
+                            {% else %}
+                                Completa <i class="fas fa-check ms-2"></i>
+                            {% endif %}
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function goToPreviousStep() {
+    const form = document.getElementById('onboarding-form');
+    const previousButton = document.createElement('input');
+    previousButton.type = 'hidden';
+    previousButton.name = 'previous';
+    previousButton.value = '1';
+    form.appendChild(previousButton);
+    form.submit();
+}
+
+function saveAndExit() {
+    // Salva i dati attuali e redirect alla dashboard
+    const form = document.getElementById('onboarding-form');
+    const saveButton = document.createElement('input');
+    saveButton.type = 'hidden';
+    saveButton.name = 'save_and_exit';
+    saveButton.value = '1';
+    form.appendChild(saveButton);
+    form.submit();
+}
+
+// Auto-save ogni 30 secondi
+setInterval(function() {
+    const form = document.getElementById('onboarding-form');
+    if (form) {
+        const formData = new FormData(form);
+        formData.append('auto_save', '1');
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        }).catch(error => console.log('Auto-save failed:', error));
+    }
+}, 30000);
+</script>
+{% endblock %}

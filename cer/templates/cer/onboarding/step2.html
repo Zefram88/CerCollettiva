@@ -1,0 +1,196 @@
+{% extends "cer/onboarding/base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block title %}{% trans "Risolvi POD" %}{% endblock %}
+
+{% block step_content %}
+<div class="alert alert-info alert-permanent">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Risoluzione POD</strong><br>
+    Inserisci il codice del tuo POD per verificare la compatibilità con la Comunità Energetica Rinnovabile.
+</div>
+
+<form method="post" id="pod-form">
+    {% csrf_token %}
+    
+    <!-- POD Input -->
+    <div class="mb-4">
+        <h5 class="mb-3">
+            <i class="fas fa-bolt me-2 text-primary"></i>
+            Codice POD
+        </h5>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.pod_code.label_tag }}
+                    {{ form.pod_code }}
+                    {% if form.pod_code.help_text %}
+                        <small class="form-text text-muted">{{ form.pod_code.help_text }}</small>
+                    {% endif %}
+                    {% if form.pod_code.errors %}
+                        <div class="text-danger">{{ form.pod_code.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.pod_address.label_tag }}
+                    {{ form.pod_address }}
+                    {% if form.pod_address.help_text %}
+                        <small class="form-text text-muted">{{ form.pod_address.help_text }}</small>
+                    {% endif %}
+                    {% if form.pod_address.errors %}
+                        <div class="text-danger">{{ form.pod_address.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-3">
+            <button type="button" class="btn btn-outline-primary" id="resolve-pod-btn">
+                <i class="fas fa-search me-2"></i>Risolvi POD
+            </button>
+        </div>
+        
+        <!-- POD Info Display -->
+        <div id="pod-info" class="alert alert-info alert-permanent hidden">
+            <h6><i class="fas fa-info-circle me-2"></i>Informazioni POD</h6>
+            <div id="pod-details"></div>
+        </div>
+    </div>
+    
+    <!-- CER Unica -->
+    <div class="mb-4">
+        <h5 class="mb-3">
+            <i class="fas fa-users me-2 text-success"></i>
+            Iscrizione alla CER
+        </h5>
+        
+        <div class="alert alert-success alert-permanent">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>CER Unica</strong><br>
+            Verificheremo la compatibilità del tuo POD con la cabina primaria della CER e procederemo con l'iscrizione automatica.
+        </div>
+    </div>
+    
+    <!-- Hidden fields for form submission -->
+    {{ form.cer_configuration }}
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const podCodeInput = document.getElementById('id_pod_code');
+    const resolvePodBtn = document.getElementById('resolve-pod-btn');
+    const podInfoDiv = document.getElementById('pod-info');
+    const podDetailsDiv = document.getElementById('pod-details');
+    
+    // POD Resolution
+    resolvePodBtn.addEventListener('click', function() {
+        const podCode = podCodeInput.value.trim();
+        if (!podCode) {
+            alert('Inserisci un codice POD valido');
+            return;
+        }
+        
+        resolvePodBtn.disabled = true;
+        resolvePodBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Risolvendo...';
+        
+        const formData = new FormData();
+        formData.append('pod_code', podCode);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch('{% url "cer:resolve_pod" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                displayPodInfo(data.pod_info, data.cer_info, data.compatible);
+            } else {
+                alert('Errore: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Errore nella risoluzione del POD');
+        })
+        .finally(() => {
+            resolvePodBtn.disabled = false;
+            resolvePodBtn.innerHTML = '<i class="fas fa-search me-2"></i>Risolvi POD';
+        });
+    });
+    
+    function displayPodInfo(podInfo, cerInfo, compatible) {
+        // Gestisci regioni, province, comuni come array o stringhe
+        const regioni = Array.isArray(podInfo.regioni) ? podInfo.regioni : (podInfo.regioni || '').split(',').filter(r => r.trim());
+        const province = Array.isArray(podInfo.province) ? podInfo.province : (podInfo.province || '').split(',').filter(p => p.trim());
+        const comuni = Array.isArray(podInfo.comuni) ? podInfo.comuni : (podInfo.comuni || '').split(',').filter(c => c.trim());
+        
+        const compatibilityStatus = compatible ? 
+            '<span class="badge bg-success">Compatibile</span>' : 
+            '<span class="badge bg-warning">Da verificare</span>';
+        
+        podDetailsDiv.innerHTML = `
+            <div class="row">
+                <div class="col-12">
+                    <h6><i class="fas fa-info-circle me-2"></i>Informazioni POD</h6>
+                    <p class="mb-2">
+                        <strong>POD:</strong> ${podInfo.pod}<br>
+                        <strong>Cabina Primaria:</strong> ${podInfo.cabina_primaria}<br>
+                        <strong>Fornitore:</strong> ${podInfo.fornitore}<br>
+                        <strong>Regioni:</strong> ${regioni.filter(r => r.trim()).join(', ')}<br>
+                        <strong>Province:</strong> ${province.filter(p => p.trim()).join(', ')}<br>
+                        <strong>Comuni:</strong> ${comuni.filter(c => c.trim()).slice(0, 3).join(', ')}${comuni.filter(c => c.trim()).length > 3 ? '...' : ''}
+                    </p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h6><i class="fas fa-users me-2"></i>Compatibilità CER</h6>
+                    <p class="mb-2">
+                        <strong>CER:</strong> ${cerInfo.name}<br>
+                        <strong>Cabina CER:</strong> ${cerInfo.primary_substation || 'Non configurata'}<br>
+                        <strong>Cabina POD:</strong> ${podInfo.cabina_primaria}<br>
+                        <strong>Stato:</strong> ${compatibilityStatus}
+                    </p>
+                    ${cerInfo.description ? `<small class="text-muted">${cerInfo.description}</small>` : ''}
+                    ${compatible ? 
+                        '<div class="alert alert-success alert-permanent mt-2"><i class="fas fa-check-circle me-2"></i>POD compatibile! Puoi procedere con l\'iscrizione.</div>' :
+                        '<div class="alert alert-warning alert-permanent mt-2"><i class="fas fa-exclamation-triangle me-2"></i>POD non compatibile. Puoi procedere comunque, ma sarà necessaria una verifica manuale.</div>'
+                    }
+                </div>
+            </div>
+        `;
+        // Mostra l'alert POD e mantienilo visibile
+        podInfoDiv.style.setProperty('display', 'block', 'important');
+        podInfoDiv.style.setProperty('visibility', 'visible', 'important');
+        podInfoDiv.style.setProperty('opacity', '1', 'important');
+        podInfoDiv.classList.remove('hidden', 'd-none', 'fade');
+        podInfoDiv.classList.add('pod-info-protected');
+        
+        // Protezione per mantenere visibilità
+        podInfoDiv.setAttribute('data-protected', 'true');
+        
+        // Aggiorna il pulsante in base alla compatibilità (sempre abilitato)
+        const completeButton = document.querySelector('button[name="next"]');
+        if (completeButton) {
+            if (compatible) {
+                completeButton.disabled = false;
+                completeButton.classList.remove('btn-warning');
+                completeButton.classList.add('btn-primary');
+                completeButton.innerHTML = 'Completa Onboarding <i class="fas fa-check ms-2"></i>';
+            } else {
+                completeButton.disabled = false; // Sempre abilitato
+                completeButton.classList.remove('btn-primary');
+                completeButton.classList.add('btn-warning');
+                completeButton.innerHTML = 'Procedi con Verifica <i class="fas fa-exclamation-triangle ms-2"></i>';
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

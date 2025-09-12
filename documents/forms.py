@@ -1,6 +1,11 @@
 # documents/forms.py
 from django import forms
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+import os
+import re
 from .models import Document
+from core.validators import FileTypeValidator
 
 class DocumentUploadForm(forms.ModelForm):
     class Meta:
@@ -42,14 +47,54 @@ class DocumentUploadForm(forms.ModelForm):
     def clean_file(self):
         file = self.cleaned_data.get('file')
         if file:
-            # Verifica dimensione file (10MB)
-            if file.size > 10 * 1024 * 1024:
-                raise forms.ValidationError("Il file non può superare i 10MB")
-            
-            # Verifica estensione file
-            ext = file.name.split('.')[-1].lower()
-            if ext not in ['pdf', 'jpg', 'jpeg', 'png']:
-                raise forms.ValidationError(
-                    "Formato file non supportato. Utilizzare PDF, JPG o PNG"
-                )
+            # Validazione completa del file
+            self._validate_file_upload(file)
         return file
+    
+    def _validate_file_upload(self, file):
+        """Valida il file caricato per tipo, dimensione e nome"""
+        # Costanti di validazione
+        ALLOWED_EXTENSIONS = ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx', 'txt']
+        MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+        MAX_FILENAME_LENGTH = 255
+        
+        # Validazione dimensione
+        if file.size > MAX_FILE_SIZE:
+            raise forms.ValidationError(
+                _("File troppo grande. Dimensione massima: {size:.1f}MB").format(
+                    size=MAX_FILE_SIZE / (1024*1024)
+                )
+            )
+        
+        # Validazione estensione
+        ext = os.path.splitext(file.name)[1].lower().lstrip('.')
+        if ext not in ALLOWED_EXTENSIONS:
+            raise forms.ValidationError(
+                _("Tipo di file non consentito. Tipi consentiti: {types}").format(
+                    types=', '.join(ALLOWED_EXTENSIONS)
+                )
+            )
+        
+        # Validazione nome file
+        if len(file.name) > MAX_FILENAME_LENGTH:
+            raise forms.ValidationError(
+                _("Nome file troppo lungo. Massimo {max} caratteri").format(
+                    max=MAX_FILENAME_LENGTH
+                )
+            )
+        
+        # Validazione caratteri speciali nel nome
+        if not re.match(r'^[a-zA-Z0-9._-]+$', file.name):
+            raise forms.ValidationError(
+                _("Il nome del file contiene caratteri non validi. Utilizzare solo lettere, numeri, punti, trattini e underscore")
+            )
+        
+        # Validazione nome file pericoloso
+        dangerous_patterns = ['..', '/', '\\', '<script', 'javascript:', 'data:']
+        for pattern in dangerous_patterns:
+            if pattern in file.name.lower():
+                raise forms.ValidationError(
+                    _("Nome file non sicuro rilevato")
+                )
+        
+        return True

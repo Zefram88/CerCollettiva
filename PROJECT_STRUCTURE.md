@@ -169,7 +169,7 @@ CerCollettiva/
 │   ├── CACER - ALLEGATO 1 Regole operative CACER def.pdf
 │   └── CACER Decreto.pdf
 ├── 📁 scripts/                    # Script di automazione
-│   ├── backup.sh                  # Script backup
+│   ├── backup.sh                  # Script backup automatico
 │   ├── init-db.sql                # Inizializzazione DB
 │   ├── logs.sh                    # Gestione log
 │   ├── README.md                  # Documentazione script
@@ -278,7 +278,7 @@ CerCollettiva/
 
 ### Script di Automazione
 - **Setup**: Configurazione ambiente
-- **Backup**: Backup automatico
+- **Backup**: Backup automatico Docker
 - **Restore**: Ripristino backup
 - **Validation**: Validazione configurazioni
 - **Deployment**: Deploy automatico
@@ -310,13 +310,66 @@ CerCollettiva/
 - **Docker**: Containerizzazione completa
 - **Nginx**: Reverse proxy e SSL
 - **Monitoring**: Prometheus + Grafana
-- **Backup**: Automatico e crittografato
+- **Backup**: Automatico Docker con cron
 
 ### CI/CD
 - **GitHub Actions**: Pipeline automatizzate
 - **Testing**: Unit, integration, security
 - **Deployment**: Automatico su tag
 - **Quality**: Linting, formatting, coverage
+
+## 🔄 Backup Automatico
+
+### Configurazione Docker
+Il sistema di backup è integrato nel `docker-compose.yml` con un servizio dedicato:
+
+```yaml
+backup:
+  image: postgres:15
+  container_name: cercollettiva_backup
+  profiles: ["backup"]
+  condition: ${ENABLE_BACKUP:-false}
+```
+
+### Attivazione/Disattivazione
+```bash
+# Abilita backup
+docker-compose --profile backup up -d
+
+# Disabilita backup
+docker-compose up -d
+
+# Con variabile d'ambiente
+ENABLE_BACKUP=true docker-compose up -d
+```
+
+### Funzionalità
+- **Database**: Backup PostgreSQL completo
+- **Media**: File upload e documenti
+- **Config**: File di configurazione
+- **Logs**: Log degli ultimi 7 giorni
+- **Cron**: Esecuzione automatica ogni giorno alle 2:00
+- **Retention**: Pulizia automatica backup vecchi (30 giorni)
+
+### File di Backup
+- **Posizione**: `./backups/`
+- **Formato**: `cercollettiva_backup_YYYYMMDD_HHMMSS.tar.gz`
+- **Contenuto**: Database + Media + Config + Logs
+
+### Ripristino Backup Docker
+```bash
+# Avvia container restore
+docker-compose --profile restore up -d
+
+# Lista backup disponibili
+ls -la backups/
+
+# Ripristino completo (database + media + config)
+docker exec cercollettiva_restore /restore.sh cercollettiva_backup_20240101_120000.tar.gz
+
+# Ripristino forzato (senza conferma)
+docker exec cercollettiva_restore /restore.sh cercollettiva_backup_20240101_120000.tar.gz --force
+```
 
 ## 🚀 Pronto per l'Uso
 

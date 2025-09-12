@@ -155,3 +155,40 @@ yarn-error.log*
 # Backup files
 *.bak
 *.backup
+backups/
+
+# Cursor IDE
+.cursor/
+
+# Archive files
+*.7z
+*.zip
+*.tar.gz
+*.rar
+
+# Temporary test files
+cookies.txt
+test_*.py
+*_test_*.py
+
+# Documenti PDF temporanei
+docs/Modulo-adesione-CarbonZero-rev1-privacy-1_editabile.pdf
+
+# File temporanei e di debug
+*.tmp
+*.temp
+debug_*.py
+temp_*.py
+
+# Screenshot e immagini temporanee
+screenshot/
+*.png
+*.jpg
+*.jpeg
+!static/images/*.png
+!static/images/*.jpg
+!static/images/*.jpeg
+
+# File di conversazione AI
+CLAUDE.md
+AI_*.md

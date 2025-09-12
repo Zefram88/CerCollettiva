@@ -34,12 +34,18 @@ class DashboardView(CerBaseView):
         # Determina se l'utente è staff o super admin
         is_global_admin = user.is_staff or user.is_superuser
         
+        # Gestione onboarding status per utenti non admin
+        onboarding_context = self._get_onboarding_context(user, is_global_admin)
+        context.update(onboarding_context)
+        
         # Recupera gli impianti in base al ruolo
         if is_global_admin:
             # Per admin globali: tutti gli impianti
             plants = Plant.objects.filter(
                 is_active=True
-            ).select_related('cer_configuration', 'owner')
+            ).select_related('cer_configuration', 'owner').prefetch_related(
+                'devices__measurements'
+            )
         else:
             # Per admin CER: impianti delle CER amministrate + propri impianti
             administered_cer_ids = user.cer_memberships.filter(
@@ -53,7 +59,9 @@ class DashboardView(CerBaseView):
                 # Impianti delle CER amministrate OR impianti personali
                 Q(cer_configuration_id__in=administered_cer_ids) |
                 Q(owner=user)
-            ).distinct().select_related('cer_configuration', 'owner')
+            ).distinct().select_related('cer_configuration', 'owner').prefetch_related(
+                'devices__measurements'
+            )
 
         # Recupera le membership CER
         user_memberships = CERMembership.objects.filter(
@@ -99,9 +107,66 @@ class DashboardView(CerBaseView):
         
         return context
 
+    def _get_onboarding_context(self, user, is_global_admin):
+        """Gestisce il contesto di onboarding per la dashboard"""
+        from users.models import CustomUser
+        
+        # Admin e staff vedono sempre la dashboard completa
+        if is_global_admin:
+            return {
+                'show_onboarding_cta': False,
+                'onboarding_status': None,
+                'onboarding_message': None,
+                'onboarding_action_url': None,
+                'onboarding_action_text': None
+            }
+        
+        # Per utenti normali, gestisci lo stato di onboarding
+        onboarding_status = getattr(user, 'onboarding_status', CustomUser.OnboardingStatus.REGISTRATO)
+        
+        if onboarding_status == CustomUser.OnboardingStatus.REGISTRATO:
+            return {
+                'show_onboarding_cta': True,
+                'onboarding_status': onboarding_status,
+                'onboarding_message': 'Completa il tuo profilo anagrafico per procedere con l\'adesione alla CER',
+                'onboarding_action_url': 'users:profile_complete',
+                'onboarding_action_text': 'Completa Profilo',
+                'onboarding_icon': 'fas fa-user-edit',
+                'onboarding_class': 'warning'
+            }
+        elif onboarding_status == CustomUser.OnboardingStatus.ANAGRAFICA_COMPLETA:
+            return {
+                'show_onboarding_cta': True,
+                'onboarding_status': onboarding_status,
+                'onboarding_message': 'Configura la tua partecipazione alla Comunità Energetica Rinnovabile',
+                'onboarding_action_url': 'cer:onboarding_wizard',  # Da implementare
+                'onboarding_action_text': 'Configura CER',
+                'onboarding_icon': 'fas fa-cogs',
+                'onboarding_class': 'info'
+            }
+        elif onboarding_status == CustomUser.OnboardingStatus.ONBOARDING_COMPLETATO:
+            return {
+                'show_onboarding_cta': False,
+                'onboarding_status': onboarding_status,
+                'onboarding_message': None,
+                'onboarding_action_url': None,
+                'onboarding_action_text': None
+            }
+        else:
+            # Fallback per stati non definiti
+            return {
+                'show_onboarding_cta': True,
+                'onboarding_status': onboarding_status,
+                'onboarding_message': 'Completa la configurazione del tuo account',
+                'onboarding_action_url': 'users:profile_complete',
+                'onboarding_action_text': 'Completa Configurazione',
+                'onboarding_icon': 'fas fa-exclamation-triangle',
+                'onboarding_class': 'secondary'
+            }
+
     def get_filtered_alerts(self, user, is_global_admin):
         """Recupera gli alert filtrati in base al ruolo dell'utente"""
-        alerts_query = Alert.objects.filter(status='active')
+        alerts_query = Alert.objects.filter(is_read=False)
         
         if is_global_admin:
             # Gli admin globali vedono tutti gli alert
@@ -136,6 +201,7 @@ class DashboardView(CerBaseView):
     def _calculate_energy_stats(self, plants, time_threshold):
         """
         Calcola le statistiche energetiche per gli impianti selezionati
+        Ottimizzato per evitare N+1 queries
         """
         stats = {
             'total_power': 0,
@@ -149,50 +215,40 @@ class DashboardView(CerBaseView):
         month_start = today_start.replace(day=1)
         year_start = month_start.replace(month=1)
         
-        for plant in plants:
-            # Calcola potenza attuale
-            recent_measurements = DeviceMeasurement.objects.filter(
-                plant=plant,
-                timestamp__gte=time_threshold
-            )
-            if recent_measurements.exists():
-                stats['total_power'] += recent_measurements.aggregate(
-                    total=Sum('power'))['total'] or 0
-                    
-            # Energia giornaliera
-            today_measurements = DeviceMeasurement.objects.filter(
-                plant=plant,
-                timestamp__gte=today_start
-            )
-            if today_measurements.exists():
-                stats['today_energy'] += today_measurements.aggregate(
-                    total=Sum('energy_total'))['total'] or 0
-                    
-            # Energia mensile
-            month_measurements = DeviceMeasurement.objects.filter(
-                plant=plant,
-                timestamp__gte=month_start
-            )
-            if month_measurements.exists():
-                stats['month_energy'] += month_measurements.aggregate(
-                    total=Sum('energy_total'))['total'] or 0
-                    
-            # Energia annuale
-            year_measurements = DeviceMeasurement.objects.filter(
-                plant=plant,
-                timestamp__gte=year_start
-            )
-            if year_measurements.exists():
-                stats['year_energy'] += year_measurements.aggregate(
-                    total=Sum('energy_total'))['total'] or 0
+        # Ottimizzazione: usa una singola query per tutte le misurazioni
+        plant_ids = [plant.id for plant in plants]
+        
+        # Calcola potenza attuale (ultime misurazioni)
+        recent_power = DeviceMeasurement.objects.filter(
+            plant_id__in=plant_ids,
+            timestamp__gte=time_threshold
+        ).aggregate(total=Sum('power'))['total'] or 0
+        
+        # Energia giornaliera
+        today_energy = DeviceMeasurement.objects.filter(
+            plant_id__in=plant_ids,
+            timestamp__gte=today_start
+        ).aggregate(total=Sum('energy_total'))['total'] or 0
+        
+        # Energia mensile
+        month_energy = DeviceMeasurement.objects.filter(
+            plant_id__in=plant_ids,
+            timestamp__gte=month_start
+        ).aggregate(total=Sum('energy_total'))['total'] or 0
+        
+        # Energia annuale
+        year_energy = DeviceMeasurement.objects.filter(
+            plant_id__in=plant_ids,
+            timestamp__gte=year_start
+        ).aggregate(total=Sum('energy_total'))['total'] or 0
         
         # Converti potenza in kW
-        stats['total_power'] = round(stats['total_power'] / 1000.0, 2)
+        stats['total_power'] = round(recent_power / 1000.0, 2)
         
         # Arrotonda i valori di energia
-        stats['today_energy'] = round(stats['today_energy'], 2)
-        stats['month_energy'] = round(stats['month_energy'], 2)
-        stats['year_energy'] = round(stats['year_energy'], 2)
+        stats['today_energy'] = round(today_energy, 2)
+        stats['month_energy'] = round(month_energy, 2)
+        stats['year_energy'] = round(year_energy, 2)
         
         return stats
 
@@ -251,7 +307,7 @@ class CerDashboardView(CerBaseView, StaffRequiredMixin):
         
         # Ultime misurazioni
         context['latest_measurements'] = DeviceMeasurement.objects.select_related(
-            'device', 'device__plant'
+            'device', 'device__plant', 'device__plant__owner'
         ).order_by('-timestamp')[:10]
         
         # Statistiche settimanali

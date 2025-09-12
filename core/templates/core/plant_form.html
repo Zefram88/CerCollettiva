@@ -27,10 +27,10 @@
                    </div>
                </div>
 
-               <div class="card-body">
+               <div class="p-4">
                    {% if form.errors %}
                        <div class="alert alert-danger alert-cer">
-                           <i class="bi bi-exclamation-circle me-2"></i>Controlla i campi evidenziati.
+                           <i class="fas fa-exclamation-circle me-2"></i>Controlla i campi evidenziati.
                            <ul class="mt-2 mb-0">
                            {% for field in form %}
                                {% for error in field.errors %}
@@ -52,7 +52,7 @@
 
                    <!-- Form Debug Info -->
                    {% if debug %}
-                   <div class="alert alert-info alert-cer">
+                   <div class="alert alert-info alert-cer alert-permanent">
                        <h6>Debug Info:</h6>
                        <pre>{{ form.fields }}</pre>
                    </div>
@@ -119,12 +119,12 @@
                            </div>
                        </div>
 
-                       <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                           <a href="{% url 'core:plant_list' %}" class="btn btn-cer-secondary me-2">
-                               <i class="bi bi-x-lg"></i> Annulla
+                       <div class="d-flex gap-2 justify-content-end mt-4">
+                           <a href="{% url 'core:plant_list' %}" class="btn btn-cer-secondary">
+                               <i class="fas fa-times me-2"></i>Annulla
                            </a>
                            <button type="submit" class="btn btn-cer-primary">
-                               <i class="bi bi-save"></i> 
+                               <i class="fas fa-save me-2"></i>
                                {% if form.instance.pk %}Aggiorna{% else %}Crea{% endif %}
                            </button>
                        </div>
@@ -138,16 +138,30 @@
                <div class="cer-card-header">
                    <h5 class="mb-0">Informazioni</h5>
                </div>
-               <div class="card-body">
-                   <div class="list-group list-group-flush">
-                       <div class="list-group-item">
-                           <i class="bi bi-asterisk text-danger me-2"></i>Campi obbligatori
+               <div class="p-4">
+                   <div class="mb-3">
+                       <div class="d-flex align-items-center mb-3">
+                           <i class="fas fa-asterisk text-danger me-3" style="width: 20px;"></i>
+                           <div>
+                               <small class="text-muted d-block">Campi obbligatori</small>
+                               <span class="fw-semibold">Tutti i campi contrassegnati con *</span>
+                           </div>
                        </div>
-                       <div class="list-group-item">
-                           <i class="bi bi-plug me-2"></i>Il codice POD è un codice alfanumerico composto da 14 o 15 cifre
+
+                       <div class="d-flex align-items-center mb-3">
+                           <i class="fas fa-plug text-energy me-3" style="width: 20px;"></i>
+                           <div>
+                               <small class="text-muted d-block">Codice POD</small>
+                               <span class="fw-semibold">14 o 15 cifre alfanumeriche</span>
+                           </div>
                        </div>
-                       <div class="list-group-item">
-                           <i class="bi bi-lightning me-2"></i>Potenza dell'impianto deve essere espressa in kW
+
+                       <div class="d-flex align-items-center">
+                           <i class="fas fa-bolt text-energy me-3" style="width: 20px;"></i>
+                           <div>
+                               <small class="text-muted d-block">Potenza</small>
+                               <span class="fw-semibold">Espressa in kW</span>
+                           </div>
                        </div>
                    </div>
                </div>

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block title %}{% trans "Selezione Tipo Membro CER" %} - CerCollettiva{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="h2 mb-3">{% trans "Selezione Tipo Membro CER" %}</h1>
+                <p class="text-muted">{% trans "Scegli il tipo di membro che vuoi diventare nella Comunità Energetica Rinnovabile" %}</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">{% trans "Step" %} {{ step }} {% trans "di" %} {{ total_steps }}</span>
+                        <span class="text-muted">{{ progress_percentage|floatformat:0 }}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {{ progress_percentage }}%" 
+                             aria-valuenow="{{ progress_percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" id="onboarding-form">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <h5 class="mb-3">{% trans "Tipo di Membro CER" %}</h5>
+                            
+                            <div class="row g-3">
+                                <!-- Consumer -->
+                                <div class="col-md-6">
+                                    <label for="id_member_role_0" class="card-option-label">
+                                        <div class="card h-100 border-2 option-card" data-option="CONSUMER">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-home fa-3x text-info"></i>
+                                                </div>
+                                                <h5 class="fw-bold mb-2">{% trans "Consumer" %}</h5>
+                                                <p class="text-muted small">
+                                                    {% trans "Membri che consumano energia dalla CER" %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <input class="form-check-input d-none" type="radio" 
+                                               name="member_role" value="CONSUMER" 
+                                               id="id_member_role_0" required>
+                                    </label>
+                                </div>
+
+                                <!-- Prosumer -->
+                                <div class="col-md-6">
+                                    <label for="id_member_role_1" class="card-option-label">
+                                        <div class="card h-100 border-2 option-card" data-option="PROSUMER">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-exchange-alt fa-3x text-success"></i>
+                                                </div>
+                                                <h5 class="fw-bold mb-2">{% trans "Prosumer" %}</h5>
+                                                <p class="text-muted small">
+                                                    {% trans "Membri che producono e consumano energia" %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <input class="form-check-input d-none" type="radio" 
+                                               name="member_role" value="PROSUMER" 
+                                               id="id_member_role_1" required>
+                                    </label>
+                                </div>
+
+                                <!-- Produttore -->
+                                <div class="col-md-6">
+                                    <label for="id_member_role_2" class="card-option-label">
+                                        <div class="card h-100 border-2 option-card" data-option="PRODUCER">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-solar-panel fa-3x text-warning"></i>
+                                                </div>
+                                                <h5 class="fw-bold mb-2">{% trans "Produttore" %}</h5>
+                                                <p class="text-muted small">
+                                                    {% trans "Membri con impianti di produzione energetica" %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <input class="form-check-input d-none" type="radio" 
+                                               name="member_role" value="PRODUCER" 
+                                               id="id_member_role_2" required>
+                                    </label>
+                                </div>
+
+                                <!-- Sostenitori -->
+                                <div class="col-md-6">
+                                    <label for="id_member_role_3" class="card-option-label">
+                                        <div class="card h-100 border-2 option-card" data-option="SUPPORTER">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-heart fa-3x text-danger"></i>
+                                                </div>
+                                                <h5 class="fw-bold mb-2">{% trans "Sostenitori" %}</h5>
+                                                <p class="text-muted small">
+                                                    {% trans "Supportano la CER con tesseramento annuale" %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <input class="form-check-input d-none" type="radio" 
+                                               name="member_role" value="SUPPORTER" 
+                                               id="id_member_role_3" required>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {% if form.member_role.errors %}
+                                <div class="text-danger mt-2">
+                                    {{ form.member_role.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Help Text -->
+                        <div class="alert alert-info alert-permanent">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>{% trans "Nota:" %}</strong>
+                            {% trans "I sostenitori non sono membri attivi della CER ma supportano il progetto con un contributo annuale. Possono eventualmente diventare membri attivi in futuro." %}
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8 col-xl-6">
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>{% trans "Indietro" %}
+                </a>
+                
+                <button type="submit" form="onboarding-form" name="next" class="btn btn-primary">
+                    {% trans "Avanti" %} <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card-option-label {
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.card-option-label:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.option-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.option-card:hover {
+    border-color: #0d6efd !important;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.option-card.selected {
+    border-color: #0d6efd !important;
+    background-color: rgba(13, 110, 253, 0.05) !important;
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.2);
+    transform: translateY(-2px);
+}
+
+.option-card.selected .fas {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.alert-permanent {
+    display: block !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const optionCards = document.querySelectorAll('.option-card');
+    const radioButtons = document.querySelectorAll('input[name="member_role"]');
+    
+    // Gestisci click sulle card
+    optionCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const option = this.getAttribute('data-option');
+            const radio = document.querySelector(`input[value="${option}"]`);
+            
+            if (radio) {
+                radio.checked = true;
+                updateSelection();
+            }
+        });
+    });
+    
+    // Gestisci cambio radio buttons
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateSelection();
+        });
+    });
+    
+    function updateSelection() {
+        // Rimuovi selezione da tutte le card
+        optionCards.forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Evidenzia la card selezionata
+        const selectedRadio = document.querySelector('input[name="member_role"]:checked');
+        if (selectedRadio) {
+            const selectedCard = selectedRadio.closest('.card-option-label').querySelector('.option-card');
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+        }
+    }
+    
+    // Inizializza selezione se c'è già un valore
+    updateSelection();
+});
+</script>
+{% endblock %}

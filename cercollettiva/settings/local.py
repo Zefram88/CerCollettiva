@@ -4,15 +4,9 @@ from .base import *
 
 # Override per sviluppo locale
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = ['*']  # Per sviluppo - accetta tutti gli host
 
-# Database SQLite per sviluppo
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Database PostgreSQL per coerenza con produzione (configurazione già definita in base.py)
 
 # Cache in memoria per sviluppo
 CACHES = {
@@ -44,14 +38,6 @@ GEOCODING_SETTINGS = {
     'CACHE_TIMEOUT': 86400  # 24 ore di cache
 }
 
-# Host consentiti per sviluppo
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '[::1]',
-    'testserver',  # Per i test Django
-]
-
 # Aggiungi automaticamente l'IP locale per development
 hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
 ALLOWED_HOSTS.extend([ip for ip in ips])
@@ -79,6 +65,8 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'energy.apps.EnergyConfig',
     'documents.apps.DocumentsConfig',
+    'monitoring.apps.MonitoringConfig',
+    'cer.apps.CerConfig',
 ]
 
 # Middleware (senza debug_toolbar)
@@ -96,27 +84,7 @@ MIDDLEWARE = [
     'core.middleware.FirstInstallationMiddleware',
 ]
 
-# Configurazione database - usa SQLite per sviluppo rapido
-# Per PostgreSQL, decommentare la sezione sotto e installare/configurare PostgreSQL
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Database PostgreSQL (decommentare quando PostgreSQL è installato e configurato)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'cercollettiva_dev',
-#         'USER': 'cercollettiva_user',
-#         'PASSWORD': 'your_password_here',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
+# Database PostgreSQL per coerenza con produzione (configurazione già definita sopra)
 
 # Cache per sviluppo
 CACHES = {

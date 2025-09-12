@@ -1,0 +1,183 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Import Excel - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="import-excel-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-file-excel"></i>
+                            Import Excel - {{ model_name }}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="import-form">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="excel_file">Seleziona file Excel:</label>
+                                <input type="file" 
+                                       class="form-control-file" 
+                                       id="excel_file" 
+                                       name="excel_file" 
+                                       accept=".xlsx,.xls"
+                                       required>
+                                <small class="form-text text-muted">
+                                    Formati supportati: .xlsx, .xls
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           class="form-check-input" 
+                                           id="preview_mode" 
+                                           name="preview_mode" 
+                                           checked>
+                                    <label class="form-check-label" for="preview_mode">
+                                        Modalità anteprima (non salva i dati)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="required_fields">Campi obbligatori:</label>
+                                <ul class="list-group">
+                                    {% for field in required_fields %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-asterisk text-danger"></i>
+                                        {{ field }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload"></i>
+                                    Importa
+                                </button>
+                                <a href="{% url 'ceradmin:index' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Annulla
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if import_results %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Risultati Import</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="stat-card stat-card-success">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>{{ import_results.success_count }}</h3>
+                                        <p>Importati</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card stat-card-danger">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>{{ import_results.error_count }}</h3>
+                                        <p>Errori</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if import_results.errors %}
+                        <div class="mt-3">
+                            <h5>Errori:</h5>
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    {% for error in import_results.errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.import-excel-container {
+    padding: 20px;
+}
+
+.import-form {
+    max-width: 600px;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stat-card-success {
+    border-left: 4px solid #28a745;
+}
+
+.stat-card-danger {
+    border-left: 4px solid #dc3545;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.stat-card-success .stat-icon {
+    color: #28a745;
+}
+
+.stat-card-danger .stat-icon {
+    color: #dc3545;
+}
+
+.stat-content h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-content p {
+    margin: 5px 0 0 0;
+    color: #666;
+}
+</style>
+{% endblock %}

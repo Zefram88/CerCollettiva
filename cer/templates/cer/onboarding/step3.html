@@ -1,0 +1,37 @@
+{% extends 'cer/onboarding/base.html' %}
+{% load i18n %}
+
+{% block step_title %}Impianto{% endblock %}
+{% block step_subtitle %}Configura il tuo impianto di produzione{% endblock %}
+
+{% block step_content %}
+<form id="onboarding-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="alert alert-info alert-permanent">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Step 3 - Impianto</strong><br>
+        Questa sezione sarà implementata in futuro per configurare gli impianti di produzione.
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Tipo Impianto</label>
+        <select class="form-control" name="plant_type">
+            <option value="">Seleziona tipo impianto...</option>
+            <option value="SOLAR">Fotovoltaico</option>
+            <option value="WIND">Eolico</option>
+            <option value="HYDRO">Idroelettrico</option>
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Potenza (kW)</label>
+        <input type="number" class="form-control" name="power" placeholder="es. 3.0">
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Indirizzo Impianto</label>
+        <input type="text" class="form-control" name="plant_address" placeholder="Indirizzo dell'impianto">
+    </div>
+</form>
+{% endblock %}

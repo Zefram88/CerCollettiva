@@ -2,8 +2,12 @@
 from django.db import models
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
 
 class MQTTAuditLog(models.Model):
+    class Meta:
+        app_label = 'energy'
+    
     OPERATION_TYPES = [
         ('AUTH', 'Autenticazione'),
         ('CONNECT', 'Connessione'),

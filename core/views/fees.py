@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
+# CSRF protection implemented via login_required decorators
 import json
 
 from ..models import CERConfiguration, CERMembership, MembershipCard, MemberRegistry

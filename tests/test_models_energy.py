@@ -214,6 +214,8 @@ class DeviceMeasurementModelTest(TestCase):
         
         self.measurement_data = {
             'device': self.device,
+            'plant': self.plant,
+            'measurement_type': 'DRAWN_POWER',
             'timestamp': timezone.now(),
             'power': Decimal('1500.50'),
             'energy': Decimal('100.25'),
@@ -242,7 +244,7 @@ class DeviceMeasurementModelTest(TestCase):
     def test_measurement_str_method(self):
         """Test string representation of measurement"""
         measurement = DeviceMeasurement.objects.create(**self.measurement_data)
-        expected = f'{self.device.name} - {measurement.timestamp}'
+        expected = f'{self.device.device_id} - {measurement.measurement_type} - {measurement.timestamp:%Y-%m-%d %H:%M:%S}'
         self.assertEqual(str(measurement), expected)
     
     def test_measurement_timestamp(self):
@@ -327,7 +329,7 @@ class DeviceMeasurementModelTest(TestCase):
         measurement = DeviceMeasurement.objects.create(**self.measurement_data)
         
         self.assertEqual(measurement.device, self.device)
-        self.assertIn(measurement, self.device.measurement_set.all())
+        self.assertIn(measurement, self.device.measurements.all())
     
     def test_measurement_validation(self):
         """Test measurement value validation"""

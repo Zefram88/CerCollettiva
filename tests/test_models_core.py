@@ -109,7 +109,7 @@ class PlantModelTest(TestCase):
         self.plant_data = {
             'name': 'Solar Plant 1',
             'code': 'PLANT001',
-            'type': 'PHOTOVOLTAIC',
+            'type': 'PRODUCER',
             'power_kw': Decimal('100.50'),
             'address': 'Via Milano 10',
             'city': 'Milano',
@@ -118,8 +118,10 @@ class PlantModelTest(TestCase):
             'latitude': Decimal('45.4642'),
             'longitude': Decimal('9.1900'),
             'owner': self.user,
-            'cer': self.cer,
-            'is_active': True
+            'cer_configuration': self.cer,
+            'is_active': True,
+            'connection_voltage': '400V',
+            'installation_date': '2023-01-01'
         }
     
     def test_create_plant(self):
@@ -128,10 +130,10 @@ class PlantModelTest(TestCase):
         
         self.assertEqual(plant.name, 'Solar Plant 1')
         self.assertEqual(plant.code, 'PLANT001')
-        self.assertEqual(plant.type, 'PHOTOVOLTAIC')
+        self.assertEqual(plant.type, 'PRODUCER')
         self.assertEqual(plant.power_kw, Decimal('100.50'))
         self.assertEqual(plant.owner, self.user)
-        self.assertEqual(plant.cer, self.cer)
+        self.assertEqual(plant.cer_configuration, self.cer)
         self.assertTrue(plant.is_active)
     
     def test_plant_str_method(self):
@@ -164,7 +166,7 @@ class PlantModelTest(TestCase):
     
     def test_plant_type_choices(self):
         """Test plant type field choices"""
-        valid_types = ['PHOTOVOLTAIC', 'WIND', 'HYDRO', 'BIOMASS', 'OTHER']
+        valid_types = ['CONSUMER', 'PRODUCER', 'PROSUMER']
         
         for plant_type in valid_types:
             plant_data = self.plant_data.copy()
@@ -179,14 +181,14 @@ class PlantModelTest(TestCase):
         plant = Plant.objects.create(**self.plant_data)
         
         self.assertEqual(plant.owner, self.user)
-        self.assertIn(plant, self.user.plant_set.all())
+        self.assertIn(plant, self.user.plants.all())
     
     def test_plant_cer_relationship(self):
         """Test plant-CER relationship"""
         plant = Plant.objects.create(**self.plant_data)
         
-        self.assertEqual(plant.cer, self.cer)
-        self.assertIn(plant, self.cer.plant_set.all())
+        self.assertEqual(plant.cer_configuration, self.cer)
+        self.assertIn(plant, self.cer.plants.all())
     
     def test_plant_timestamps(self):
         """Test plant timestamp fields"""
@@ -243,13 +245,13 @@ class CERMembershipModelTest(TestCase):
     def test_create_membership(self):
         """Test creating a CER membership"""
         membership = CERMembership.objects.create(
-            cer=self.cer,
+            cer_configuration=self.cer,
             user=self.member,
             role='MEMBER',
             share_percentage=Decimal('10.00')
         )
         
-        self.assertEqual(membership.cer, self.cer)
+        self.assertEqual(membership.cer_configuration, self.cer)
         self.assertEqual(membership.user, self.member)
         self.assertEqual(membership.role, 'MEMBER')
         self.assertEqual(membership.share_percentage, Decimal('10.00'))
@@ -258,7 +260,7 @@ class CERMembershipModelTest(TestCase):
     def test_membership_str_method(self):
         """Test string representation of membership"""
         membership = CERMembership.objects.create(
-            cer=self.cer,
+            cer_configuration=self.cer,
             user=self.member,
             role='MEMBER'
         )
@@ -267,15 +269,17 @@ class CERMembershipModelTest(TestCase):
     
     def test_membership_role_choices(self):
         """Test membership role field choices"""
-        valid_roles = ['ADMIN', 'MEMBER', 'VIEWER']
+        valid_roles = ['ADMIN', 'MEMBER', 'TECHNICAL']
         
         for role in valid_roles:
             membership = CERMembership.objects.create(
-                cer=self.cer,
+                cer_configuration=self.cer,
                 user=User.objects.create_user(
                     username=f'user_{role}',
                     email=f'{role}@example.com',
-                    password='TestPass123!'
+                    password='TestPass123!',
+                    first_name='Test',
+                    last_name='User'
                 ),
                 role=role
             )
@@ -284,7 +288,7 @@ class CERMembershipModelTest(TestCase):
     def test_membership_unique_constraint(self):
         """Test that a user can only have one membership per CER"""
         CERMembership.objects.create(
-            cer=self.cer,
+            cer_configuration=self.cer,
             user=self.member,
             role='MEMBER'
         )
@@ -292,15 +296,15 @@ class CERMembershipModelTest(TestCase):
         # Try to create duplicate membership
         with self.assertRaises(Exception):
             CERMembership.objects.create(
-                cer=self.cer,
+                cer_configuration=self.cer,
                 user=self.member,
-                role='VIEWER'
+                role='TECHNICAL'
             )
     
     def test_membership_share_percentage_validation(self):
         """Test share percentage validation"""
         membership = CERMembership(
-            cer=self.cer,
+            cer_configuration=self.cer,
             user=self.member,
             role='MEMBER',
             share_percentage=Decimal('150.00')  # Invalid: > 100%
@@ -312,13 +316,14 @@ class CERMembershipModelTest(TestCase):
     def test_membership_dates(self):
         """Test membership date fields"""
         membership = CERMembership.objects.create(
-            cer=self.cer,
+            cer_configuration=self.cer,
             user=self.member,
             role='MEMBER',
             joined_date=date(2024, 1, 1)
         )
         
         self.assertEqual(membership.joined_date, date(2024, 1, 1))
+        self.assertIsNotNone(membership.joined_at)
         self.assertIsNotNone(membership.created_at)
         self.assertIsNotNone(membership.updated_at)
 
@@ -354,14 +359,16 @@ class AlertModelTest(TestCase):
         self.plant = Plant.objects.create(
             name='Test Plant',
             code='PLANT001',
-            type='PHOTOVOLTAIC',
+            type='PRODUCER',
             power_kw=Decimal('50.00'),
             address='Via Test 1',
             city='Milano',
             province='MI',
             zip_code='20100',
             owner=self.user,
-            cer=self.cer
+            cer_configuration=self.cer,
+            connection_voltage='400V',
+            installation_date='2023-01-01'
         )
     
     def test_create_alert(self):
@@ -429,8 +436,8 @@ class AlertModelTest(TestCase):
         
         self.assertEqual(alert.plant, self.plant)
         self.assertEqual(alert.user, self.user)
-        self.assertIn(alert, self.plant.alert_set.all())
-        self.assertIn(alert, self.user.alert_set.all())
+        self.assertIn(alert, self.plant.alerts.all())
+        self.assertIn(alert, self.user.alerts.all())
     
     def test_alert_timestamps(self):
         """Test alert timestamp fields"""

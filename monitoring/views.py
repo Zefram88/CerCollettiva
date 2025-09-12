@@ -417,7 +417,7 @@ class MetricsView(View):
         
         # Application metrics
         try:
-            from core.models import Plant, CERConfiguration
+            from core.main_models import Plant, CERConfiguration
             from energy.models import DeviceConfiguration
             
             plant_count = Plant.objects.filter(is_active=True).count()

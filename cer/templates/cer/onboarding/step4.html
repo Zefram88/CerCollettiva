@@ -1,0 +1,35 @@
+{% extends 'cer/onboarding/base.html' %}
+{% load i18n %}
+
+{% block step_title %}Documenti{% endblock %}
+{% block step_subtitle %}Carica i documenti richiesti{% endblock %}
+
+{% block step_content %}
+<form id="onboarding-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="alert alert-info alert-permanent">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Step 4 - Documenti</strong><br>
+        Questa sezione sarà implementata in futuro per il caricamento dei documenti.
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Documento Identità</label>
+        <input type="file" class="form-control" name="identity_document" accept=".pdf,.jpg,.jpeg,.png">
+        <small class="form-text text-muted">Carica una copia del documento di identità</small>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Codice Fiscale</label>
+        <input type="file" class="form-control" name="fiscal_code_document" accept=".pdf,.jpg,.jpeg,.png">
+        <small class="form-text text-muted">Carica una copia del codice fiscale</small>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Contratto di Fornitura</label>
+        <input type="file" class="form-control" name="supply_contract" accept=".pdf,.jpg,.jpeg,.png">
+        <small class="form-text text-muted">Carica il contratto di fornitura energetica</small>
+    </div>
+</form>
+{% endblock %}

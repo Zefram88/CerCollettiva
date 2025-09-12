@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Completa il tuo profilo - CerCollettiva{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Completa il tuo profilo
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Benvenuto {{ user.first_name }}!</strong><br>
+                        Per procedere con l'adesione alla Comunità Energetica Rinnovabile, 
+                        devi completare il tuo profilo anagrafico.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Informazioni attuali:</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>Nome:</strong> {{ user.first_name }} {{ user.last_name }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Email:</strong> {{ user.email }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Stato:</strong> 
+                                    <span class="badge bg-warning">{{ user.get_onboarding_status_display }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Prossimi passi:</h5>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Registrazione completata</strong>
+                                </div>
+                                <div class="list-group-item">
+                                    <i class="fas fa-clock text-warning me-2"></i>
+                                    <strong>Completamento anagrafico</strong>
+                                    <small class="d-block text-muted">Dati fiscali e anagrafici completi</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <i class="fas fa-circle text-muted me-2"></i>
+                                    <strong>Configurazione CER</strong>
+                                    <small class="d-block text-muted">Scelta tipo socio e impianti</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-tools me-2"></i>
+                            <strong>Funzionalità in sviluppo</strong><br>
+                            Il completamento del profilo sarà disponibile nella prossima versione.
+                        </div>
+                        
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Vai alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

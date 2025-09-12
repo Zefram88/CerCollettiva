@@ -1,7 +1,7 @@
 # energy/management/commands/update_plant_coordinates.py
 
 from django.core.management.base import BaseCommand
-from core.models import Plant
+from core.main_models import Plant
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import time

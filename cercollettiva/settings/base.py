@@ -8,6 +8,13 @@ from dotenv import load_dotenv
 # Carica variabili d'ambiente
 load_dotenv()
 
+# Import security settings
+try:
+    from .security import *
+except ImportError:
+    # Fallback se il file security.py non esiste
+    pass
+
 # Configurazioni di base
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-test-key-for-development-only-change-in-production')
@@ -34,6 +41,8 @@ LOCAL_APPS = [
     'core.apps.CoreConfig',
     'energy.apps.EnergyConfig',
     'documents.apps.DocumentsConfig',
+    'monitoring.apps.MonitoringConfig',
+    'cer.apps.CerConfig',
 ]
 
 THIRD_PARTY_APPS = [
@@ -52,6 +61,8 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Per gestione multilingua
+    'core.middleware.rate_limiting.RateLimitMiddleware',  # Rate limiting
+    'core.middleware.security_headers.SecurityHeadersMiddleware',  # Security headers
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -89,8 +100,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'cercollettiva'),
         'USER': os.getenv('DB_USER', 'cercollettiva_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'cercollettiva_pass'),
+        'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
@@ -107,7 +118,18 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
     }
+}
+
+# Configurazione rate limiting
+RATE_LIMIT_SETTINGS = {
+    'default': {'requests': 100, 'window': 3600},  # 100 req/hour
+    'api': {'requests': 200, 'window': 3600},      # 200 req/hour
+    'login': {'requests': 5, 'window': 900},       # 5 req/15min
+    'upload': {'requests': 10, 'window': 3600},    # 10 req/hour
 }
 
 # Validazione password
@@ -155,13 +177,15 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 os.makedirs(os.path.join(MEDIA_ROOT, 'documents', 'gaudi'), exist_ok=True)
 
-# Sicurezza
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Sicurezza - Configurazione SSL per ambiente
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Rest Framework
 REST_FRAMEWORK = {

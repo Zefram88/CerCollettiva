@@ -7,6 +7,9 @@ from .device import DeviceMeasurement, DeviceConfiguration
 
 class EnergyInterval(models.Model):
     """Misurazioni di energia per intervalli di 15 minuti"""
+    class Meta:
+        app_label = 'energy'
+    
     device = models.ForeignKey(
         'energy.DeviceConfiguration',
         on_delete=models.CASCADE,
@@ -53,6 +56,9 @@ class EnergyInterval(models.Model):
 
 class EnergyMeasurement(BaseMeasurementModel):
     """Misurazioni di energia"""
+    
+    class Meta:
+        app_label = 'energy'
     
     MEASUREMENT_TYPES = [
         ('POWER_DRAW', 'Prelievo'),
@@ -122,6 +128,9 @@ class EnergyMeasurement(BaseMeasurementModel):
 
 class EnergyAggregate(BaseMeasurementModel):
     """Aggregazioni di misurazioni energetiche"""
+    
+    class Meta:
+        app_label = 'energy'
     
     PERIOD_CHOICES = [
         ('15M', '15 Minuti'),

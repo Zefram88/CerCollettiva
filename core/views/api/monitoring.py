@@ -4,18 +4,19 @@ Gestisce endpoint per performance, device, accessibility, feedback e A/B testing
 """
 
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 import json
 import logging
 from datetime import datetime
 from datetime import timezone as dt_timezone
 
 # Import monitoring models
-from core.models import (
+from core.main_models import (
     PerformanceMetrics,
     DeviceInfo,
     AccessibilityAudit,
@@ -27,7 +28,7 @@ from core.models import (
 
 logger = logging.getLogger(__name__)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class PerformanceMetricsView(View):
     """Endpoint per ricevere metriche performance"""
     
@@ -74,7 +75,7 @@ class PerformanceMetricsView(View):
                 'message': 'Internal server error'
             }, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class DeviceInfoView(View):
     """Endpoint per ricevere informazioni dispositivo"""
     
@@ -103,7 +104,7 @@ class DeviceInfoView(View):
                 'message': 'Internal server error'
             }, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class AccessibilityAuditView(View):
     """Endpoint per ricevere risultati audit accessibilità"""
     
@@ -132,7 +133,7 @@ class AccessibilityAuditView(View):
                 'message': 'Internal server error'
             }, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class UserFeedbackView(View):
     """Endpoint per ricevere feedback utenti"""
     
@@ -161,7 +162,7 @@ class UserFeedbackView(View):
                 'message': 'Internal server error'
             }, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class SessionDataView(View):
     """Endpoint per ricevere dati sessione utente"""
     
@@ -214,7 +215,7 @@ class SessionDataView(View):
                 'message': 'Internal server error'
             }, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class ABTestingParticipationView(View):
     """Endpoint per ricevere partecipazioni A/B testing"""
     
@@ -243,7 +244,7 @@ class ABTestingParticipationView(View):
                 'message': 'Internal server error'
             }, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class ABTestingEventView(View):
     """Endpoint per ricevere eventi A/B testing"""
     

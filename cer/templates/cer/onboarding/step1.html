@@ -1,0 +1,268 @@
+{% extends 'cer/onboarding/base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block step_title %}Verifica Dati Anagrafici{% endblock %}
+{% block step_subtitle %}Controlla e correggi i tuoi dati anagrafici se necessario{% endblock %}
+
+{% block step_content %}
+<div class="alert alert-info alert-permanent">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>{% trans "Nota:" %}</strong>
+    {% trans "Verifica i tuoi dati anagrafici. Puoi correggerli se necessario prima di procedere con l'onboarding CER." %}
+</div>
+
+<form id="onboarding-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Dati Anagrafici -->
+    <div class="mb-4">
+        <h5 class="mb-3">
+            <i class="fas fa-user me-2 text-primary"></i>
+            {% trans "Dati Anagrafici" %}
+        </h5>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.legal_type.label_tag }}
+                    {{ form.legal_type }}
+                    {% if form.legal_type.help_text %}
+                        <small class="form-text text-muted">{{ form.legal_type.help_text }}</small>
+                    {% endif %}
+                    {% if form.legal_type.errors %}
+                        <div class="text-danger">{{ form.legal_type.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.profit_type.label_tag }}
+                    {{ form.profit_type }}
+                    {% if form.profit_type.help_text %}
+                        <small class="form-text text-muted">{{ form.profit_type.help_text }}</small>
+                    {% endif %}
+                    {% if form.profit_type.errors %}
+                        <div class="text-danger">{{ form.profit_type.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.fiscal_code.label_tag }}
+                    {{ form.fiscal_code }}
+                    {% if form.fiscal_code.help_text %}
+                        <small class="form-text text-muted">{{ form.fiscal_code.help_text }}</small>
+                    {% endif %}
+                    {% if form.fiscal_code.errors %}
+                        <div class="text-danger">{{ form.fiscal_code.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.phone.label_tag }}
+                    {{ form.phone }}
+                    {% if form.phone.help_text %}
+                        <small class="form-text text-muted">{{ form.phone.help_text }}</small>
+                    {% endif %}
+                    {% if form.phone.errors %}
+                        <div class="text-danger">{{ form.phone.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                    {% if form.first_name.help_text %}
+                        <small class="form-text text-muted">{{ form.first_name.help_text }}</small>
+                    {% endif %}
+                    {% if form.first_name.errors %}
+                        <div class="text-danger">{{ form.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                    {% if form.last_name.help_text %}
+                        <small class="form-text text-muted">{{ form.last_name.help_text }}</small>
+                    {% endif %}
+                    {% if form.last_name.errors %}
+                        <div class="text-danger">{{ form.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-3">
+                    {{ form.address.label_tag }}
+                    {{ form.address }}
+                    {% if form.address.help_text %}
+                        <small class="form-text text-muted">{{ form.address.help_text }}</small>
+                    {% endif %}
+                    {% if form.address.errors %}
+                        <div class="text-danger">{{ form.address.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Campi condizionali per aziende/enti -->
+    <div id="business-fields" class="mb-4" style="display: none;">
+        <h5 class="mb-3">
+            <i class="fas fa-building me-2 text-warning"></i>
+            {% trans "Dati Aziendali" %}
+        </h5>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.legal_name.label_tag }}
+                    {{ form.legal_name }}
+                    {% if form.legal_name.errors %}
+                        <div class="text-danger">{{ form.legal_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.vat_number.label_tag }}
+                    {{ form.vat_number }}
+                    {% if form.vat_number.errors %}
+                        <div class="text-danger">{{ form.vat_number.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.pec.label_tag }}
+                    {{ form.pec }}
+                    {% if form.pec.errors %}
+                        <div class="text-danger">{{ form.pec.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.sdi_code.label_tag }}
+                    {{ form.sdi_code }}
+                    {% if form.sdi_code.errors %}
+                        <div class="text-danger">{{ form.sdi_code.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Campi condizionali per associazioni -->
+    <div id="association-fields" class="mb-4" style="display: none;">
+        <h5 class="mb-3">
+            <i class="fas fa-users me-2 text-success"></i>
+            {% trans "Dati Associazione" %}
+        </h5>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.registration_number.label_tag }}
+                    {{ form.registration_number }}
+                    {% if form.registration_number.errors %}
+                        <div class="text-danger">{{ form.registration_number.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.statute_date.label_tag }}
+                    {{ form.statute_date }}
+                    {% if form.statute_date.errors %}
+                        <div class="text-danger">{{ form.statute_date.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Campi condizionali per enti religiosi -->
+    <div id="church-fields" class="mb-4" style="display: none;">
+        <h5 class="mb-3">
+            <i class="fas fa-church me-2 text-info"></i>
+            {% trans "Dati Ente Religioso" %}
+        </h5>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.religious_entity_code.label_tag }}
+                    {{ form.religious_entity_code }}
+                    {% if form.religious_entity_code.errors %}
+                        <div class="text-danger">{{ form.religious_entity_code.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'cer:onboarding_step' step=0 %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{% trans "Indietro" %}
+        </a>
+        <button type="submit" form="onboarding-form" name="next" class="btn btn-primary">
+            {% trans "Avanti" %}<i class="fas fa-arrow-right ms-2"></i>
+        </button>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const legalTypeField = document.getElementById('id_legal_type');
+    const businessFields = document.getElementById('business-fields');
+    const associationFields = document.getElementById('association-fields');
+    const churchFields = document.getElementById('church-fields');
+    
+    function toggleFields() {
+        const legalType = legalTypeField.value;
+        
+        // Nascondi tutti i campi condizionali
+        businessFields.style.display = 'none';
+        associationFields.style.display = 'none';
+        churchFields.style.display = 'none';
+        
+        // Mostra i campi appropriati
+        if (legalType === 'BUSINESS') {
+            businessFields.style.display = 'block';
+        } else if (legalType === 'ASSOCIATION') {
+            businessFields.style.display = 'block';
+            associationFields.style.display = 'block';
+        } else if (legalType === 'CHURCH') {
+            businessFields.style.display = 'block';
+            churchFields.style.display = 'block';
+        } else if (legalType === 'PUBLIC') {
+            businessFields.style.display = 'block';
+        }
+    }
+    
+    // Inizializza i campi
+    toggleFields();
+    
+    // Aggiungi listener per i cambiamenti
+    legalTypeField.addEventListener('change', toggleFields);
+});
+</script>
+{% endblock %}

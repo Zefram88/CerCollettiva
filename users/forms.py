@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 
@@ -11,12 +12,12 @@ User = get_user_model()
 
 class UserLoginForm(forms.Form):
     """Form per il login degli utenti"""
-    username = forms.CharField(
-        label=_('Username'),
-        widget=forms.TextInput(attrs={
+    email = forms.EmailField(
+        label=_('Email'),
+        widget=forms.EmailInput(attrs={
             'class': 'form-control', 
-            'placeholder': _('Nome utente'),
-            'autocomplete': 'username'
+            'placeholder': _('Email'),
+            'autocomplete': 'email'
         })
     )
     password = forms.CharField(
@@ -27,6 +28,188 @@ class UserLoginForm(forms.Form):
             'autocomplete': 'current-password'
         })
     )
+
+class MinimalRegistrationForm(UserCreationForm):
+    """Form minimale per registrazione rapida - solo campi essenziali"""
+    
+    # Campi base essenziali
+    first_name = forms.CharField(
+        label=_('Nome'),
+        max_length=30,
+        required=True,
+        help_text=_('Inserisci il tuo nome'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'given-name',
+            'placeholder': _('Nome')
+        })
+    )
+    
+    last_name = forms.CharField(
+        label=_('Cognome'),
+        max_length=30,
+        required=True,
+        help_text=_('Inserisci il tuo cognome'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'family-name',
+            'placeholder': _('Cognome')
+        })
+    )
+    
+    email = forms.EmailField(
+        label=_('Email'),
+        required=True,
+        help_text=_('Inserisci un indirizzo email valido'),
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'email',
+            'placeholder': _('email@esempio.com')
+        })
+    )
+
+    # Consensi GDPR con tracciamento lettura
+    privacy_policy_read = forms.BooleanField(
+        label=_('Privacy Policy'),
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text=_("Confermo di aver letto l'informativa sulla privacy")
+    )
+    
+    data_processing_read = forms.BooleanField(
+        label=_('Trattamento Dati'),
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text=_("Confermo di aver letto l'accordo sul trattamento dei dati")
+    )
+    
+    # Campi nascosti per tracciamento timestamp
+    privacy_policy_timestamp = forms.DateTimeField(
+        required=False,
+        initial=None,
+        widget=forms.HiddenInput()
+    )
+    
+    data_processing_timestamp = forms.DateTimeField(
+        required=False,
+        initial=None,
+        widget=forms.HiddenInput()
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'username', 'first_name', 'last_name', 'email',
+            'password1', 'password2',
+            'privacy_policy_read', 'data_processing_read',
+            'privacy_policy_timestamp', 'data_processing_timestamp'
+        ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Configurazione password
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control password-input',
+            'autocomplete': 'new-password',
+            'placeholder': _('Password')
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control password-input',
+            'autocomplete': 'new-password',
+            'placeholder': _('Conferma password')
+        })
+        
+        # Help text personalizzati
+        self.fields['password1'].help_text = _('La password deve contenere almeno 8 caratteri')
+        self.fields['password2'].help_text = _('Inserisci la stessa password per conferma')
+        
+        # Nascondi il campo username (viene generato automaticamente)
+        self.fields['username'].widget = forms.HiddenInput()
+        self.fields['username'].required = False
+        self.fields['username'].initial = ''  # Valore vuoto di default
+    
+    def save(self, commit=True):
+        """Salva l'utente generando automaticamente l'username dall'email"""
+        from django.utils import timezone
+        
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password1'])
+        
+        # Genera username dall'email (parte prima della @)
+        email = user.email
+        if not email:
+            raise ValueError("Email è richiesta per generare l'username")
+            
+        base_username = email.split('@')[0]
+        
+        # Assicurati che l'username sia unico
+        username = base_username
+        counter = 1
+        while CustomUser.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        # Forza l'username generato
+        user.username = username
+        
+        # Verifica che l'username non sia vuoto
+        if not user.username:
+            raise ValueError("Username non può essere vuoto")
+        
+        # Imposta valori di default per onboarding
+        user.legal_type = 'PRIVATE'  # Default per form minimale
+        user.profit_type = 'NON_PROFIT'  # Default per privati
+        user.onboarding_status = CustomUser.OnboardingStatus.REGISTRATO
+        user.cer_role = CustomUser.CERRole.ISCRITTO
+        
+        # Imposta consensi GDPR con timestamp
+        now = timezone.now()
+        user.privacy_policy = self.cleaned_data['privacy_policy_read']
+        user.data_processing = self.cleaned_data['data_processing_read']
+        user.privacy_policy_timestamp = now
+        user.data_processing_timestamp = now
+        
+        if commit:
+            user.save()
+        return user
+        
+    def clean_username(self):
+        """Genera username automaticamente dall'email"""
+        email = self.cleaned_data.get('email')
+        if email:
+            # Genera username dall'email
+            base_username = email.split('@')[0]
+            username = base_username
+            counter = 1
+            while CustomUser.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            return username
+        return ''
+    
+    def clean_email(self):
+        """Validazione email univoca"""
+        email = self.cleaned_data.get('email')
+        if email and CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError(_('Un utente con questo indirizzo email esiste già.'))
+        return email
+
+    def clean_privacy_policy_read(self):
+        """Validazione lettura privacy policy"""
+        privacy_policy_read = self.cleaned_data.get('privacy_policy_read')
+        if not privacy_policy_read:
+            raise forms.ValidationError(_('Devi confermare di aver letto la privacy policy per registrarti.'))
+        return privacy_policy_read
+
+    def clean_data_processing_read(self):
+        """Validazione lettura accordo trattamento dati"""
+        data_processing_read = self.cleaned_data.get('data_processing_read')
+        if not data_processing_read:
+            raise forms.ValidationError(_('Devi confermare di aver letto l\'accordo sul trattamento dei dati.'))
+        return data_processing_read
+
+
 
 class UserRegistrationForm(UserCreationForm):
     """Form personalizzato per la registrazione degli utenti con GDPR"""

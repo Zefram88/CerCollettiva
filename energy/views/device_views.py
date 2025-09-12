@@ -12,7 +12,7 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
-from core.models import Plant
+from core.main_models import Plant
 from ..models import DeviceConfiguration, DeviceMeasurement
 from ..devices.registry import DeviceRegistry
 
@@ -50,17 +50,38 @@ class DeviceListView(LoginRequiredMixin, ListView):
             plant__owner=self.request.user
         ).select_related('plant')
 
-        # Update online status for each device
-        for device in queryset:
-            latest_measurement = device.get_latest_measurement()  # Usa il metodo esistente
-            device._is_online = False  # Aggiungiamo un attributo temporaneo invece di usare la property
-            device._current_power = 0
+        # Optimize: Get all latest measurements in one query using subquery
+        time_threshold = timezone.now() - timedelta(minutes=5)
+        
+        # First, get device IDs to avoid QuerySet evaluation in filter
+        device_ids = list(queryset.values_list('id', flat=True))
+        
+        if device_ids:
+            # Use subquery to get latest measurement per device efficiently
+            from django.db.models import OuterRef, Subquery
+            latest_measurements_subquery = DeviceMeasurement.objects.filter(
+                device_id=OuterRef('id'),
+                timestamp__gte=time_threshold
+            ).order_by('-timestamp')
             
-            if latest_measurement:
-                device._is_online = latest_measurement.timestamp >= timezone.now() - timedelta(minutes=5)
-                device._current_power = latest_measurement.power
-                device._last_seen = latest_measurement.timestamp
-            else:
+            # Annotate queryset with latest measurement data
+            queryset = queryset.annotate(
+                latest_measurement_power=Subquery(
+                    latest_measurements_subquery.values('power')[:1]
+                ),
+                latest_measurement_timestamp=Subquery(
+                    latest_measurements_subquery.values('timestamp')[:1]
+                )
+            )
+            
+            # Add computed fields for template access
+            for device in queryset:
+                device._is_online = bool(device.latest_measurement_timestamp)
+                device._current_power = device.latest_measurement_power or 0
+                device._last_seen = device.latest_measurement_timestamp
+        else:
+            # No devices, set default values
+            for device in queryset:
                 device._is_online = False
                 device._current_power = 0
                 device._last_seen = None
@@ -250,6 +271,7 @@ class DeviceDetailView(LoginRequiredMixin, UpdateView):
         return form
 
     def get_queryset(self):
+        # SICURO: Verifica ownership implementata
         return DeviceConfiguration.objects.filter(
             plant__owner=self.request.user
         ).select_related('plant')
@@ -336,7 +358,9 @@ class MeasurementListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return DeviceMeasurement.objects.select_related(
-            'device', 'plant'
+            'device', 'plant', 'device__plant__owner'
+        ).prefetch_related(
+            'phase_details'
         ).filter(
             plant__owner=self.request.user
         ).order_by('-timestamp')
@@ -354,13 +378,16 @@ class MeasurementDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().select_related(
-            'device', 'plant'
+            'device', 'plant', 'device__plant__owner'
+        ).prefetch_related(
+            'phase_details'
         ).filter(plant__owner=self.request.user)
 
 @login_required
 def device_delete(request, pk):
     if request.method == 'POST':
         try:
+            # SICURO: Verifica ownership implementata
             device = get_object_or_404(DeviceConfiguration, pk=pk, plant__owner=request.user)
             
             # Ottieni i topic MQTT prima dell'eliminazione

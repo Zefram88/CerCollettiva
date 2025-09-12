@@ -9,29 +9,23 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-6">
-            <div class="text-center mb-5">
-                <div class="d-inline-flex align-items-center justify-content-center bg-gradient-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
-                    <i class="fas fa-user-plus text-white" style="font-size: 2rem;"></i>
-                </div>
-                <h2 class="fw-bold mb-3">
-                    <span class="text-gradient">Registrazione</span>
-                </h2>
-                <p class="lead text-muted">
-                    Unisciti alla rivoluzione energetica. Crea il tuo account gratuito.
-                </p>
-            </div>
 
             <div class="cer-card animate-fade-in-up">
                 <div class="cer-card-header text-center">
                     <h4 class="mb-0 fw-bold">
-                        <i class="fas fa-solar-panel me-2"></i>
-                        Nuovo Account
+                        <i class="fas fa-user-plus me-2"></i>
+                        Registrazione
                     </h4>
                 </div>
                 
                 <div class="p-4">
                     <form method="POST" novalidate>
                         {% csrf_token %}
+                        
+                        <!-- Campi nascosti per timestamp e username -->
+                        {{ form.privacy_policy_timestamp }}
+                        {{ form.data_processing_timestamp }}
+                        {{ form.username }}
                         
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger alert-cer mb-4">
@@ -41,27 +35,6 @@
                         {% endif %}
 
                         <div class="row g-3">
-                            <!-- Username e Email -->
-                            <div class="col-md-6">
-                                <label for="{{ form.username.id_for_label }}" class="form-label required">
-                                    <i class="fas fa-user me-2"></i>{{ form.username.label }}
-                                </label>
-                                {{ form.username }}
-                                {% if form.username.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.username.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <label for="{{ form.email.id_for_label }}" class="form-label required">
-                                    <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
-                                </label>
-                                {{ form.email }}
-                                {% if form.email.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-
                             <!-- Nome e Cognome -->
                             <div class="col-md-6">
                                 <label for="{{ form.first_name.id_for_label }}" class="form-label required">
@@ -70,6 +43,9 @@
                                 {{ form.first_name }}
                                 {% if form.first_name.errors %}
                                     <div class="invalid-feedback d-block">{{ form.first_name.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.first_name.help_text %}
+                                    <small id="{{ form.first_name.id_for_label }}_helptext" class="form-text text-muted">{{ form.first_name.help_text }}</small>
                                 {% endif %}
                             </div>
                             
@@ -80,6 +56,23 @@
                                 {{ form.last_name }}
                                 {% if form.last_name.errors %}
                                     <div class="invalid-feedback d-block">{{ form.last_name.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.last_name.help_text %}
+                                    <small id="{{ form.last_name.id_for_label }}_helptext" class="form-text text-muted">{{ form.last_name.help_text }}</small>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-12">
+                                <label for="{{ form.email.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.email.help_text %}
+                                    <small id="{{ form.email.id_for_label }}_helptext" class="form-text text-muted">{{ form.email.help_text }}</small>
                                 {% endif %}
                             </div>
 
@@ -97,9 +90,9 @@
                                 {% if form.password1.errors %}
                                     <div class="invalid-feedback d-block">{{ form.password1.errors.0 }}</div>
                                 {% endif %}
-                                {% if form.password1.help_text %}
-                                    <small class="form-text text-muted">{{ form.password1.help_text }}</small>
-                                {% endif %}
+                                    {% if form.password1.help_text %}
+                                        <small id="{{ form.password1.id_for_label }}_helptext" class="form-text text-muted">{{ form.password1.help_text }}</small>
+                                    {% endif %}
                             </div>
                             
                             <div class="col-md-6">
@@ -115,102 +108,9 @@
                                 {% if form.password2.errors %}
                                     <div class="invalid-feedback d-block">{{ form.password2.errors.0 }}</div>
                                 {% endif %}
-                            </div>
-
-                            <!-- Tipo Legale -->
-                            <div class="col-12">
-                                <hr class="my-4">
-                                <h6 class="text-energy mb-3">
-                                    <i class="fas fa-building me-2"></i>Informazioni Legali
-                                </h6>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <label for="{{ form.legal_type.id_for_label }}" class="form-label required">
-                                    <i class="fas fa-user-tie me-2"></i>{{ form.legal_type.label }}
-                                </label>
-                                {{ form.legal_type }}
-                                {% if form.legal_type.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.legal_type.errors.0 }}</div>
+                                {% if form.password2.help_text %}
+                                    <small id="{{ form.password2.id_for_label }}_helptext" class="form-text text-muted">{{ form.password2.help_text }}</small>
                                 {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6" id="profit-type-field">
-                                <label for="{{ form.profit_type.id_for_label }}" class="form-label">
-                                    <i class="fas fa-chart-line me-2"></i>{{ form.profit_type.label }}
-                                </label>
-                                {{ form.profit_type }}
-                                {% if form.profit_type.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.profit_type.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-
-                            <!-- Altri campi nascosti inizialmente -->
-                            <div id="additional-fields" style="display: none;">
-                                <!-- Codice fiscale per privati -->
-                                <div class="col-12" id="fiscal-code-field">
-                                    <label for="{{ form.fiscal_code.id_for_label }}" class="form-label required">
-                                        <i class="fas fa-id-card me-2"></i>{{ form.fiscal_code.label }}
-                                    </label>
-                                    {{ form.fiscal_code }}
-                                    {% if form.fiscal_code.errors %}
-                                        <div class="invalid-feedback d-block">{{ form.fiscal_code.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Phone e Address per privati -->
-                                <div class="col-md-6">
-                                    <label for="{{ form.phone.id_for_label }}" class="form-label required">
-                                        <i class="fas fa-phone me-2"></i>{{ form.phone.label }}
-                                    </label>
-                                    {{ form.phone }}
-                                    {% if form.phone.errors %}
-                                        <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="{{ form.address.id_for_label }}" class="form-label required">
-                                        <i class="fas fa-map-marker-alt me-2"></i>{{ form.address.label }}
-                                    </label>
-                                    {{ form.address }}
-                                    {% if form.address.errors %}
-                                        <div class="invalid-feedback d-block">{{ form.address.errors.0 }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Campi business -->
-                                <div class="business-fields" style="display: none;">
-                                    <div class="col-md-6">
-                                        <label for="{{ form.legal_name.id_for_label }}" class="form-label">
-                                            <i class="fas fa-building me-2"></i>{{ form.legal_name.label }}
-                                        </label>
-                                        {{ form.legal_name }}
-                                        {% if form.legal_name.errors %}
-                                            <div class="invalid-feedback d-block">{{ form.legal_name.errors.0 }}</div>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <label for="{{ form.vat_number.id_for_label }}" class="form-label">
-                                            <i class="fas fa-receipt me-2"></i>{{ form.vat_number.label }}
-                                        </label>
-                                        {{ form.vat_number }}
-                                        {% if form.vat_number.errors %}
-                                            <div class="invalid-feedback d-block">{{ form.vat_number.errors.0 }}</div>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <label for="{{ form.pec.id_for_label }}" class="form-label">
-                                            <i class="fas fa-at me-2"></i>{{ form.pec.label }}
-                                        </label>
-                                        {{ form.pec }}
-                                        {% if form.pec.errors %}
-                                            <div class="invalid-feedback d-block">{{ form.pec.errors.0 }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -222,28 +122,34 @@
                             </h6>
                             
                             <div class="form-check mb-3">
-                                {{ form.privacy_policy }}
-                                <label class="form-check-label" for="{{ form.privacy_policy.id_for_label }}">
-                                    <strong>{{ form.privacy_policy.label }}</strong>
-                                    {% if form.privacy_policy.help_text %}
-                                        <br><small class="text-muted">{{ form.privacy_policy.help_text }}</small>
+                                {{ form.privacy_policy_read }}
+                                <label class="form-check-label" for="{{ form.privacy_policy_read.id_for_label }}">
+                                    <strong>{{ form.privacy_policy_read.label }}</strong>
+                                    <a href="#" class="text-decoration-none ms-2" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                                        <i class="fas fa-external-link-alt"></i> Leggi
+                                    </a>
+                                    {% if form.privacy_policy_read.help_text %}
+                                        <br><small id="{{ form.privacy_policy_read.id_for_label }}_helptext" class="text-muted">{{ form.privacy_policy_read.help_text }}</small>
                                     {% endif %}
                                 </label>
-                                {% if form.privacy_policy.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.privacy_policy.errors.0 }}</div>
+                                {% if form.privacy_policy_read.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.privacy_policy_read.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             
                             <div class="form-check mb-3">
-                                {{ form.data_processing }}
-                                <label class="form-check-label" for="{{ form.data_processing.id_for_label }}">
-                                    <strong>{{ form.data_processing.label }}</strong>
-                                    {% if form.data_processing.help_text %}
-                                        <br><small class="text-muted">{{ form.data_processing.help_text }}</small>
+                                {{ form.data_processing_read }}
+                                <label class="form-check-label" for="{{ form.data_processing_read.id_for_label }}">
+                                    <strong>{{ form.data_processing_read.label }}</strong>
+                                    <a href="#" class="text-decoration-none ms-2" data-bs-toggle="modal" data-bs-target="#dataProcessingModal">
+                                        <i class="fas fa-external-link-alt"></i> Leggi
+                                    </a>
+                                    {% if form.data_processing_read.help_text %}
+                                        <br><small id="{{ form.data_processing_read.id_for_label }}_helptext" class="text-muted">{{ form.data_processing_read.help_text }}</small>
                                     {% endif %}
                                 </label>
-                                {% if form.data_processing.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.data_processing.errors.0 }}</div>
+                                {% if form.data_processing_read.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.data_processing_read.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -269,11 +175,157 @@
     </div>
 </div>
 
+<!-- Modal Privacy Policy -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">
+                    <i class="fas fa-shield-alt me-2"></i>Informativa sulla Privacy
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-content">
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">1. Titolare del Trattamento</h6>
+                        <p>Il Titolare del trattamento dei dati personali è CerCollettiva Platform.</p>
+                        <ul>
+                            <li><strong>Email di contatto:</strong> privacy@cercollettiva.it</li>
+                            <li><strong>Finalità:</strong> Gestione account, servizi CER, adempimenti legali</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">2. Dati Trattati</h6>
+                        <ul>
+                            <li>Dati identificativi (nome, cognome, email, telefono)</li>
+                            <li>Dati aziendali (se applicabile: P.IVA, denominazione, PEC)</li>
+                            <li>Dati energetici (produzione, consumo, impianti)</li>
+                            <li>Dati tecnici (IP, navigazione, cookie)</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">3. Base Giuridica</h6>
+                        <ul>
+                            <li><strong>Consenso:</strong> Per marketing e comunicazioni promozionali</li>
+                            <li><strong>Contratto:</strong> Per fornire i servizi richiesti</li>
+                            <li><strong>Obbligo legale:</strong> Per adempimenti normativi</li>
+                            <li><strong>Legittimo interesse:</strong> Per miglioramento servizio e sicurezza</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">4. Conservazione</h6>
+                        <ul>
+                            <li>Dati account: durata rapporto + 10 anni</li>
+                            <li>Dati energetici: 5 anni</li>
+                            <li>Dati marketing: fino alla revoca consenso</li>
+                            <li>Log sistema: 12 mesi</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">5. I Tuoi Diritti</h6>
+                        <p>Hai diritto di accesso, rettifica, cancellazione, limitazione, portabilità, opposizione e revoca del consenso.</p>
+                        <p><strong>Contatto:</strong> privacy@cercollettiva.it</p>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">6. Sicurezza</h6>
+                        <p>Adottiamo misure tecniche e organizzative appropriate per proteggere i tuoi dati personali.</p>
+                    </section>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="button" class="btn btn-primary" onclick="markAsRead('privacy_policy_read')">
+                    <i class="fas fa-check me-2"></i>Ho Letto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Data Processing Agreement -->
+<div class="modal fade" id="dataProcessingModal" tabindex="-1" aria-labelledby="dataProcessingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataProcessingModalLabel">
+                    <i class="fas fa-file-contract me-2"></i>Accordo sul Trattamento dei Dati
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-content">
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">1. Finalità del Trattamento</h6>
+                        <ul>
+                            <li><strong>Gestione Account:</strong> Creazione, autenticazione, sicurezza</li>
+                            <li><strong>Servizi CER:</strong> Partecipazione comunità energetiche</li>
+                            <li><strong>Adempimenti Legali:</strong> Conformità normative energetiche</li>
+                            <li><strong>Miglioramento:</strong> Analisi statistiche, sviluppo</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">2. Tipologie di Dati</h6>
+                        <ul>
+                            <li>Dati identificativi (nome, cognome, CF, email, telefono)</li>
+                            <li>Dati aziendali (denominazione, P.IVA, PEC, SDI)</li>
+                            <li>Dati tecnici (IP, navigazione, cookie, log)</li>
+                            <li>Dati energetici (produzione, consumo, impianti, fatturazione)</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">3. Destinatari</h6>
+                        <ul>
+                            <li>Fornitori di servizi (hosting, manutenzione)</li>
+                            <li>Autorità competenti (GSE, ARERA, Agenzia Entrate)</li>
+                            <li>Altri membri CER (solo dati necessari)</li>
+                            <li>Partner commerciali (solo con consenso)</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">4. Trasferimenti</h6>
+                        <p>I dati sono trattati principalmente in Italia. Eventuali trasferimenti extra-UE avvengono con garanzie adeguate (clausole standard, certificazioni).</p>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">5. Sicurezza</h6>
+                        <ul>
+                            <li>Crittografia dati in transito e a riposo</li>
+                            <li>Accessi controllati e autenticazione forte</li>
+                            <li>Monitoraggio continuo sicurezza</li>
+                            <li>Backup regolari e disaster recovery</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h6 class="fw-bold mb-3">6. Diritti e Reclami</h6>
+                        <p>Puoi esercitare i tuoi diritti GDPR contattandoci o rivolgerti al Garante Privacy.</p>
+                    </section>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="button" class="btn btn-primary" onclick="markAsRead('data_processing_read')">
+                    <i class="fas fa-check me-2"></i>Ho Letto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Funzione semplificata per toggle password visibility
+// Funzione per toggle password visibility
 function togglePassword(inputId, button) {
     const input = document.getElementById(inputId);
     const icon = button.querySelector('i');
@@ -289,48 +341,204 @@ function togglePassword(inputId, button) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const legalTypeSelect = document.getElementById('id_legal_type');
-    const profitTypeField = document.getElementById('profit-type-field');
-    const additionalFields = document.getElementById('additional-fields');
-    const fiscalCodeField = document.getElementById('fiscal-code-field');
-    const businessFields = document.querySelectorAll('.business-fields');
+// Funzione per tracciare la lettura dei documenti
+function markAsRead(fieldName) {
+    console.log('=== markAsRead INIZIO ===');
+    console.log('fieldName:', fieldName);
     
-    function updateFormFields() {
-        const selectedType = legalTypeSelect.value;
-        
-        // Reset all fields visibility
-        additionalFields.style.display = 'none';
-        fiscalCodeField.style.display = 'none';
-        businessFields.forEach(field => field.style.display = 'none');
-        
-        // Handle profit type based on legal type
-        const profitTypeSelect = document.getElementById('id_profit_type');
-        
-        if (selectedType === 'PRIVATE') {
-            profitTypeSelect.value = 'NON_PROFIT';
-            profitTypeSelect.disabled = true;
-            profitTypeField.style.display = 'none';
-            
-            additionalFields.style.display = 'block';
-            fiscalCodeField.style.display = 'block';
-            
-        } else if (['BUSINESS', 'ASSOCIATION', 'PUBLIC', 'CHURCH'].includes(selectedType)) {
-            if (selectedType === 'BUSINESS') {
-                profitTypeSelect.value = 'PROFIT';
-                profitTypeSelect.disabled = true;
-            } else {
-                profitTypeSelect.disabled = false;
-            }
-            
-            profitTypeField.style.display = 'block';
-            additionalFields.style.display = 'block';
-            businessFields.forEach(field => field.style.display = 'block');
-        }
+    const checkbox = document.getElementById('id_' + fieldName);
+    
+    // Correggi il selettore per i campi timestamp
+    let timestampFieldId = '';
+    if (fieldName === 'privacy_policy_read') {
+        timestampFieldId = 'id_privacy_policy_timestamp';
+    } else if (fieldName === 'data_processing_read') {
+        timestampFieldId = 'id_data_processing_timestamp';
     }
     
-    legalTypeSelect.addEventListener('change', updateFormFields);
-    updateFormFields();
+    const timestampField = document.getElementById(timestampFieldId);
+    
+    console.log('Checkbox trovata:', checkbox);
+    console.log('Timestamp field trovato:', timestampField);
+    
+    if (checkbox && timestampField) {
+        console.log('Entrambi gli elementi trovati, procedo...');
+        
+        // Marca come letto e abilita
+        checkbox.checked = true;
+        checkbox.disabled = false;
+        console.log('Checkbox marcata come checked:', checkbox.checked);
+        console.log('Checkbox abilitata:', !checkbox.disabled);
+        
+        // Imposta timestamp corrente
+        const now = new Date();
+        timestampField.value = now.toISOString();
+        console.log('Timestamp impostato:', timestampField.value);
+        
+        // Chiudi il modal
+        let modalId = '';
+        if (fieldName === 'privacy_policy_read') {
+            modalId = 'privacyModal';
+        } else if (fieldName === 'data_processing_read') {
+            modalId = 'dataProcessingModal';
+        }
+        
+        console.log('Modal ID:', modalId);
+        
+        if (modalId) {
+            const modalElement = document.getElementById(modalId);
+            console.log('Modal element trovato:', modalElement);
+            
+            if (modalElement) {
+                console.log('Bootstrap disponibile:', typeof bootstrap !== 'undefined');
+                console.log('Bootstrap.Modal disponibile:', typeof bootstrap !== 'undefined' && bootstrap.Modal);
+                
+                // Usa Bootstrap per chiudere il modal
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    console.log('Istanza modal esistente:', modal);
+                    
+                    if (modal) {
+                        console.log('Chiudendo modal esistente...');
+                        modal.hide();
+                    } else {
+                        console.log('Creando nuova istanza modal...');
+                        const newModal = new bootstrap.Modal(modalElement);
+                        newModal.hide();
+                    }
+                } else {
+                    console.log('Bootstrap non disponibile, chiusura manuale...');
+                    modalElement.style.display = 'none';
+                    modalElement.classList.remove('show');
+                    document.body.classList.remove('modal-open');
+                }
+            }
+        }
+        
+        // Mostra feedback visivo
+        const formCheck = checkbox.closest('.form-check');
+        console.log('Form check trovato:', formCheck);
+        if (formCheck) {
+            formCheck.classList.add('text-success');
+            console.log('Classe text-success aggiunta');
+        }
+        
+        // Verifica se entrambi i documenti sono stati letti
+        console.log('Chiamando checkAllDocumentsRead...');
+        checkAllDocumentsRead();
+        
+        console.log('=== markAsRead COMPLETATO CON SUCCESSO ===');
+    } else {
+        console.error('=== ERRORE: Elementi non trovati ===');
+        console.error('Checkbox:', checkbox);
+        console.error('Timestamp field:', timestampField);
+    }
+}
+
+// Verifica se tutti i documenti sono stati letti
+function checkAllDocumentsRead() {
+    console.log('=== checkAllDocumentsRead INIZIO ===');
+    
+    const privacyCheckbox = document.getElementById('id_privacy_policy_read');
+    const dataProcessingCheckbox = document.getElementById('id_data_processing_read');
+    
+    console.log('Privacy checkbox trovata:', privacyCheckbox);
+    console.log('Data processing checkbox trovata:', dataProcessingCheckbox);
+    
+    if (privacyCheckbox && dataProcessingCheckbox) {
+        const privacyRead = privacyCheckbox.checked && !privacyCheckbox.disabled;
+        const dataProcessingRead = dataProcessingCheckbox.checked && !dataProcessingCheckbox.disabled;
+        
+        console.log('Privacy read:', privacyRead);
+        console.log('Data processing read:', dataProcessingRead);
+        
+        if (privacyRead && dataProcessingRead) {
+            console.log('Entrambi i documenti letti, abilitando submit...');
+            // Abilita il pulsante di registrazione
+            const submitBtn = document.querySelector('button[type="submit"]');
+            console.log('Submit button trovato:', submitBtn);
+            
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-secondary');
+                submitBtn.classList.add('btn-cer-primary');
+                console.log('Submit button abilitato');
+            }
+        } else {
+            console.log('Non tutti i documenti sono stati letti');
+        }
+    } else {
+        console.error('Checkbox non trovate');
+    }
+    
+    console.log('=== checkAllDocumentsRead FINE ===');
+}
+
+// Inizializza al caricamento della pagina
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INIZIALIZZAZIONE DOM ===');
+    
+    // Disabilita inizialmente il pulsante di registrazione
+    const submitBtn = document.querySelector('button[type="submit"]');
+    console.log('Submit button trovato:', submitBtn);
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.remove('btn-cer-primary');
+        submitBtn.classList.add('btn-secondary');
+        console.log('Submit button disabilitato');
+    }
+    
+    // Disabilita le checkbox per impedire selezione diretta
+    const privacyCheckbox = document.getElementById('id_privacy_policy_read');
+    const dataProcessingCheckbox = document.getElementById('id_data_processing_read');
+    
+    console.log('Privacy checkbox trovata:', privacyCheckbox);
+    console.log('Data processing checkbox trovata:', dataProcessingCheckbox);
+    
+    if (privacyCheckbox) {
+        privacyCheckbox.disabled = true;
+        console.log('Privacy checkbox disabilitata');
+        privacyCheckbox.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('Devi prima leggere il documento cliccando su "Leggi"');
+            return false;
+        });
+    }
+    
+    if (dataProcessingCheckbox) {
+        dataProcessingCheckbox.disabled = true;
+        console.log('Data processing checkbox disabilitata');
+        dataProcessingCheckbox.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('Devi prima leggere il documento cliccando su "Leggi"');
+            return false;
+        });
+    }
+    
+    // Verifica campi timestamp
+    const privacyTimestamp = document.getElementById('id_privacy_policy_timestamp');
+    const dataProcessingTimestamp = document.getElementById('id_data_processing_timestamp');
+    
+    console.log('Privacy timestamp trovato:', privacyTimestamp);
+    console.log('Data processing timestamp trovato:', dataProcessingTimestamp);
+    
+    // Debug: verifica tutti gli input nascosti
+    const allHiddenInputs = document.querySelectorAll('input[type="hidden"]');
+    console.log('Tutti gli input nascosti:', allHiddenInputs);
+    allHiddenInputs.forEach((input, index) => {
+        console.log(`Input nascosto ${index}:`, input.id, input.name, input.value);
+    });
+    
+    // Verifica Bootstrap
+    console.log('Bootstrap disponibile:', typeof bootstrap !== 'undefined');
+    console.log('jQuery disponibile:', typeof $ !== 'undefined');
+    
+    // Verifica stato iniziale
+    checkAllDocumentsRead();
+    
+    console.log('=== INIZIALIZZAZIONE COMPLETATA ===');
 });
 </script>
 
@@ -354,10 +562,6 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #ef4444;
     font-size: 0.875rem;
     margin-top: 0.25rem;
-}
-
-#additional-fields {
-    transition: all 0.3s ease;
 }
 
 /* Password Toggle Button Styles */
@@ -393,6 +597,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .position-relative .form-control {
     padding-right: 60px !important;
+}
+
+/* Stili per checkbox disabilitate */
+.form-check-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-check-input:disabled + .form-check-label {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 </style>
 {% endblock %}

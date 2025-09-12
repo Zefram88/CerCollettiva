@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% block title %}Accordo sul Trattamento dei Dati - CerCollettiva{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card cer-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Accordo sul Trattamento dei Dati Personali</h5>
+                    <p class="small mt-2">
+                        Data dell'ultimo aggiornamento: {{ "now"|date:"d F Y" }}
+                    </p>
+                    <p class="small text-muted">
+                        Conformemente al Regolamento Generale sulla Protezione dei Dati (GDPR) - Regolamento UE 2016/679
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    <div class="privacy-content">
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">1. Titolare del Trattamento</h6>
+                            <p>Il Titolare del trattamento dei dati personali è:</p>
+                            <ul>
+                                <li><strong>Denominazione:</strong> CerCollettiva Platform</li>
+                                <li><strong>Sede legale:</strong> [Da specificare in base all'implementazione]</li>
+                                <li><strong>Email di contatto:</strong> privacy@cercollettiva.it</li>
+                                <li><strong>Telefono:</strong> [Da specificare]</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">2. Finalità del Trattamento</h6>
+                            <p>I tuoi dati personali vengono trattati per le seguenti finalità:</p>
+                            
+                            <h6 class="fw-semibold mt-3">2.1 Gestione Account e Servizi</h6>
+                            <ul>
+                                <li>Creazione e gestione del tuo account utente</li>
+                                <li>Autenticazione e sicurezza dell'accesso</li>
+                                <li>Fornitura dei servizi della piattaforma</li>
+                                <li>Comunicazioni di servizio e notifiche</li>
+                            </ul>
+
+                            <h6 class="fw-semibold mt-3">2.2 Gestione Comunità Energetica</h6>
+                            <ul>
+                                <li>Registrazione e partecipazione alle Comunità Energetiche Rinnovabili (CER)</li>
+                                <li>Gestione dei dati di produzione e consumo energetico</li>
+                                <li>Calcolo e distribuzione dei benefici economici</li>
+                                <li>Comunicazione con altri membri della comunità</li>
+                            </ul>
+
+                            <h6 class="fw-semibold mt-3">2.3 Adempimenti Legali e Fiscali</h6>
+                            <ul>
+                                <li>Conformità alle normative energetiche italiane</li>
+                                <li>Adempimenti fiscali e contabili</li>
+                                <li>Comunicazioni alle autorità competenti</li>
+                                <li>Conservazione documentale per audit</li>
+                            </ul>
+
+                            <h6 class="fw-semibold mt-3">2.4 Miglioramento del Servizio</h6>
+                            <ul>
+                                <li>Analisi statistiche anonime</li>
+                                <li>Miglioramento delle funzionalità</li>
+                                <li>Ricerca e sviluppo</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">3. Base Giuridica del Trattamento</h6>
+                            <p>Il trattamento dei tuoi dati si basa su:</p>
+                            <ul>
+                                <li><strong>Consenso (Art. 6.1.a GDPR):</strong> Per finalità di marketing e comunicazioni promozionali</li>
+                                <li><strong>Esecuzione del contratto (Art. 6.1.b GDPR):</strong> Per fornire i servizi richiesti</li>
+                                <li><strong>Adempimento obbligo legale (Art. 6.1.c GDPR):</strong> Per adempimenti normativi</li>
+                                <li><strong>Legittimo interesse (Art. 6.1.f GDPR):</strong> Per miglioramento del servizio e sicurezza</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">4. Tipologie di Dati Trattati</h6>
+                            
+                            <h6 class="fw-semibold mt-3">4.1 Dati Identificativi</h6>
+                            <ul>
+                                <li>Nome e cognome</li>
+                                <li>Codice fiscale</li>
+                                <li>Indirizzo email</li>
+                                <li>Numero di telefono</li>
+                                <li>Indirizzo di residenza</li>
+                            </ul>
+
+                            <h6 class="fw-semibold mt-3">4.2 Dati Aziendali (se applicabile)</h6>
+                            <ul>
+                                <li>Denominazione sociale</li>
+                                <li>Partita IVA</li>
+                                <li>Codice SDI</li>
+                                <li>Indirizzo PEC</li>
+                            </ul>
+
+                            <h6 class="fw-semibold mt-3">4.3 Dati Tecnici</h6>
+                            <ul>
+                                <li>Indirizzo IP</li>
+                                <li>Dati di navigazione</li>
+                                <li>Cookie e tecnologie simili</li>
+                                <li>Log di sistema</li>
+                            </ul>
+
+                            <h6 class="fw-semibold mt-3">4.4 Dati Energetici</h6>
+                            <ul>
+                                <li>Dati di produzione energetica</li>
+                                <li>Dati di consumo</li>
+                                <li>Informazioni sugli impianti</li>
+                                <li>Dati di fatturazione energetica</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">5. Periodo di Conservazione</h6>
+                            <p>I dati vengono conservati per i seguenti periodi:</p>
+                            <ul>
+                                <li><strong>Dati account:</strong> Per tutta la durata del rapporto contrattuale + 10 anni per adempimenti fiscali</li>
+                                <li><strong>Dati energetici:</strong> 5 anni dalla fine del rapporto</li>
+                                <li><strong>Dati di marketing:</strong> Fino alla revoca del consenso</li>
+                                <li><strong>Log di sistema:</strong> 12 mesi</li>
+                                <li><strong>Cookie:</strong> Secondo le impostazioni del browser o fino a 2 anni</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">6. Destinatari dei Dati</h6>
+                            <p>I tuoi dati possono essere comunicati a:</p>
+                            <ul>
+                                <li><strong>Fornitori di servizi:</strong> Hosting, manutenzione, analisi dati</li>
+                                <li><strong>Autorità competenti:</strong> GSE, ARERA, Agenzia delle Entrate</li>
+                                <li><strong>Altri membri CER:</strong> Solo dati necessari per la gestione della comunità</li>
+                                <li><strong>Partner commerciali:</strong> Solo con il tuo consenso esplicito</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">7. Trasferimenti Internazionali</h6>
+                            <p>I dati sono trattati principalmente in Italia. Eventuali trasferimenti verso paesi terzi avvengono con garanzie adeguate:</p>
+                            <ul>
+                                <li>Decisioni di adeguatezza della Commissione Europea</li>
+                                <li>Clausole contrattuali standard</li>
+                                <li>Certificazioni di conformità</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">8. I Tuoi Diritti</h6>
+                            <p>Hai il diritto di:</p>
+                            <ul>
+                                <li><strong>Accesso:</strong> Conoscere quali dati trattiamo</li>
+                                <li><strong>Rettifica:</strong> Correggere dati inesatti</li>
+                                <li><strong>Cancellazione:</strong> Richiedere la cancellazione dei dati</li>
+                                <li><strong>Limitazione:</strong> Limitare il trattamento</li>
+                                <li><strong>Portabilità:</strong> Ricevere i dati in formato strutturato</li>
+                                <li><strong>Opposizione:</strong> Opporti al trattamento per motivi legittimi</li>
+                                <li><strong>Revoca consenso:</strong> In qualsiasi momento</li>
+                            </ul>
+                            <p class="mt-3">
+                                <strong>Per esercitare i tuoi diritti:</strong> privacy@cercollettiva.it
+                            </p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">9. Sicurezza dei Dati</h6>
+                            <p>Adottiamo misure tecniche e organizzative appropriate per proteggere i tuoi dati:</p>
+                            <ul>
+                                <li>Crittografia dei dati in transito e a riposo</li>
+                                <li>Accessi controllati e autenticazione forte</li>
+                                <li>Monitoraggio continuo della sicurezza</li>
+                                <li>Backup regolari e disaster recovery</li>
+                                <li>Formazione del personale sulla privacy</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">10. Reclami</h6>
+                            <p>Se ritieni che il trattamento dei tuoi dati violi il GDPR, puoi:</p>
+                            <ul>
+                                <li>Contattarci: privacy@cercollettiva.it</li>
+                                <li>Rivolgerti al Garante Privacy: www.garanteprivacy.it</li>
+                                <li>Avvalerti del diritto di ricorso giurisdizionale</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h6 class="fw-bold mb-3">11. Modifiche</h6>
+                            <p>Questo accordo può essere modificato. Ti informeremo di eventuali cambiamenti significativi tramite email o notifica nella piattaforma.</p>
+                        </section>
+
+                        <div class="alert alert-info mt-4">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-2"></i>Importante
+                            </h6>
+                            <p class="mb-0">
+                                Accettando questo accordo, confermi di aver letto, compreso e accettato il trattamento dei tuoi dati personali secondo quanto descritto. 
+                                Il consenso può essere revocato in qualsiasi momento contattandoci.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .cer-card {
+        transition: transform 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .cer-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .privacy-content h6 {
+        color: #2c3e50;
+    }
+
+    .privacy-content ul li {
+        color: #4a5568;
+        line-height: 1.6;
+    }
+
+    .privacy-content p {
+        color: #4a5568;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+{% endblock %}

@@ -4,14 +4,8 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Header con breadcrumb e azioni principali -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <nav class="cer-breadcrumb" aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
-                <li class="breadcrumb-item active">Gestione Impianti</li>
-            </ol>
-        </nav>
+    <!-- Header con azioni principali -->
+    <div class="d-flex justify-content-start align-items-center mb-4">
         <div class="btn-group">
             <a href="{% url 'core:plant_create' %}" class="btn btn-cer-primary">
                 <i class="fas fa-plus"></i> Nuovo Impianto

@@ -159,6 +159,13 @@ class EnergyMQTTClient:
         try:
             if not self._initialized:
                 raise ValueError("Client not configured. Call configure() first.")
+            
+            # Avvia EventBus per processing asincrono
+            from .event_bus import get_event_bus
+            event_bus = get_event_bus()
+            if not event_bus._running:
+                event_bus.start()
+                logger.info("EventBus started for MQTT client")
                     
             logger.info(f"Connessione al broker MQTT {self._host}:{self._port}")
             
@@ -235,6 +242,15 @@ class EnergyMQTTClient:
         if rc == 0:
             with self._lock:  # Thread safety
                 self._is_connected = True
+                
+                # Registra la connessione nel monitor di salute
+                try:
+                    from .monitoring import get_health_monitor
+                    health_monitor = get_health_monitor()
+                    health_monitor.record_connection()
+                except:
+                    pass
+                
                 #print("\n=============== MQTT ==================")
                 print(f" | Connessione al broker stabilita!    |")
                 logger.info(f"Broker: {self._host}:{self._port}")
@@ -251,6 +267,14 @@ class EnergyMQTTClient:
                 self._publish_status("online")
                 #print("========================================\n")
         else:
+            # Registra la disconnessione nel monitor di salute
+            try:
+                from .monitoring import get_health_monitor
+                health_monitor = get_health_monitor()
+                health_monitor.record_disconnection()
+            except:
+                pass
+            
             error_msgs = {
                 1: "Versione protocollo non corretta", 
                 2: "Identificativo client non valido",
@@ -294,44 +318,67 @@ class EnergyMQTTClient:
         threading.Thread(target=reconnect_thread, daemon=True).start()
                 
     def _on_message(self, client, userdata, msg):
-        """Callback per i messaggi ricevuti"""
+        """Callback per i messaggi ricevuti - Event-driven"""
         try:
-            data = json.loads(msg.payload.decode('utf-8'))
+            # Registra il messaggio nel monitor di salute
+            from .monitoring import get_health_monitor
+            health_monitor = get_health_monitor()
+            health_monitor.record_message()
             
+            # Parse del payload
+            try:
+                payload = json.loads(msg.payload.decode('utf-8'))
+            except json.JSONDecodeError as e:
+                logger.error(f"Error decoding JSON from {msg.topic}: {e}")
+                health_monitor.record_error()
+                return
+            
+            # Pubblica evento nell'EventBus per processing asincrono
+            from .event_bus import get_event_bus
+            from .router import MessageContext
+            
+            event_bus = get_event_bus()
+            
+            # Crea contesto del messaggio
+            context = MessageContext(
+                topic=msg.topic,
+                payload=payload,
+                qos=msg.qos,
+                retain=msg.retain,
+                timestamp=timezone.now()
+            )
+            
+            # Pubblica evento per processing asincrono
+            success = event_bus.publish_mqtt_message(msg.topic, payload, context)
+            
+            # Log del messaggio ricevuto
             if msg.topic.endswith('/em:0'):
-                device_id = msg.topic.split('/')[2]
-                current_power = data.get('total_act_power')
-                
-                last_value = self._last_values.get(device_id)
-                
-                if current_power is not None:
-                    # Se riceviamo uno 0 e abbiamo un valore precedente valido
-                    if current_power == 0 and last_value:
-                        time_diff = (timezone.now() - last_value['timestamp']).seconds
-                        # Se sono passati meno di 5 minuti, manteniamo il valore precedente
-                        if time_diff < 300:  # 300 secondi = 5 minuti
-                            current_power = last_value['power']
-                            logger.info(f"  Ignorato valore zero, mantenuto precedente: {current_power:.1f}W")
-                    
-                    self._last_values[device_id] = {
-                        'power': current_power,
-                        'timestamp': timezone.now()
-                    }
-                    logger.info(f"  Potenza Totale [W]: {current_power:.1f}")
-                    
-                elif last_value and (timezone.now() - last_value['timestamp']).seconds < 120:
-                    logger.info(f"  Potenza Totale [W]: {last_value['power']:.1f} (mantenuto)")
-            
+                try:
+                    current_power = payload.get('total_act_power', 0)
+                    status = "published" if success else "failed"
+                    logger.info(f"  Potenza Totale [W]: {current_power:.1f} ({status})")
+                except:
+                    pass
             elif msg.topic.endswith('/emdata:0'):
-                logger.info(f"  Energia Attiva Totale [kWh]: {data.get('total_act', 'N/A'):.2f}")
-                
-            self._device_manager.process_message(msg.topic, msg.payload)
+                try:
+                    energy = payload.get('total_act', 0)
+                    status = "published" if success else "failed"
+                    logger.info(f"  Energia Attiva Totale [kWh]: {energy:.2f} ({status})")
+                except:
+                    pass
             
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON from {msg.topic}: {e}")
-            logger.error(f"Raw payload: {msg.payload}")
+            if not success:
+                health_monitor.record_error()
+            
         except Exception as e:
-            logger.error(f"Error processing message on {msg.topic}: {str(e)}")    
+            logger.error(f"Error processing message on {msg.topic}: {str(e)}")
+            # Registra l'errore nel monitor
+            try:
+                from .monitoring import get_health_monitor
+                health_monitor = get_health_monitor()
+                health_monitor.record_error()
+            except:
+                pass    
 
 
     def _subscribe_topics(self) -> None:

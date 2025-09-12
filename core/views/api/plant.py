@@ -6,18 +6,85 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Avg, Sum, Count, Q
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from datetime import timedelta
 import logging
 
 from ...models import Plant
 from energy.models import DeviceConfiguration, DeviceMeasurement
+from core.validators import ValidationMixin, APIValidationMixin
 
 logger = logging.getLogger(__name__)
+
+
+class APIResponseHelper(ValidationMixin, APIValidationMixin):
+    """Helper class for standardized API responses"""
+    
+    @staticmethod
+    def success_response(data, status=200):
+        """Return standardized success response"""
+        return JsonResponse({
+            'status': 'success',
+            'data': data,
+            'timestamp': timezone.now().isoformat()
+        }, status=status)
+    
+    @staticmethod
+    def error_response(message, detail=None, status=400):
+        """Return standardized error response"""
+        response_data = {
+            'status': 'error',
+            'message': message,
+            'timestamp': timezone.now().isoformat()
+        }
+        if detail:
+            response_data['detail'] = detail
+        return JsonResponse(response_data, status=status)
+    
+    @staticmethod
+    def validation_error_response(errors, status=400):
+        """Return standardized validation error response"""
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Validation failed',
+            'validation_errors': errors,
+            'timestamp': timezone.now().isoformat()
+        }, status=status)
+
+
+def validate_api_parameters(request, valid_params):
+    """Validate API parameters using centralized validation"""
+    helper = APIResponseHelper()
+    errors = {}
+    
+    for param, validator in valid_params.items():
+        value = request.GET.get(param)
+        if value is not None:
+            try:
+                validated_value = validator(value)
+                request.GET = request.GET.copy()
+                request.GET[param] = validated_value
+            except ValidationError as e:
+                errors[param] = str(e)
+    
+    return errors if errors else None
+
 
 @login_required
 def get_plant_data(request, pk):
     """API per dati impianto in formato JSON"""
     try:
+        # Validate API parameters
+        from core.validators import POWER_VALIDATOR
+        param_validators = {
+            'hours': lambda x: min(float(x), 48) if float(x) > 0 else 24,
+            'interval': lambda x: max(int(x), 60) if int(x) > 0 else 600
+        }
+        
+        validation_errors = validate_api_parameters(request, param_validators)
+        if validation_errors:
+            return APIResponseHelper.validation_error_response(validation_errors)
+        
         # Verifica permessi in modo più completo e ottimizzato
         if request.user.is_staff:
             plant = get_object_or_404(Plant, pk=pk)
@@ -40,10 +107,11 @@ def get_plant_data(request, pk):
         # Recupera dispositivo
         device = DeviceConfiguration.objects.filter(plant=plant).first()
         if not device:
-            return JsonResponse({
-                'error': 'Nessun dispositivo trovato',
-                'detail': 'Non esistono dispositivi configurati per questo impianto'
-            }, status=404)
+            return APIResponseHelper.error_response(
+                'Nessun dispositivo trovato',
+                'Non esistono dispositivi configurati per questo impianto',
+                status=404
+            )
             
         # Recupera ultima misurazione per potenza attuale
         last_measurement = DeviceMeasurement.objects.filter(
@@ -102,19 +170,33 @@ def get_plant_data(request, pk):
         }
         
         logger.info(f"Returning data for plant {pk}: {len(data)} measurements")
-        return JsonResponse(response_data)
+        return APIResponseHelper.success_response(response_data)
         
     except Exception as e:
+        # Don't catch Http404 - let it propagate
+        from django.http import Http404
+        if isinstance(e, Http404):
+            raise
         logger.error(f"Error in get_plant_data: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'error': 'Internal server error',
-            'detail': str(e) if settings.DEBUG else None
-        }, status=500)
+        return APIResponseHelper.error_response(
+            'Internal server error',
+            str(e) if settings.DEBUG else None,
+            status=500
+        )
 
 @login_required
 def plant_measurements_api(request, plant_id):
     """API per le misurazioni di un impianto"""
     try:
+        # Validate API parameters
+        param_validators = {
+            'hours': lambda x: min(int(x), 48) if int(x) > 0 else 24
+        }
+        
+        validation_errors = validate_api_parameters(request, param_validators)
+        if validation_errors:
+            return APIResponseHelper.validation_error_response(validation_errors)
+        
         # Verifica permessi con la stessa logica ottimizzata
         if request.user.is_staff:
             plant = get_object_or_404(Plant, id=plant_id)
@@ -131,10 +213,11 @@ def plant_measurements_api(request, plant_id):
         # Recupera device
         device = DeviceConfiguration.objects.filter(plant=plant).first()
         if not device:
-            return JsonResponse({
-                'error': 'Dispositivo non trovato',
-                'detail': 'Non esistono dispositivi configurati per questo impianto'
-            }, status=404)
+            return APIResponseHelper.error_response(
+                'Dispositivo non trovato',
+                'Non esistono dispositivi configurati per questo impianto',
+                status=404
+            )
             
         # Parametri temporali
         hours = min(int(request.GET.get('hours', 24)), 48)  # Max 48h
@@ -146,7 +229,7 @@ def plant_measurements_api(request, plant_id):
             timestamp__gte=time_threshold
         ).order_by('timestamp')
         
-        return JsonResponse({
+        response_data = {
             'data': [{
                 'timestamp': m.timestamp.isoformat(),
                 'power': float(m.power),
@@ -166,11 +249,18 @@ def plant_measurements_api(request, plant_id):
                     avg=Avg('power')
                 )['avg'] or 0)
             }
-        })
+        }
+        
+        return APIResponseHelper.success_response(response_data)
         
     except Exception as e:
+        # Don't catch Http404 - let it propagate
+        from django.http import Http404
+        if isinstance(e, Http404):
+            raise
         logger.error(f"Error in plant_measurements_api: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'error': 'Internal server error',
-            'detail': str(e) if settings.DEBUG else None
-        }, status=500)
+        return APIResponseHelper.error_response(
+            'Internal server error',
+            str(e) if settings.DEBUG else None,
+            status=500
+        )

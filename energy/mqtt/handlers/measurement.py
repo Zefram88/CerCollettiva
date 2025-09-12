@@ -6,11 +6,17 @@ from datetime import datetime
 from django.utils import timezone
 from .base import BaseHandler
 from ...devices.base.device import MeasurementData
+from ...services.measurement_service import MeasurementService
+from ...mqtt.router import MessageContext
 
 logger = logging.getLogger(__name__)
 
 class MeasurementHandler(BaseHandler):
-    """Handler specializzato per messaggi di misurazione"""
+    """Handler specializzato per messaggi di misurazione - Decoupled from business logic"""
+    
+    def __init__(self):
+        super().__init__()
+        self._measurement_service = MeasurementService()
     
     def _validate_message(self, topic: str, payload: Any) -> bool:
         """Validazione specifica per misurazioni"""
@@ -86,4 +92,115 @@ class MeasurementHandler(BaseHandler):
                 data.power_factor <= 1
             )
         except Exception:
+            return False
+    
+    def handle_power_measurement(self, event) -> bool:
+        """
+        Gestisce una misurazione di potenza usando il service layer - Event-driven
+        """
+        try:
+            # Converte Event in MessageContext per compatibilità con service layer
+            from ..router import MessageContext
+            context = MessageContext(
+                topic=event.topic,
+                payload=event.payload,
+                qos=0,  # Default QoS
+                retain=False,  # Default retain
+                timestamp=event.timestamp
+            )
+            
+            return self._measurement_service.process_power_measurement(context)
+        except Exception as e:
+            logger.error(f"Error handling power measurement: {e}")
+            return False
+    
+    def handle_energy_measurement(self, event) -> bool:
+        """
+        Gestisce una misurazione di energia - Event-driven
+        """
+        try:
+            # Estrae device_id dal metadata dell'evento
+            device_id = event.metadata.get('device_id')
+            if not device_id:
+                logger.error("Device ID not found in event metadata")
+                return False
+            
+            # Trova la configurazione del dispositivo
+            from ...models import DeviceConfiguration
+            try:
+                device_config = DeviceConfiguration.objects.get(
+                    device_id=device_id,
+                    is_active=True
+                )
+            except DeviceConfiguration.DoesNotExist:
+                logger.error(f"Device configuration not found: {device_id}")
+                return False
+            
+            # Processa il calcolo del delta energia
+            return self._process_energy_delta(event, device_config)
+            
+        except Exception as e:
+            logger.error(f"Error handling energy measurement: {e}")
+            return False
+    
+    def _process_energy_delta(self, event, device_config) -> bool:
+        """Processa il calcolo del delta energia"""
+        try:
+            from django.db import transaction
+            from django.utils import timezone
+            from ...models import DeviceMeasurement
+            
+            current_timestamp = event.timestamp
+            payload = event.payload
+            
+            # Estrae il valore di energia totale dal payload (in Wh)
+            current_energy_total = float(payload.get('total_act', 0))
+            
+            # Recupera l'ultimo valore di energia per questo dispositivo
+            last_energy = event.metadata.get('last_energy_value')
+            
+            # Calcola il delta solo se abbiamo un valore precedente
+            if last_energy is not None:
+                energy_delta = current_energy_total - last_energy
+                
+                # Verifica che il delta sia positivo e ragionevole
+                if 0 <= energy_delta <= 100000:  # max 100 kWh in 15 min
+                    # Crea la misurazione con il delta calcolato
+                    with transaction.atomic():
+                        measurement = DeviceMeasurement.objects.create(
+                            device=device_config,
+                            plant=device_config.plant,
+                            timestamp=current_timestamp,
+                            power=0,  # Per i messaggi di energia, la potenza istantanea non è disponibile
+                            voltage=0,  # Valore di default
+                            current=0,  # Valore di default
+                            energy_total=energy_delta / 1000.0,  # Convertiamo da Wh a kWh
+                            measurement_type='ENERGY',
+                            quality='GOOD'
+                        )
+                        
+                        # Aggiorna last_seen
+                        device_config.last_seen = current_timestamp
+                        device_config.save(update_fields=['last_seen'])
+                        
+                        logger.info(f"""
+                            Energy delta calculated for device {device_config.device_id}:
+                            - Previous reading: {last_energy:.3f} Wh
+                            - Current reading: {current_energy_total:.3f} Wh
+                            - Delta: {energy_delta:.3f} Wh ({energy_delta/1000.0:.3f} kWh)
+                        """)
+                else:
+                    logger.warning(f"""
+                        Invalid energy delta for device {device_config.device_id}:
+                        - Previous reading: {last_energy:.3f} Wh
+                        - Current reading: {current_energy_total:.3f} Wh
+                        - Delta: {energy_delta:.3f} Wh
+                    """)
+            else:
+                logger.info(f"First energy reading for device {device_config.device_id}: {current_energy_total:.3f} Wh")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error processing energy delta: {e}")
             return False

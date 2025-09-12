@@ -73,7 +73,7 @@ class Command(BaseCommand):
 # core/management/commands/example_cer_setup.py
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from core.models import CERConfiguration, Plant
+from core.main_models import CERConfiguration, Plant
 from decimal import Decimal
 
 User = get_user_model()

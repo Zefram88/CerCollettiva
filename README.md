@@ -73,22 +73,34 @@ Accedi a:
 - Applicazione: http://127.0.0.1:8000/
 - Admin: http://127.0.0.1:8000/ceradmin/
 
-### Installazione in produzione
-
-Per l'installazione in ambiente di produzione con Nginx, Gunicorn e PostgreSQL:
+### 🐳 Docker (Raccomandato)
 
 ```bash
-cd docs/install
-chmod +x install_updated.sh
-./install_updated.sh
+# Sviluppo
+docker-compose up -d
+
+# Produzione  
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
-Lo script guiderà attraverso la configurazione di:
-- Database PostgreSQL
-- Server web Nginx
-- WSGI server Gunicorn
-- SSL/HTTPS con Certbot
-- Firewall e sicurezza
+### 🖥️ Installazione Nativa
+
+```bash
+# Produzione standard
+cd docs/install
+chmod +x install-prod.sh
+./install-prod.sh
+
+# Produzione con Redis
+chmod +x install-prod-v2.sh  
+./install-prod-v2.sh
+
+# WSL (Windows)
+chmod +x install-wsl.sh
+./install-wsl.sh
+```
+
+**Vedi [docs/install/README.md](docs/install/README.md) per la guida completa.**
 
 ### Installazione manuale
 
@@ -112,32 +124,58 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-## Struttura del progetto
+## 📁 Struttura del progetto
 
 ```
 CerCollettiva/
-├── cercollettiva/       # Configurazioni Django principali
-├── core/                # App principale CER management
-├── energy/              # Gestione dispositivi IoT e misure energetiche
-├── documents/           # Gestione documenti e GAUDI
-├── users/               # Autenticazione e profili utente
-├── templates/           # Template HTML
-├── static/              # File statici (CSS, JS, immagini)
-├── media/               # File caricati dagli utenti
-├── scripts/             # Script di gestione server
-├── utilities/           # Utility Python
-├── docs/                # Documentazione
-│   └── install/         # Script di installazione
-├── venv/                # Ambiente virtuale Python
-├── manage.py            # Django management script
-└── .env                 # Configurazione ambiente (non versionato)
+├── 📱 App Django
+│   ├── cercollettiva/       # Configurazioni Django principali
+│   ├── core/                # App principale CER management
+│   ├── energy/              # Gestione dispositivi IoT e misure energetiche
+│   ├── documents/           # Gestione documenti e GAUDI
+│   └── users/               # Autenticazione e profili utente
+├── 🎨 Frontend
+│   ├── templates/           # Template HTML
+│   └── static/              # File statici (CSS, JS, immagini)
+├── 📚 Documentazione
+│   ├── guides/              # Guide tecniche
+│   ├── api/                 # Documentazione API
+│   ├── install/             # Script installazione
+│   ├── epic/                # Epic di sviluppo
+│   ├── stories/             # User stories
+│   └── slices/              # Technical slices
+├── 🛠️ Scripts & Config
+│   ├── scripts/             # Script di gestione server
+│   ├── utilities/           # Utility Python
+│   ├── config/              # Configurazioni Docker/Nginx
+│   └── docker-compose.yml   # Stack Docker
+└── 📄 Root Files
+    ├── manage.py            # Django management script
+    ├── requirements.txt     # Dipendenze Python
+    └── .env                 # Configurazione ambiente
 ```
 
-## Documentazione
+## 📚 Documentazione
 
-- [CLAUDE.md](CLAUDE.md) - Guida per lo sviluppo con Claude AI
-- [CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md) - Codice di condotta
-- [LICENSE](LICENSE) - Licenza MIT
+### 🚀 Quick Start
+- **[Installazione](docs/install/README.md)** - Guida completa Docker vs nativo
+- **[Sviluppo](docs/guides/development.md)** - Setup ambiente sviluppo
+- **[Deploy](docs/guides/deployment.md)** - Deploy produzione
+
+### 🔧 Guide Tecniche
+- **[Sicurezza](docs/guides/security.md)** - Best practices sicurezza
+- **[Monitoring](docs/guides/monitoring.md)** - Sistema monitoraggio
+- **[API](docs/api/reference.md)** - Documentazione API completa
+
+### 📋 Sviluppo
+- **[Epic](docs/epic/)** - Epic di sviluppo (4 file)
+- **[Stories](docs/stories/)** - User stories (13 file)  
+- **[Slices](docs/slices/)** - Technical slices (11 file)
+
+### 📖 Altro
+- **[CLAUDE.md](CLAUDE.md)** - Guida sviluppo con Claude AI
+- **[CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md)** - Codice di condotta
+- **[LICENSE](LICENSE)** - Licenza MIT
 
 ## Script di utilità
 

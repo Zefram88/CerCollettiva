@@ -14,7 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from energy.models import DeviceConfiguration, DeviceMeasurement
-from core.models import Plant
+from core.main_models import Plant
 
 from ..api.serializers import (
     DeviceMeasurementSerializer, EnergyMeasurementSerializer,
@@ -103,13 +103,15 @@ class DeviceMeasurementViewSet(DeviceOnlineCheckMixin, CachedRetrieveMixin,
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-        latest_measurements = self.get_queryset().raw("""
-            SELECT m.* FROM (
-                SELECT DISTINCT ON (device_id) *
-                FROM energy_devicemeasurement
-                ORDER BY device_id, timestamp DESC
-            ) m
-        """)
+        # SICURO: Utilizzo ORM Django invece di query raw
+        # Ottieni l'ultima misurazione per ogni dispositivo usando ORM
+        device_ids = self.get_queryset().values_list('device_id', flat=True).distinct()
+        latest_measurements = []
+        
+        for device_id in device_ids:
+            latest = self.get_queryset().filter(device_id=device_id).order_by('-timestamp').first()
+            if latest:
+                latest_measurements.append(latest)
         
         return Response(self.get_serializer(latest_measurements, many=True).data)
 
