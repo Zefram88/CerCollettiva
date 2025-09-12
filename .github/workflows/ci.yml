@@ -73,7 +73,15 @@ jobs:
     
     - name: Run migrations
       run: |
-        python manage.py migrate
+        python manage.py migrate contenttypes
+        python manage.py migrate auth
+        python manage.py migrate users
+        python manage.py migrate admin
+        python manage.py migrate sessions
+        python manage.py migrate core
+        python manage.py migrate energy
+        python manage.py migrate documents
+        python manage.py migrate cer
     
     - name: Collect static files
       run: |
