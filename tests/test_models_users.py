@@ -34,7 +34,7 @@ class CustomUserModelTest(TestCase):
             last_name=self.user_data['last_name']
         )
         
-        self.assertEqual(user.username, 'testuser')
+        self.assertEqual(user.username, 'test@example.com')  # username == email policy
         self.assertEqual(user.email, 'test@example.com')
         self.assertTrue(user.check_password('TestPass123!'))
         self.assertFalse(user.is_staff)
@@ -51,7 +51,7 @@ class CustomUserModelTest(TestCase):
             last_name='User'
         )
         
-        self.assertEqual(admin_user.username, 'admin')
+        self.assertEqual(admin_user.username, 'admin@example.com')  # username == email policy
         self.assertTrue(admin_user.is_staff)
         self.assertTrue(admin_user.is_superuser)
         self.assertTrue(admin_user.is_active)
@@ -65,7 +65,7 @@ class CustomUserModelTest(TestCase):
             first_name='Test',
             last_name='User'
         )
-        self.assertEqual(str(user), 'testuser (Privato)')
+        self.assertEqual(str(user), 'test@example.com (Privato)')  # username == email policy
     
     def test_user_full_name(self):
         """Test user full name property"""
@@ -78,11 +78,11 @@ class CustomUserModelTest(TestCase):
         )
         self.assertEqual(user.get_full_name(), 'John Doe')
     
-    def test_unique_username(self):
-        """Test that username must be unique"""
+    def test_unique_email(self):
+        """Test that email must be unique (and username follows email)"""
         User.objects.create_user(
-            username='testuser',
-            email='test1@example.com',
+            username='testuser',  # Will be overridden to email
+            email='test@example.com',
             password='TestPass123!',
             first_name='Test',
             last_name='User'
@@ -90,8 +90,8 @@ class CustomUserModelTest(TestCase):
         
         with self.assertRaises(IntegrityError):
             User.objects.create_user(
-                username='testuser',
-                email='test2@example.com',
+                username='different',  # Will be overridden to email  
+                email='test@example.com',  # Same email should fail
                 password='TestPass123!',
                 first_name='Test',
                 last_name='User'
