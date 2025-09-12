@@ -8,166 +8,450 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ABTestingEvent',
+            name="ABTestingEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('event_type', models.CharField(max_length=100)),
-                ('event_data', models.JSONField(default=dict)),
-                ('experiments', models.JSONField(default=dict, help_text='Active experiments at time of event')),
-                ('url', models.URLField()),
-                ('raw_data', models.JSONField(default=dict)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_id", models.CharField(db_index=True, max_length=100)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("event_type", models.CharField(max_length=100)),
+                ("event_data", models.JSONField(default=dict)),
+                (
+                    "experiments",
+                    models.JSONField(
+                        default=dict, help_text="Active experiments at time of event"
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("raw_data", models.JSONField(default=dict)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['session_id', 'timestamp'], name='core_abtest_session_c5f102_idx'), models.Index(fields=['event_type', 'timestamp'], name='core_abtest_event_t_15d3c6_idx'), models.Index(fields=['timestamp'], name='core_abtest_timesta_44edd7_idx')],
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id", "timestamp"],
+                        name="core_abtest_session_c5f102_idx",
+                    ),
+                    models.Index(
+                        fields=["event_type", "timestamp"],
+                        name="core_abtest_event_t_15d3c6_idx",
+                    ),
+                    models.Index(
+                        fields=["timestamp"], name="core_abtest_timesta_44edd7_idx"
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='ABTestingParticipation',
+            name="ABTestingParticipation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('experiment_id', models.CharField(max_length=100)),
-                ('variant', models.CharField(max_length=50)),
-                ('user_id_hash', models.CharField(help_text='Hashed user ID for consistent assignment', max_length=100)),
-                ('url', models.URLField()),
-                ('raw_data', models.JSONField(default=dict)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_id", models.CharField(db_index=True, max_length=100)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("experiment_id", models.CharField(max_length=100)),
+                ("variant", models.CharField(max_length=50)),
+                (
+                    "user_id_hash",
+                    models.CharField(
+                        help_text="Hashed user ID for consistent assignment",
+                        max_length=100,
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("raw_data", models.JSONField(default=dict)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['session_id', 'timestamp'], name='core_abtest_session_3c250d_idx'), models.Index(fields=['experiment_id', 'variant'], name='core_abtest_experim_0e5e6f_idx'), models.Index(fields=['timestamp'], name='core_abtest_timesta_9ffb62_idx')],
-                'unique_together': {('session_id', 'experiment_id')},
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id", "timestamp"],
+                        name="core_abtest_session_3c250d_idx",
+                    ),
+                    models.Index(
+                        fields=["experiment_id", "variant"],
+                        name="core_abtest_experim_0e5e6f_idx",
+                    ),
+                    models.Index(
+                        fields=["timestamp"], name="core_abtest_timesta_9ffb62_idx"
+                    ),
+                ],
+                "unique_together": {("session_id", "experiment_id")},
             },
         ),
         migrations.CreateModel(
-            name='AccessibilityAudit',
+            name="AccessibilityAudit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100)),
-                ('url', models.URLField()),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('total_issues', models.IntegerField(default=0)),
-                ('errors', models.IntegerField(default=0)),
-                ('warnings', models.IntegerField(default=0)),
-                ('accessibility_score', models.IntegerField(default=100)),
-                ('issues_data', models.JSONField(default=list, help_text='Detailed issues data')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_id", models.CharField(db_index=True, max_length=100)),
+                ("url", models.URLField()),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("total_issues", models.IntegerField(default=0)),
+                ("errors", models.IntegerField(default=0)),
+                ("warnings", models.IntegerField(default=0)),
+                ("accessibility_score", models.IntegerField(default=100)),
+                (
+                    "issues_data",
+                    models.JSONField(default=list, help_text="Detailed issues data"),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['session_id', 'timestamp'], name='core_access_session_b71b43_idx'), models.Index(fields=['accessibility_score', 'timestamp'], name='core_access_accessi_24f1b3_idx')],
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id", "timestamp"],
+                        name="core_access_session_b71b43_idx",
+                    ),
+                    models.Index(
+                        fields=["accessibility_score", "timestamp"],
+                        name="core_access_accessi_24f1b3_idx",
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='DeviceInfo',
+            name="DeviceInfo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('device_type', models.CharField(choices=[('mobile', 'Mobile'), ('tablet', 'Tablet'), ('desktop', 'Desktop'), ('unknown', 'Unknown')], max_length=20)),
-                ('os', models.CharField(max_length=50)),
-                ('os_version', models.CharField(blank=True, max_length=50)),
-                ('browser', models.CharField(max_length=50)),
-                ('browser_version', models.CharField(blank=True, max_length=50)),
-                ('screen_width', models.IntegerField()),
-                ('screen_height', models.IntegerField()),
-                ('viewport_width', models.IntegerField()),
-                ('viewport_height', models.IntegerField()),
-                ('pixel_ratio', models.FloatField(default=1.0)),
-                ('touch_support', models.BooleanField(default=False)),
-                ('hardware_acceleration', models.BooleanField(default=False)),
-                ('webgl_support', models.BooleanField(default=False)),
-                ('connection_type', models.CharField(blank=True, max_length=20)),
-                ('device_memory', models.IntegerField(blank=True, null=True)),
-                ('user_agent', models.TextField()),
-                ('raw_data', models.JSONField(default=dict)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_id", models.CharField(db_index=True, max_length=100)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "device_type",
+                    models.CharField(
+                        choices=[
+                            ("mobile", "Mobile"),
+                            ("tablet", "Tablet"),
+                            ("desktop", "Desktop"),
+                            ("unknown", "Unknown"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("os", models.CharField(max_length=50)),
+                ("os_version", models.CharField(blank=True, max_length=50)),
+                ("browser", models.CharField(max_length=50)),
+                ("browser_version", models.CharField(blank=True, max_length=50)),
+                ("screen_width", models.IntegerField()),
+                ("screen_height", models.IntegerField()),
+                ("viewport_width", models.IntegerField()),
+                ("viewport_height", models.IntegerField()),
+                ("pixel_ratio", models.FloatField(default=1.0)),
+                ("touch_support", models.BooleanField(default=False)),
+                ("hardware_acceleration", models.BooleanField(default=False)),
+                ("webgl_support", models.BooleanField(default=False)),
+                ("connection_type", models.CharField(blank=True, max_length=20)),
+                ("device_memory", models.IntegerField(blank=True, null=True)),
+                ("user_agent", models.TextField()),
+                ("raw_data", models.JSONField(default=dict)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['session_id', 'timestamp'], name='core_device_session_16d849_idx'), models.Index(fields=['device_type', 'timestamp'], name='core_device_device__cf8d23_idx')],
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id", "timestamp"],
+                        name="core_device_session_16d849_idx",
+                    ),
+                    models.Index(
+                        fields=["device_type", "timestamp"],
+                        name="core_device_device__cf8d23_idx",
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='PerformanceMetrics',
+            name="PerformanceMetrics",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100)),
-                ('url', models.URLField()),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('lcp', models.FloatField(blank=True, help_text='Largest Contentful Paint (ms)', null=True)),
-                ('fid', models.FloatField(blank=True, help_text='First Input Delay (ms)', null=True)),
-                ('cls', models.FloatField(blank=True, help_text='Cumulative Layout Shift', null=True)),
-                ('fcp', models.FloatField(blank=True, help_text='First Contentful Paint (ms)', null=True)),
-                ('ttfb', models.FloatField(blank=True, help_text='Time to First Byte (ms)', null=True)),
-                ('memory_used', models.BigIntegerField(blank=True, help_text='Memory used (bytes)', null=True)),
-                ('memory_total', models.BigIntegerField(blank=True, help_text='Memory total (bytes)', null=True)),
-                ('memory_limit', models.BigIntegerField(blank=True, help_text='Memory limit (bytes)', null=True)),
-                ('raw_data', models.JSONField(default=dict, help_text='Raw performance data')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_id", models.CharField(db_index=True, max_length=100)),
+                ("url", models.URLField()),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "lcp",
+                    models.FloatField(
+                        blank=True, help_text="Largest Contentful Paint (ms)", null=True
+                    ),
+                ),
+                (
+                    "fid",
+                    models.FloatField(
+                        blank=True, help_text="First Input Delay (ms)", null=True
+                    ),
+                ),
+                (
+                    "cls",
+                    models.FloatField(
+                        blank=True, help_text="Cumulative Layout Shift", null=True
+                    ),
+                ),
+                (
+                    "fcp",
+                    models.FloatField(
+                        blank=True, help_text="First Contentful Paint (ms)", null=True
+                    ),
+                ),
+                (
+                    "ttfb",
+                    models.FloatField(
+                        blank=True, help_text="Time to First Byte (ms)", null=True
+                    ),
+                ),
+                (
+                    "memory_used",
+                    models.BigIntegerField(
+                        blank=True, help_text="Memory used (bytes)", null=True
+                    ),
+                ),
+                (
+                    "memory_total",
+                    models.BigIntegerField(
+                        blank=True, help_text="Memory total (bytes)", null=True
+                    ),
+                ),
+                (
+                    "memory_limit",
+                    models.BigIntegerField(
+                        blank=True, help_text="Memory limit (bytes)", null=True
+                    ),
+                ),
+                (
+                    "raw_data",
+                    models.JSONField(default=dict, help_text="Raw performance data"),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['session_id', 'timestamp'], name='core_perfor_session_652860_idx'), models.Index(fields=['timestamp'], name='core_perfor_timesta_564842_idx')],
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id", "timestamp"],
+                        name="core_perfor_session_652860_idx",
+                    ),
+                    models.Index(
+                        fields=["timestamp"], name="core_perfor_timesta_564842_idx"
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='SessionData',
+            name="SessionData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100, unique=True)),
-                ('start_time', models.DateTimeField()),
-                ('end_time', models.DateTimeField(blank=True, null=True)),
-                ('last_activity', models.DateTimeField(auto_now=True)),
-                ('session_duration', models.BigIntegerField(blank=True, help_text='Session duration (ms)', null=True)),
-                ('page_time', models.BigIntegerField(default=0, help_text='Total page time (ms)')),
-                ('interactions_count', models.IntegerField(default=0)),
-                ('pages_visited', models.IntegerField(default=0)),
-                ('user_agent', models.TextField()),
-                ('referrer', models.URLField(blank=True)),
-                ('screen_resolution', models.CharField(blank=True, max_length=20)),
-                ('viewport_size', models.CharField(blank=True, max_length=20)),
-                ('performance_rating', models.CharField(blank=True, max_length=20)),
-                ('issues_count', models.IntegerField(default=0)),
-                ('raw_data', models.JSONField(default=dict)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "session_id",
+                    models.CharField(db_index=True, max_length=100, unique=True),
+                ),
+                ("start_time", models.DateTimeField()),
+                ("end_time", models.DateTimeField(blank=True, null=True)),
+                ("last_activity", models.DateTimeField(auto_now=True)),
+                (
+                    "session_duration",
+                    models.BigIntegerField(
+                        blank=True, help_text="Session duration (ms)", null=True
+                    ),
+                ),
+                (
+                    "page_time",
+                    models.BigIntegerField(default=0, help_text="Total page time (ms)"),
+                ),
+                ("interactions_count", models.IntegerField(default=0)),
+                ("pages_visited", models.IntegerField(default=0)),
+                ("user_agent", models.TextField()),
+                ("referrer", models.URLField(blank=True)),
+                ("screen_resolution", models.CharField(blank=True, max_length=20)),
+                ("viewport_size", models.CharField(blank=True, max_length=20)),
+                ("performance_rating", models.CharField(blank=True, max_length=20)),
+                ("issues_count", models.IntegerField(default=0)),
+                ("raw_data", models.JSONField(default=dict)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-last_activity'],
-                'indexes': [models.Index(fields=['session_id'], name='core_sessio_session_3e3309_idx'), models.Index(fields=['user', 'last_activity'], name='core_sessio_user_id_7c3950_idx'), models.Index(fields=['last_activity'], name='core_sessio_last_ac_eb030b_idx')],
+                "ordering": ["-last_activity"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id"], name="core_sessio_session_3e3309_idx"
+                    ),
+                    models.Index(
+                        fields=["user", "last_activity"],
+                        name="core_sessio_user_id_7c3950_idx",
+                    ),
+                    models.Index(
+                        fields=["last_activity"], name="core_sessio_last_ac_eb030b_idx"
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='UserFeedback',
+            name="UserFeedback",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_id', models.CharField(db_index=True, max_length=100)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('overall_rating', models.IntegerField(blank=True, choices=[(1, 'Very Dissatisfied'), (2, 'Dissatisfied'), (3, 'Neutral'), (4, 'Satisfied'), (5, 'Very Satisfied')], null=True)),
-                ('performance_rating', models.CharField(blank=True, max_length=20)),
-                ('issues_reported', models.TextField(blank=True)),
-                ('suggestions', models.TextField(blank=True)),
-                ('comments', models.TextField(blank=True)),
-                ('session_duration', models.BigIntegerField(blank=True, help_text='Session duration (ms)', null=True)),
-                ('page_time', models.BigIntegerField(blank=True, help_text='Page time (ms)', null=True)),
-                ('interactions_count', models.IntegerField(default=0)),
-                ('raw_data', models.JSONField(default=dict)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_id", models.CharField(db_index=True, max_length=100)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "overall_rating",
+                    models.IntegerField(
+                        blank=True,
+                        choices=[
+                            (1, "Very Dissatisfied"),
+                            (2, "Dissatisfied"),
+                            (3, "Neutral"),
+                            (4, "Satisfied"),
+                            (5, "Very Satisfied"),
+                        ],
+                        null=True,
+                    ),
+                ),
+                ("performance_rating", models.CharField(blank=True, max_length=20)),
+                ("issues_reported", models.TextField(blank=True)),
+                ("suggestions", models.TextField(blank=True)),
+                ("comments", models.TextField(blank=True)),
+                (
+                    "session_duration",
+                    models.BigIntegerField(
+                        blank=True, help_text="Session duration (ms)", null=True
+                    ),
+                ),
+                (
+                    "page_time",
+                    models.BigIntegerField(
+                        blank=True, help_text="Page time (ms)", null=True
+                    ),
+                ),
+                ("interactions_count", models.IntegerField(default=0)),
+                ("raw_data", models.JSONField(default=dict)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['session_id', 'timestamp'], name='core_userfe_session_632696_idx'), models.Index(fields=['overall_rating', 'timestamp'], name='core_userfe_overall_5f182c_idx')],
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["session_id", "timestamp"],
+                        name="core_userfe_session_632696_idx",
+                    ),
+                    models.Index(
+                        fields=["overall_rating", "timestamp"],
+                        name="core_userfe_overall_5f182c_idx",
+                    ),
+                ],
             },
         ),
     ]

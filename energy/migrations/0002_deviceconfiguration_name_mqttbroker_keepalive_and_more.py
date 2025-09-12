@@ -7,28 +7,44 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('energy', '0001_initial'),
+        ("energy", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deviceconfiguration',
-            name='name',
-            field=models.CharField(default='', max_length=100, verbose_name='Nome'),
+            model_name="deviceconfiguration",
+            name="name",
+            field=models.CharField(default="", max_length=100, verbose_name="Nome"),
         ),
         migrations.AddField(
-            model_name='mqttbroker',
-            name='keepalive',
-            field=models.IntegerField(default=60, validators=[django.core.validators.MinValueValidator(10), django.core.validators.MaxValueValidator(600)], verbose_name='Keep Alive (secondi)'),
+            model_name="mqttbroker",
+            name="keepalive",
+            field=models.IntegerField(
+                default=60,
+                validators=[
+                    django.core.validators.MinValueValidator(10),
+                    django.core.validators.MaxValueValidator(600),
+                ],
+                verbose_name="Keep Alive (secondi)",
+            ),
         ),
         migrations.AddField(
-            model_name='mqttbroker',
-            name='qos_level',
-            field=models.IntegerField(default=1, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='Livello QoS'),
+            model_name="mqttbroker",
+            name="qos_level",
+            field=models.IntegerField(
+                default=1,
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(2),
+                ],
+                verbose_name="Livello QoS",
+            ),
         ),
         migrations.AddField(
-            model_name='mqttbroker',
-            name='tls_cert',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='Certificato TLS'),
+            model_name="mqttbroker",
+            name="tls_cert",
+            field=models.CharField(
+                blank=True, max_length=500, null=True, verbose_name="Certificato TLS"
+            ),
         ),
     ]

@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_customuser_onboarding_status_and_more'),
+        ("users", "0002_customuser_onboarding_status_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customuser',
-            name='cer_role',
-            field=models.CharField(choices=[('ISCRITTO', 'Iscritto'), ('SOCIO_ORDINARIO', 'Socio Ordinario'), ('SOCIO_SOSTENITORE', 'Socio Sostenitore')], default='ISCRITTO', max_length=20, verbose_name='Ruolo CER'),
+            model_name="customuser",
+            name="cer_role",
+            field=models.CharField(
+                choices=[
+                    ("ISCRITTO", "Iscritto"),
+                    ("SOCIO_ORDINARIO", "Socio Ordinario"),
+                    ("SOCIO_SOSTENITORE", "Socio Sostenitore"),
+                ],
+                default="ISCRITTO",
+                max_length=20,
+                verbose_name="Ruolo CER",
+            ),
         ),
     ]

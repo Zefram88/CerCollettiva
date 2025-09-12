@@ -8,121 +8,194 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0002_abtestingevent_abtestingparticipation_and_more'),
+        ("core", "0002_abtestingevent_abtestingparticipation_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='alert',
-            name='core_alert_status_b34d9c_idx',
+            model_name="alert",
+            name="core_alert_status_b34d9c_idx",
         ),
         migrations.RemoveIndex(
-            model_name='alert',
-            name='core_alert_plant_i_8231cc_idx',
+            model_name="alert",
+            name="core_alert_plant_i_8231cc_idx",
         ),
         migrations.RemoveIndex(
-            model_name='alert',
-            name='core_alert_cer_con_e7a092_idx',
+            model_name="alert",
+            name="core_alert_cer_con_e7a092_idx",
         ),
         migrations.RemoveField(
-            model_name='alert',
-            name='severity',
+            model_name="alert",
+            name="severity",
         ),
         migrations.RemoveField(
-            model_name='alert',
-            name='status',
+            model_name="alert",
+            name="status",
         ),
         migrations.AddField(
-            model_name='alert',
-            name='is_read',
-            field=models.BooleanField(default=False, verbose_name='Letto'),
+            model_name="alert",
+            name="is_read",
+            field=models.BooleanField(default=False, verbose_name="Letto"),
         ),
         migrations.AddField(
-            model_name='alert',
-            name='title',
-            field=models.CharField(default='Alert', max_length=255, verbose_name='Titolo'),
+            model_name="alert",
+            name="title",
+            field=models.CharField(
+                default="Alert", max_length=255, verbose_name="Titolo"
+            ),
         ),
         migrations.AddField(
-            model_name='alert',
-            name='type',
-            field=models.CharField(choices=[('INFO', 'Info'), ('WARNING', 'Warning'), ('ERROR', 'Error'), ('CRITICAL', 'Critical')], default='INFO', max_length=20, verbose_name='Tipo'),
+            model_name="alert",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("INFO", "Info"),
+                    ("WARNING", "Warning"),
+                    ("ERROR", "Error"),
+                    ("CRITICAL", "Critical"),
+                ],
+                default="INFO",
+                max_length=20,
+                verbose_name="Tipo",
+            ),
         ),
         migrations.AddField(
-            model_name='alert',
-            name='updated_at',
+            model_name="alert",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='alert',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='alerts', to=settings.AUTH_USER_MODEL),
+            model_name="alert",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="alerts",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='cermembership',
-            name='joined_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Data di adesione'),
+            model_name="cermembership",
+            name="joined_date",
+            field=models.DateField(
+                blank=True, null=True, verbose_name="Data di adesione"
+            ),
         ),
         migrations.AddField(
-            model_name='cermembership',
-            name='share_percentage',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=5, verbose_name='Percentuale di partecipazione'),
+            model_name="cermembership",
+            name="share_percentage",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=5,
+                verbose_name="Percentuale di partecipazione",
+            ),
         ),
         migrations.AddField(
-            model_name='plant',
-            name='code',
-            field=models.CharField(default='PLANT001', max_length=50, unique=True, verbose_name='Codice impianto'),
+            model_name="plant",
+            name="code",
+            field=models.CharField(
+                default="PLANT001",
+                max_length=50,
+                unique=True,
+                verbose_name="Codice impianto",
+            ),
         ),
         migrations.AddField(
-            model_name='plant',
-            name='commissioning_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Data di messa in servizio'),
+            model_name="plant",
+            name="commissioning_date",
+            field=models.DateField(
+                blank=True, null=True, verbose_name="Data di messa in servizio"
+            ),
         ),
         migrations.AddField(
-            model_name='plant',
-            name='pod',
-            field=models.CharField(blank=True, max_length=50, null=True, verbose_name='POD'),
+            model_name="plant",
+            name="pod",
+            field=models.CharField(
+                blank=True, max_length=50, null=True, verbose_name="POD"
+            ),
         ),
         migrations.AddField(
-            model_name='plant',
-            name='power_kw',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='Potenza (kW)'),
+            model_name="plant",
+            name="power_kw",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=10,
+                verbose_name="Potenza (kW)",
+            ),
         ),
         migrations.AddField(
-            model_name='plant',
-            name='type',
-            field=models.CharField(choices=[('CONSUMER', 'Consumatore'), ('PRODUCER', 'Produttore'), ('PROSUMER', 'Prosumer')], default='PRODUCER', max_length=20, verbose_name='Tipologia'),
+            model_name="plant",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("CONSUMER", "Consumatore"),
+                    ("PRODUCER", "Produttore"),
+                    ("PROSUMER", "Prosumer"),
+                ],
+                default="PRODUCER",
+                max_length=20,
+                verbose_name="Tipologia",
+            ),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='message',
-            field=models.TextField(default='', verbose_name='Messaggio'),
+            model_name="alert",
+            name="message",
+            field=models.TextField(default="", verbose_name="Messaggio"),
         ),
         migrations.AlterField(
-            model_name='plant',
-            name='nominal_power',
-            field=models.FloatField(blank=True, null=True, verbose_name='Potenza nominale (kW)'),
+            model_name="plant",
+            name="nominal_power",
+            field=models.FloatField(
+                blank=True, null=True, verbose_name="Potenza nominale (kW)"
+            ),
         ),
         migrations.AlterField(
-            model_name='plant',
-            name='plant_type',
-            field=models.CharField(blank=True, choices=[('CONSUMER', 'Consumatore'), ('PRODUCER', 'Produttore'), ('PROSUMER', 'Prosumer')], max_length=20, null=True, verbose_name='Tipologia'),
+            model_name="plant",
+            name="plant_type",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("CONSUMER", "Consumatore"),
+                    ("PRODUCER", "Produttore"),
+                    ("PROSUMER", "Prosumer"),
+                ],
+                max_length=20,
+                null=True,
+                verbose_name="Tipologia",
+            ),
         ),
         migrations.AlterField(
-            model_name='plant',
-            name='pod_code',
-            field=models.CharField(blank=True, max_length=50, null=True, unique=True, verbose_name='Codice POD'),
+            model_name="plant",
+            name="pod_code",
+            field=models.CharField(
+                blank=True,
+                max_length=50,
+                null=True,
+                unique=True,
+                verbose_name="Codice POD",
+            ),
         ),
         migrations.AddIndex(
-            model_name='alert',
-            index=models.Index(fields=['type', 'created_at'], name='core_alert_type_cad906_idx'),
+            model_name="alert",
+            index=models.Index(
+                fields=["type", "created_at"], name="core_alert_type_cad906_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='alert',
-            index=models.Index(fields=['plant', 'type'], name='core_alert_plant_i_3288d7_idx'),
+            model_name="alert",
+            index=models.Index(
+                fields=["plant", "type"], name="core_alert_plant_i_3288d7_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='alert',
-            index=models.Index(fields=['cer_configuration', 'type'], name='core_alert_cer_con_529040_idx'),
+            model_name="alert",
+            index=models.Index(
+                fields=["cer_configuration", "type"],
+                name="core_alert_cer_con_529040_idx",
+            ),
         ),
     ]

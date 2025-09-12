@@ -6,27 +6,54 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('users', '0005_alter_customuser_email'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("users", "0005_alter_customuser_email"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='customuser',
-            name='valid_onboarding_status',
+            model_name="customuser",
+            name="valid_onboarding_status",
         ),
         migrations.AddField(
-            model_name='customuser',
-            name='is_supporter',
-            field=models.BooleanField(default=False, help_text="Indica se l'utente è un sostenitore (non membro CER)", verbose_name='Sostenitore'),
+            model_name="customuser",
+            name="is_supporter",
+            field=models.BooleanField(
+                default=False,
+                help_text="Indica se l'utente è un sostenitore (non membro CER)",
+                verbose_name="Sostenitore",
+            ),
         ),
         migrations.AlterField(
-            model_name='customuser',
-            name='onboarding_status',
-            field=models.CharField(choices=[('REGISTRATO', 'Registrato'), ('ANAGRAFICA_COMPLETA', 'Anagrafica Completa'), ('CER_COMPLETA', 'CER Completa'), ('ONBOARDING_COMPLETATO', 'Onboarding Completato')], default='REGISTRATO', max_length=25, verbose_name='Stato Onboarding'),
+            model_name="customuser",
+            name="onboarding_status",
+            field=models.CharField(
+                choices=[
+                    ("REGISTRATO", "Registrato"),
+                    ("ANAGRAFICA_COMPLETA", "Anagrafica Completa"),
+                    ("CER_COMPLETA", "CER Completa"),
+                    ("ONBOARDING_COMPLETATO", "Onboarding Completato"),
+                ],
+                default="REGISTRATO",
+                max_length=25,
+                verbose_name="Stato Onboarding",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='customuser',
-            constraint=models.CheckConstraint(check=models.Q(('onboarding_status__in', ['REGISTRATO', 'ANAGRAFICA_COMPLETA', 'CER_COMPLETA', 'ONBOARDING_COMPLETATO'])), name='valid_onboarding_status'),
+            model_name="customuser",
+            constraint=models.CheckConstraint(
+                check=models.Q(
+                    (
+                        "onboarding_status__in",
+                        [
+                            "REGISTRATO",
+                            "ANAGRAFICA_COMPLETA",
+                            "CER_COMPLETA",
+                            "ONBOARDING_COMPLETATO",
+                        ],
+                    )
+                ),
+                name="valid_onboarding_status",
+            ),
         ),
     ]

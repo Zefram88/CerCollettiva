@@ -6,35 +6,37 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('energy', '0003_devicemeasurement_energy_devicemeasurement_frequency_and_more'),
+        (
+            "energy",
+            "0003_devicemeasurement_energy_devicemeasurement_frequency_and_more",
+        ),
     ]
 
     operations = [
         # Add indexes for DeviceConfiguration model
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_device_config_plant_active ON energy_deviceconfiguration (plant_id, is_active);",
-            reverse_sql="DROP INDEX IF EXISTS idx_device_config_plant_active;"
+            reverse_sql="DROP INDEX IF EXISTS idx_device_config_plant_active;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_device_config_device_id ON energy_deviceconfiguration (device_id);",
-            reverse_sql="DROP INDEX IF EXISTS idx_device_config_device_id;"
+            reverse_sql="DROP INDEX IF EXISTS idx_device_config_device_id;",
         ),
-        
         # Add indexes for DeviceMeasurement model
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_device_measurement_device_timestamp ON energy_devicemeasurement (device_id, timestamp);",
-            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_device_timestamp;"
+            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_device_timestamp;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_device_measurement_plant_timestamp ON energy_devicemeasurement (plant_id, timestamp);",
-            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_plant_timestamp;"
+            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_plant_timestamp;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_device_measurement_timestamp ON energy_devicemeasurement (timestamp);",
-            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_timestamp;"
+            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_timestamp;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_device_measurement_quality ON energy_devicemeasurement (quality);",
-            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_quality;"
+            reverse_sql="DROP INDEX IF EXISTS idx_device_measurement_quality;",
         ),
     ]

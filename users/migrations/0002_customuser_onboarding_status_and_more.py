@@ -6,18 +6,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('users', '0001_initial'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("users", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customuser',
-            name='onboarding_status',
-            field=models.CharField(choices=[('REGISTRATO', 'Registrato'), ('ANAGRAFICA_COMPLETA', 'Anagrafica Completa'), ('ONBOARDING_COMPLETATO', 'Onboarding Completato')], default='REGISTRATO', max_length=25, verbose_name='Stato Onboarding'),
+            model_name="customuser",
+            name="onboarding_status",
+            field=models.CharField(
+                choices=[
+                    ("REGISTRATO", "Registrato"),
+                    ("ANAGRAFICA_COMPLETA", "Anagrafica Completa"),
+                    ("ONBOARDING_COMPLETATO", "Onboarding Completato"),
+                ],
+                default="REGISTRATO",
+                max_length=25,
+                verbose_name="Stato Onboarding",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='customuser',
-            constraint=models.CheckConstraint(check=models.Q(('onboarding_status__in', ['REGISTRATO', 'ANAGRAFICA_COMPLETA', 'ONBOARDING_COMPLETATO'])), name='valid_onboarding_status'),
+            model_name="customuser",
+            constraint=models.CheckConstraint(
+                check=models.Q(
+                    (
+                        "onboarding_status__in",
+                        ["REGISTRATO", "ANAGRAFICA_COMPLETA", "ONBOARDING_COMPLETATO"],
+                    )
+                ),
+                name="valid_onboarding_status",
+            ),
         ),
     ]

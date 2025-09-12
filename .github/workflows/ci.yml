@@ -89,7 +89,7 @@ jobs:
     
     - name: Run tests
       run: |
-        coverage run --source='.' manage.py test
+        coverage run --source='.' manage.py test --keepdb --noinput
         coverage report
         coverage xml
     

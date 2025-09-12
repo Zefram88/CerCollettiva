@@ -6,37 +6,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_add_created_at_to_cermembership'),
+        ("core", "0005_add_created_at_to_cermembership"),
     ]
 
     operations = [
         # Add indexes for Plant model
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_plant_owner_active ON core_plant (owner_id, is_active);",
-            reverse_sql="DROP INDEX IF EXISTS idx_plant_owner_active;"
+            reverse_sql="DROP INDEX IF EXISTS idx_plant_owner_active;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_plant_cer_active ON core_plant (cer_configuration_id, is_active);",
-            reverse_sql="DROP INDEX IF EXISTS idx_plant_cer_active;"
+            reverse_sql="DROP INDEX IF EXISTS idx_plant_cer_active;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_plant_created_at ON core_plant (created_at);",
-            reverse_sql="DROP INDEX IF EXISTS idx_plant_created_at;"
+            reverse_sql="DROP INDEX IF EXISTS idx_plant_created_at;",
         ),
-        
         # Add indexes for CERMembership model
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_cer_membership_user_active ON core_cermembership (user_id, is_active);",
-            reverse_sql="DROP INDEX IF EXISTS idx_cer_membership_user_active;"
+            reverse_sql="DROP INDEX IF EXISTS idx_cer_membership_user_active;",
         ),
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_cer_membership_cer_role ON core_cermembership (cer_configuration_id, role);",
-            reverse_sql="DROP INDEX IF EXISTS idx_cer_membership_cer_role;"
+            reverse_sql="DROP INDEX IF EXISTS idx_cer_membership_cer_role;",
         ),
-        
         # Add indexes for Alert model
         migrations.RunSQL(
             "CREATE INDEX IF NOT EXISTS idx_alert_is_read_created ON core_alert (is_read, created_at);",
-            reverse_sql="DROP INDEX IF EXISTS idx_alert_is_read_created;"
+            reverse_sql="DROP INDEX IF EXISTS idx_alert_is_read_created;",
         ),
     ]

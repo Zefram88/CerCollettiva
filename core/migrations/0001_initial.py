@@ -18,268 +18,1160 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CERConfiguration',
+            name="CERConfiguration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, verbose_name='Nome')),
-                ('code', models.CharField(max_length=50, unique=True, verbose_name='Codice identificativo')),
-                ('primary_substation', models.CharField(max_length=100, verbose_name='Cabina primaria')),
-                ('logo', models.ImageField(blank=True, help_text='Logo della CER (formato consigliato: PNG, max 2MB)', null=True, upload_to='cer_logos/', verbose_name='Logo CER')),
-                ('description', models.TextField(blank=True, help_text='Descrizione della CER che apparirà nella vista pubblica', verbose_name='Descrizione')),
-                ('statute_document', models.FileField(blank=True, help_text='Documento PDF dello statuto della CER', null=True, upload_to='cer_documents/', validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf'])], verbose_name='Statuto')),
-                ('regulation_document', models.FileField(blank=True, help_text='Documento PDF del regolamento della CER', null=True, upload_to='cer_documents/', validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf'])], verbose_name='Regolamento')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attiva')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, verbose_name="Nome")),
+                (
+                    "code",
+                    models.CharField(
+                        max_length=50, unique=True, verbose_name="Codice identificativo"
+                    ),
+                ),
+                (
+                    "primary_substation",
+                    models.CharField(max_length=100, verbose_name="Cabina primaria"),
+                ),
+                (
+                    "logo",
+                    models.ImageField(
+                        blank=True,
+                        help_text="Logo della CER (formato consigliato: PNG, max 2MB)",
+                        null=True,
+                        upload_to="cer_logos/",
+                        verbose_name="Logo CER",
+                    ),
+                ),
+                (
+                    "description",
+                    models.TextField(
+                        blank=True,
+                        help_text="Descrizione della CER che apparirà nella vista pubblica",
+                        verbose_name="Descrizione",
+                    ),
+                ),
+                (
+                    "statute_document",
+                    models.FileField(
+                        blank=True,
+                        help_text="Documento PDF dello statuto della CER",
+                        null=True,
+                        upload_to="cer_documents/",
+                        validators=[
+                            django.core.validators.FileExtensionValidator(
+                                allowed_extensions=["pdf"]
+                            )
+                        ],
+                        verbose_name="Statuto",
+                    ),
+                ),
+                (
+                    "regulation_document",
+                    models.FileField(
+                        blank=True,
+                        help_text="Documento PDF del regolamento della CER",
+                        null=True,
+                        upload_to="cer_documents/",
+                        validators=[
+                            django.core.validators.FileExtensionValidator(
+                                allowed_extensions=["pdf"]
+                            )
+                        ],
+                        verbose_name="Regolamento",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attiva")),
             ],
             options={
-                'verbose_name': 'Configurazione CER',
-                'verbose_name_plural': 'Configurazioni CER',
-                'ordering': ['-created_at'],
+                "verbose_name": "Configurazione CER",
+                "verbose_name_plural": "Configurazioni CER",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='CERDistributionConfiguration',
+            name="CERDistributionConfiguration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('producer_percentage', models.DecimalField(decimal_places=2, default=45.0, help_text='Percentuale destinata ai produttori', max_digits=5, verbose_name='Percentuale Produttori (%)')),
-                ('consumer_percentage', models.DecimalField(decimal_places=2, default=30.0, help_text='Percentuale destinata ai consumatori', max_digits=5, verbose_name='Percentuale Consumatori (%)')),
-                ('management_percentage', models.DecimalField(decimal_places=2, default=20.0, help_text='Percentuale per spese di gestione (commercialista, spese vive, bancarie, legali, marketing)', max_digits=5, verbose_name='Percentuale Gestione (%)')),
-                ('investment_fund_percentage', models.DecimalField(decimal_places=2, default=3.0, help_text='Percentuale per fondo investimenti', max_digits=5, verbose_name='Percentuale Fondo Investimento (%)')),
-                ('solidarity_fund_percentage', models.DecimalField(decimal_places=2, default=2.0, help_text='Percentuale per fondo di solidarietà', max_digits=5, verbose_name='Percentuale Fondo Solidarietà (%)')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Creato il')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Aggiornato il')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Configurazione Attiva')),
-                ('management_description', models.TextField(blank=True, help_text='Dettaglio delle spese coperte dalla percentuale di gestione', verbose_name='Descrizione Spese Gestione')),
-                ('investment_description', models.TextField(blank=True, help_text='Descrizione degli investimenti pianificati', verbose_name='Descrizione Fondo Investimento')),
-                ('solidarity_description', models.TextField(blank=True, help_text='Criteri e finalità del fondo di solidarietà', verbose_name='Descrizione Fondo Solidarietà')),
-                ('cer_configuration', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='distribution_config', to='core.cerconfiguration', verbose_name='Configurazione CER')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "producer_percentage",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=45.0,
+                        help_text="Percentuale destinata ai produttori",
+                        max_digits=5,
+                        verbose_name="Percentuale Produttori (%)",
+                    ),
+                ),
+                (
+                    "consumer_percentage",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=30.0,
+                        help_text="Percentuale destinata ai consumatori",
+                        max_digits=5,
+                        verbose_name="Percentuale Consumatori (%)",
+                    ),
+                ),
+                (
+                    "management_percentage",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=20.0,
+                        help_text="Percentuale per spese di gestione (commercialista, spese vive, bancarie, legali, marketing)",
+                        max_digits=5,
+                        verbose_name="Percentuale Gestione (%)",
+                    ),
+                ),
+                (
+                    "investment_fund_percentage",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=3.0,
+                        help_text="Percentuale per fondo investimenti",
+                        max_digits=5,
+                        verbose_name="Percentuale Fondo Investimento (%)",
+                    ),
+                ),
+                (
+                    "solidarity_fund_percentage",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=2.0,
+                        help_text="Percentuale per fondo di solidarietà",
+                        max_digits=5,
+                        verbose_name="Percentuale Fondo Solidarietà (%)",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Creato il"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Aggiornato il"),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True, verbose_name="Configurazione Attiva"
+                    ),
+                ),
+                (
+                    "management_description",
+                    models.TextField(
+                        blank=True,
+                        help_text="Dettaglio delle spese coperte dalla percentuale di gestione",
+                        verbose_name="Descrizione Spese Gestione",
+                    ),
+                ),
+                (
+                    "investment_description",
+                    models.TextField(
+                        blank=True,
+                        help_text="Descrizione degli investimenti pianificati",
+                        verbose_name="Descrizione Fondo Investimento",
+                    ),
+                ),
+                (
+                    "solidarity_description",
+                    models.TextField(
+                        blank=True,
+                        help_text="Criteri e finalità del fondo di solidarietà",
+                        verbose_name="Descrizione Fondo Solidarietà",
+                    ),
+                ),
+                (
+                    "cer_configuration",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="distribution_config",
+                        to="core.cerconfiguration",
+                        verbose_name="Configurazione CER",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Configurazione Ripartizione Economica CER',
-                'verbose_name_plural': 'Configurazioni Ripartizione Economica CER',
+                "verbose_name": "Configurazione Ripartizione Economica CER",
+                "verbose_name_plural": "Configurazioni Ripartizione Economica CER",
             },
         ),
         migrations.CreateModel(
-            name='CERMembership',
+            name="CERMembership",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('ADMIN', 'Amministratore'), ('MEMBER', 'Membro'), ('TECHNICAL', 'Tecnico')], default='MEMBER', max_length=20, verbose_name='Ruolo')),
-                ('member_type', models.CharField(choices=[('PRODUCER', 'Produttore'), ('CONSUMER', 'Solo Consumatore'), ('PROSUMER', 'Prosumer')], default='CONSUMER', help_text='Tipo di partecipazione nella CER', max_length=20, verbose_name='Tipologia Membro')),
-                ('joined_at', models.DateTimeField(auto_now_add=True)),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
-                ('conformity_declaration', models.FileField(blank=True, null=True, upload_to='cer/conformity/%Y/%m/%d/', verbose_name='Dichiarazione di conformità')),
-                ('gse_practice', models.FileField(blank=True, null=True, upload_to='cer/gse/%Y/%m/%d/', verbose_name='Pratica GSE')),
-                ('panels_photo', models.FileField(blank=True, null=True, upload_to='cer/panels/%Y/%m/%d/', verbose_name='Foto pannelli')),
-                ('inverter_photo', models.FileField(blank=True, null=True, upload_to='cer/inverter/%Y/%m/%d/', verbose_name='Foto inverter')),
-                ('panels_serial_list', models.TextField(blank=True, null=True, verbose_name='Lista seriali pannelli')),
-                ('document_verified', models.BooleanField(default=False, verbose_name='Documenti verificati')),
-                ('document_verified_at', models.DateTimeField(blank=True, null=True)),
-                ('cer_configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memberships', to='core.cerconfiguration')),
-                ('document_verified_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='verified_memberships', to=settings.AUTH_USER_MODEL)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cer_memberships', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("ADMIN", "Amministratore"),
+                            ("MEMBER", "Membro"),
+                            ("TECHNICAL", "Tecnico"),
+                        ],
+                        default="MEMBER",
+                        max_length=20,
+                        verbose_name="Ruolo",
+                    ),
+                ),
+                (
+                    "member_type",
+                    models.CharField(
+                        choices=[
+                            ("PRODUCER", "Produttore"),
+                            ("CONSUMER", "Solo Consumatore"),
+                            ("PROSUMER", "Prosumer"),
+                        ],
+                        default="CONSUMER",
+                        help_text="Tipo di partecipazione nella CER",
+                        max_length=20,
+                        verbose_name="Tipologia Membro",
+                    ),
+                ),
+                ("joined_at", models.DateTimeField(auto_now_add=True)),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attivo")),
+                (
+                    "conformity_declaration",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="cer/conformity/%Y/%m/%d/",
+                        verbose_name="Dichiarazione di conformità",
+                    ),
+                ),
+                (
+                    "gse_practice",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="cer/gse/%Y/%m/%d/",
+                        verbose_name="Pratica GSE",
+                    ),
+                ),
+                (
+                    "panels_photo",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="cer/panels/%Y/%m/%d/",
+                        verbose_name="Foto pannelli",
+                    ),
+                ),
+                (
+                    "inverter_photo",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="cer/inverter/%Y/%m/%d/",
+                        verbose_name="Foto inverter",
+                    ),
+                ),
+                (
+                    "panels_serial_list",
+                    models.TextField(
+                        blank=True, null=True, verbose_name="Lista seriali pannelli"
+                    ),
+                ),
+                (
+                    "document_verified",
+                    models.BooleanField(
+                        default=False, verbose_name="Documenti verificati"
+                    ),
+                ),
+                ("document_verified_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "cer_configuration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="memberships",
+                        to="core.cerconfiguration",
+                    ),
+                ),
+                (
+                    "document_verified_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="verified_memberships",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cer_memberships",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Membership CER',
-                'verbose_name_plural': 'Membership CER',
-                'unique_together': {('user', 'cer_configuration')},
+                "verbose_name": "Membership CER",
+                "verbose_name_plural": "Membership CER",
+                "unique_together": {("user", "cer_configuration")},
             },
         ),
         migrations.AddField(
-            model_name='cerconfiguration',
-            name='members',
-            field=models.ManyToManyField(related_name='cer_configurations', through='core.CERMembership', to=settings.AUTH_USER_MODEL),
+            model_name="cerconfiguration",
+            name="members",
+            field=models.ManyToManyField(
+                related_name="cer_configurations",
+                through="core.CERMembership",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='Plant',
+            name="Plant",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('raw_address', models.TextField(blank=True, help_text="Indirizzo originale non processato dall'attestato Gaudì", null=True, verbose_name='Indirizzo grezzo')),
-                ('name', models.CharField(max_length=255, verbose_name='Nome impianto')),
-                ('pod_code', models.CharField(max_length=50, unique=True, verbose_name='Codice POD')),
-                ('plant_type', models.CharField(choices=[('CONSUMER', 'Consumatore'), ('PRODUCER', 'Produttore'), ('PROSUMER', 'Prosumer')], max_length=20, verbose_name='Tipologia')),
-                ('nominal_power', models.FloatField(verbose_name='Potenza nominale (kW)')),
-                ('connection_voltage', models.CharField(max_length=50, verbose_name='Tensione connessione')),
-                ('installation_date', models.DateField(verbose_name='Data installazione')),
-                ('address', models.CharField(max_length=255, verbose_name='Indirizzo')),
-                ('city', models.CharField(max_length=100, verbose_name='Città')),
-                ('zip_code', models.CharField(max_length=5, verbose_name='CAP')),
-                ('province', models.CharField(max_length=2, verbose_name='Provincia')),
-                ('latitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True, verbose_name='Latitudine')),
-                ('longitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True, verbose_name='Longitudine')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
-                ('mqtt_connected', models.BooleanField(default=False, verbose_name='Connesso MQTT')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('gaudi_request_code', models.CharField(blank=True, max_length=50, null=True, verbose_name='Codice richiesta Gaudì')),
-                ('censimp_code', models.CharField(blank=True, max_length=50, null=True, verbose_name='Codice CENSIMP')),
-                ('sapr_code', models.CharField(blank=True, help_text="Codice SAPR nell'attestazione Gaudì", max_length=50, null=True, verbose_name='Codice SAPR')),
-                ('validation_date', models.DateField(blank=True, help_text="Data di convalida dell'attestazione Gaudì", null=True, verbose_name='Data Convalida Gaudì')),
-                ('gaudi_voltage', models.IntegerField(blank=True, help_text='Tensione di generazione dichiarata in Gaudì (V)', null=True, verbose_name='Tensione Gaudì')),
-                ('expected_yearly_production', models.IntegerField(blank=True, help_text='Produzione lorda media annua attesa in kWh', null=True, verbose_name='Produzione Annua Attesa')),
-                ('expected_operation_date', models.DateField(blank=True, help_text='Data di presunto esercizio dichiarata in Gaudì', null=True, verbose_name='Data Presunto Esercizio')),
-                ('gaudi_verified', models.BooleanField(default=False, help_text='Indica se i dati sono stati verificati con attestazione Gaudì', verbose_name='Verificato Gaudì')),
-                ('gaudi_verification_date', models.DateTimeField(blank=True, help_text="Data in cui è stato verificato l'attestato Gaudì", null=True, verbose_name='Data verifica Gaudì')),
-                ('gaudi_version', models.IntegerField(blank=True, help_text="Numero versione dell'attestato Gaudì", null=True, verbose_name='Versione Gaudì')),
-                ('section_type', models.CharField(blank=True, help_text="Tipo di sezione dell'impianto (es. SILICIO MONOCRISTALLINO)", max_length=50, null=True, verbose_name='Tipo Sezione')),
-                ('section_id', models.CharField(blank=True, help_text='Identificativo della sezione nel sistema CENSIMP', max_length=50, null=True, verbose_name='ID Sezione CENSIMP')),
-                ('group_id', models.CharField(blank=True, help_text='Identificativo del gruppo nel sistema CENSIMP', max_length=50, null=True, verbose_name='ID Gruppo CENSIMP')),
-                ('generator_group_id', models.CharField(blank=True, help_text='Numero identificativo del gruppo generatore', max_length=50, null=True, verbose_name='Numero Gruppo')),
-                ('remote_disconnect', models.BooleanField(default=False, help_text="Indica se l'impianto è predisposto per il teledistacco", verbose_name='Teledistacco')),
-                ('active_power', models.FloatField(blank=True, help_text='Potenza attiva nominale del generatore (kW)', null=True, verbose_name='Potenza Attiva Nominale')),
-                ('net_power', models.FloatField(blank=True, help_text="Potenza efficiente netta dell'impianto (kW)", null=True, verbose_name='Potenza Efficiente Netta')),
-                ('gross_power', models.FloatField(blank=True, help_text="Potenza efficiente lorda dell'impianto (kW)", null=True, verbose_name='Potenza Efficiente Lorda')),
-                ('grid_feed_type', models.CharField(choices=[('TOTAL', 'Totale'), ('PARTIAL', 'Parziale')], default='TOTAL', help_text='Tipo di immissione in rete', max_length=10, verbose_name='Tipo Immissione')),
-                ('has_storage', models.BooleanField(default=False, help_text="Indica se l'impianto dispone di un sistema di accumulo", verbose_name='Sistema Accumulo')),
-                ('gaudi_certificate_uploaded', models.BooleanField(default=False, verbose_name='Attestato GAUDÌ caricato')),
-                ('gaudi_upload_date', models.DateTimeField(blank=True, null=True, verbose_name='Data caricamento GAUDÌ')),
-                ('mqtt_broker', models.CharField(blank=True, max_length=255, null=True)),
-                ('mqtt_port', models.IntegerField(default=1883)),
-                ('mqtt_username', models.CharField(blank=True, max_length=255, null=True)),
-                ('mqtt_password', models.CharField(blank=True, max_length=255, null=True)),
-                ('mqtt_topic_prefix', models.CharField(default='cercollettiva/', help_text='Prefisso per i topic MQTT (es. cercollettiva/pod_code)', max_length=255, verbose_name='MQTT Topic Prefix')),
-                ('mqtt_client_id', models.CharField(default=core.models.generate_mqtt_client_id, help_text='Identificativo univoco per il client MQTT', max_length=255, unique=True, verbose_name='MQTT Client ID')),
-                ('use_ssl', models.BooleanField(default=True, verbose_name='Usa SSL/TLS')),
-                ('cer_configuration', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='plants', to='core.cerconfiguration')),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='plants', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "raw_address",
+                    models.TextField(
+                        blank=True,
+                        help_text="Indirizzo originale non processato dall'attestato Gaudì",
+                        null=True,
+                        verbose_name="Indirizzo grezzo",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=255, verbose_name="Nome impianto"),
+                ),
+                (
+                    "pod_code",
+                    models.CharField(
+                        max_length=50, unique=True, verbose_name="Codice POD"
+                    ),
+                ),
+                (
+                    "plant_type",
+                    models.CharField(
+                        choices=[
+                            ("CONSUMER", "Consumatore"),
+                            ("PRODUCER", "Produttore"),
+                            ("PROSUMER", "Prosumer"),
+                        ],
+                        max_length=20,
+                        verbose_name="Tipologia",
+                    ),
+                ),
+                (
+                    "nominal_power",
+                    models.FloatField(verbose_name="Potenza nominale (kW)"),
+                ),
+                (
+                    "connection_voltage",
+                    models.CharField(
+                        max_length=50, verbose_name="Tensione connessione"
+                    ),
+                ),
+                (
+                    "installation_date",
+                    models.DateField(verbose_name="Data installazione"),
+                ),
+                ("address", models.CharField(max_length=255, verbose_name="Indirizzo")),
+                ("city", models.CharField(max_length=100, verbose_name="Città")),
+                ("zip_code", models.CharField(max_length=5, verbose_name="CAP")),
+                ("province", models.CharField(max_length=2, verbose_name="Provincia")),
+                (
+                    "latitude",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=6,
+                        max_digits=9,
+                        null=True,
+                        verbose_name="Latitudine",
+                    ),
+                ),
+                (
+                    "longitude",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=6,
+                        max_digits=9,
+                        null=True,
+                        verbose_name="Longitudine",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attivo")),
+                (
+                    "mqtt_connected",
+                    models.BooleanField(default=False, verbose_name="Connesso MQTT"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "gaudi_request_code",
+                    models.CharField(
+                        blank=True,
+                        max_length=50,
+                        null=True,
+                        verbose_name="Codice richiesta Gaudì",
+                    ),
+                ),
+                (
+                    "censimp_code",
+                    models.CharField(
+                        blank=True,
+                        max_length=50,
+                        null=True,
+                        verbose_name="Codice CENSIMP",
+                    ),
+                ),
+                (
+                    "sapr_code",
+                    models.CharField(
+                        blank=True,
+                        help_text="Codice SAPR nell'attestazione Gaudì",
+                        max_length=50,
+                        null=True,
+                        verbose_name="Codice SAPR",
+                    ),
+                ),
+                (
+                    "validation_date",
+                    models.DateField(
+                        blank=True,
+                        help_text="Data di convalida dell'attestazione Gaudì",
+                        null=True,
+                        verbose_name="Data Convalida Gaudì",
+                    ),
+                ),
+                (
+                    "gaudi_voltage",
+                    models.IntegerField(
+                        blank=True,
+                        help_text="Tensione di generazione dichiarata in Gaudì (V)",
+                        null=True,
+                        verbose_name="Tensione Gaudì",
+                    ),
+                ),
+                (
+                    "expected_yearly_production",
+                    models.IntegerField(
+                        blank=True,
+                        help_text="Produzione lorda media annua attesa in kWh",
+                        null=True,
+                        verbose_name="Produzione Annua Attesa",
+                    ),
+                ),
+                (
+                    "expected_operation_date",
+                    models.DateField(
+                        blank=True,
+                        help_text="Data di presunto esercizio dichiarata in Gaudì",
+                        null=True,
+                        verbose_name="Data Presunto Esercizio",
+                    ),
+                ),
+                (
+                    "gaudi_verified",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Indica se i dati sono stati verificati con attestazione Gaudì",
+                        verbose_name="Verificato Gaudì",
+                    ),
+                ),
+                (
+                    "gaudi_verification_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Data in cui è stato verificato l'attestato Gaudì",
+                        null=True,
+                        verbose_name="Data verifica Gaudì",
+                    ),
+                ),
+                (
+                    "gaudi_version",
+                    models.IntegerField(
+                        blank=True,
+                        help_text="Numero versione dell'attestato Gaudì",
+                        null=True,
+                        verbose_name="Versione Gaudì",
+                    ),
+                ),
+                (
+                    "section_type",
+                    models.CharField(
+                        blank=True,
+                        help_text="Tipo di sezione dell'impianto (es. SILICIO MONOCRISTALLINO)",
+                        max_length=50,
+                        null=True,
+                        verbose_name="Tipo Sezione",
+                    ),
+                ),
+                (
+                    "section_id",
+                    models.CharField(
+                        blank=True,
+                        help_text="Identificativo della sezione nel sistema CENSIMP",
+                        max_length=50,
+                        null=True,
+                        verbose_name="ID Sezione CENSIMP",
+                    ),
+                ),
+                (
+                    "group_id",
+                    models.CharField(
+                        blank=True,
+                        help_text="Identificativo del gruppo nel sistema CENSIMP",
+                        max_length=50,
+                        null=True,
+                        verbose_name="ID Gruppo CENSIMP",
+                    ),
+                ),
+                (
+                    "generator_group_id",
+                    models.CharField(
+                        blank=True,
+                        help_text="Numero identificativo del gruppo generatore",
+                        max_length=50,
+                        null=True,
+                        verbose_name="Numero Gruppo",
+                    ),
+                ),
+                (
+                    "remote_disconnect",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Indica se l'impianto è predisposto per il teledistacco",
+                        verbose_name="Teledistacco",
+                    ),
+                ),
+                (
+                    "active_power",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Potenza attiva nominale del generatore (kW)",
+                        null=True,
+                        verbose_name="Potenza Attiva Nominale",
+                    ),
+                ),
+                (
+                    "net_power",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Potenza efficiente netta dell'impianto (kW)",
+                        null=True,
+                        verbose_name="Potenza Efficiente Netta",
+                    ),
+                ),
+                (
+                    "gross_power",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Potenza efficiente lorda dell'impianto (kW)",
+                        null=True,
+                        verbose_name="Potenza Efficiente Lorda",
+                    ),
+                ),
+                (
+                    "grid_feed_type",
+                    models.CharField(
+                        choices=[("TOTAL", "Totale"), ("PARTIAL", "Parziale")],
+                        default="TOTAL",
+                        help_text="Tipo di immissione in rete",
+                        max_length=10,
+                        verbose_name="Tipo Immissione",
+                    ),
+                ),
+                (
+                    "has_storage",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Indica se l'impianto dispone di un sistema di accumulo",
+                        verbose_name="Sistema Accumulo",
+                    ),
+                ),
+                (
+                    "gaudi_certificate_uploaded",
+                    models.BooleanField(
+                        default=False, verbose_name="Attestato GAUDÌ caricato"
+                    ),
+                ),
+                (
+                    "gaudi_upload_date",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Data caricamento GAUDÌ"
+                    ),
+                ),
+                (
+                    "mqtt_broker",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("mqtt_port", models.IntegerField(default=1883)),
+                (
+                    "mqtt_username",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "mqtt_password",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "mqtt_topic_prefix",
+                    models.CharField(
+                        default="cercollettiva/",
+                        help_text="Prefisso per i topic MQTT (es. cercollettiva/pod_code)",
+                        max_length=255,
+                        verbose_name="MQTT Topic Prefix",
+                    ),
+                ),
+                (
+                    "mqtt_client_id",
+                    models.CharField(
+                        default=core.models.generate_mqtt_client_id,
+                        help_text="Identificativo univoco per il client MQTT",
+                        max_length=255,
+                        unique=True,
+                        verbose_name="MQTT Client ID",
+                    ),
+                ),
+                (
+                    "use_ssl",
+                    models.BooleanField(default=True, verbose_name="Usa SSL/TLS"),
+                ),
+                (
+                    "cer_configuration",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="plants",
+                        to="core.cerconfiguration",
+                    ),
+                ),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="plants",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Impianto',
-                'verbose_name_plural': 'Impianti',
-                'ordering': ['-created_at'],
+                "verbose_name": "Impianto",
+                "verbose_name_plural": "Impianti",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Alert',
+            name="Alert",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(max_length=20)),
-                ('severity', models.CharField(max_length=20)),
-                ('message', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('cer_configuration', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='alerts', to='core.cerconfiguration')),
-                ('plant', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='alerts', to='core.plant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("status", models.CharField(max_length=20)),
+                ("severity", models.CharField(max_length=20)),
+                ("message", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "cer_configuration",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="alerts",
+                        to="core.cerconfiguration",
+                    ),
+                ),
+                (
+                    "plant",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="alerts",
+                        to="core.plant",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='PlantDocument',
+            name="PlantDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('document', models.FileField(upload_to='plant_documents/')),
-                ('document_type', models.CharField(choices=[('TECH', 'Documentazione Tecnica'), ('LEGAL', 'Documentazione Legale'), ('CERT', 'Certificazioni'), ('OTHER', 'Altro')], max_length=5)),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('plant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='core.plant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("document", models.FileField(upload_to="plant_documents/")),
+                (
+                    "document_type",
+                    models.CharField(
+                        choices=[
+                            ("TECH", "Documentazione Tecnica"),
+                            ("LEGAL", "Documentazione Legale"),
+                            ("CERT", "Certificazioni"),
+                            ("OTHER", "Altro"),
+                        ],
+                        max_length=5,
+                    ),
+                ),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "plant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="documents",
+                        to="core.plant",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-uploaded_at'],
+                "ordering": ["-uploaded_at"],
             },
         ),
         migrations.CreateModel(
-            name='PlantMeasurement',
+            name="PlantMeasurement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(db_index=True)),
-                ('value', models.FloatField()),
-                ('variable_type', models.CharField(max_length=50)),
-                ('quality', models.CharField(default='GOOD', max_length=50)),
-                ('plant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='measurements', to='core.plant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(db_index=True)),
+                ("value", models.FloatField()),
+                ("variable_type", models.CharField(max_length=50)),
+                ("quality", models.CharField(default="GOOD", max_length=50)),
+                (
+                    "plant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="measurements",
+                        to="core.plant",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
+                "ordering": ["-timestamp"],
             },
         ),
         migrations.CreateModel(
-            name='GSEIncomeTracking',
+            name="GSEIncomeTracking",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('payment_type', models.CharField(choices=[('ADVANCE', 'Acconto Mensile'), ('SETTLEMENT', 'Conguaglio Finale'), ('ADJUSTMENT', 'Rettifica')], max_length=20, verbose_name='Tipo Pagamento')),
-                ('reference_month', models.DateField(help_text='Mese a cui si riferisce il pagamento', verbose_name='Mese di Riferimento')),
-                ('reference_year', models.IntegerField(help_text='Anno a cui si riferisce il pagamento', verbose_name='Anno di Riferimento')),
-                ('gross_amount', models.DecimalField(decimal_places=2, help_text='Importo lordo ricevuto dal GSE', max_digits=12, verbose_name='Importo Lordo GSE (€)')),
-                ('net_amount', models.DecimalField(decimal_places=2, help_text='Importo netto dopo detrazioni', max_digits=12, verbose_name='Importo Netto (€)')),
-                ('taxes_amount', models.DecimalField(decimal_places=2, default=0, help_text='Imposte, contributi e altre detrazioni', max_digits=12, verbose_name='Imposte e Detrazioni (€)')),
-                ('expected_payment_date', models.DateField(blank=True, null=True, verbose_name='Data Attesa Pagamento')),
-                ('actual_payment_date', models.DateField(blank=True, null=True, verbose_name='Data Pagamento Effettivo')),
-                ('payment_status', models.CharField(choices=[('EXPECTED', 'Atteso'), ('RECEIVED', 'Ricevuto'), ('DELAYED', 'In Ritardo'), ('DISPUTED', 'Contestato')], default='EXPECTED', max_length=20, verbose_name='Stato Pagamento')),
-                ('gse_practice_number', models.CharField(blank=True, help_text='Numero identificativo della pratica GSE', max_length=50, verbose_name='Numero Pratica GSE')),
-                ('shared_energy_kwh', models.DecimalField(blank=True, decimal_places=2, help_text='kWh di energia condivisa nel periodo', max_digits=12, null=True, verbose_name='Energia Condivisa (kWh)')),
-                ('energy_tariff', models.DecimalField(blank=True, decimal_places=4, help_text="Tariffa applicata per l'energia condivisa", max_digits=8, null=True, verbose_name='Tariffa Energia (€/kWh)')),
-                ('notes', models.TextField(blank=True, help_text='Note aggiuntive sul pagamento', verbose_name='Note')),
-                ('gse_communication', models.FileField(blank=True, help_text='File della comunicazione GSE', null=True, upload_to='gse/communications/%Y/%m/', verbose_name='Comunicazione GSE')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Creato il')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Aggiornato il')),
-                ('cer_configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gse_incomes', to='core.cerconfiguration', verbose_name='Configurazione CER')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "payment_type",
+                    models.CharField(
+                        choices=[
+                            ("ADVANCE", "Acconto Mensile"),
+                            ("SETTLEMENT", "Conguaglio Finale"),
+                            ("ADJUSTMENT", "Rettifica"),
+                        ],
+                        max_length=20,
+                        verbose_name="Tipo Pagamento",
+                    ),
+                ),
+                (
+                    "reference_month",
+                    models.DateField(
+                        help_text="Mese a cui si riferisce il pagamento",
+                        verbose_name="Mese di Riferimento",
+                    ),
+                ),
+                (
+                    "reference_year",
+                    models.IntegerField(
+                        help_text="Anno a cui si riferisce il pagamento",
+                        verbose_name="Anno di Riferimento",
+                    ),
+                ),
+                (
+                    "gross_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Importo lordo ricevuto dal GSE",
+                        max_digits=12,
+                        verbose_name="Importo Lordo GSE (€)",
+                    ),
+                ),
+                (
+                    "net_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Importo netto dopo detrazioni",
+                        max_digits=12,
+                        verbose_name="Importo Netto (€)",
+                    ),
+                ),
+                (
+                    "taxes_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0,
+                        help_text="Imposte, contributi e altre detrazioni",
+                        max_digits=12,
+                        verbose_name="Imposte e Detrazioni (€)",
+                    ),
+                ),
+                (
+                    "expected_payment_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Data Attesa Pagamento"
+                    ),
+                ),
+                (
+                    "actual_payment_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Data Pagamento Effettivo"
+                    ),
+                ),
+                (
+                    "payment_status",
+                    models.CharField(
+                        choices=[
+                            ("EXPECTED", "Atteso"),
+                            ("RECEIVED", "Ricevuto"),
+                            ("DELAYED", "In Ritardo"),
+                            ("DISPUTED", "Contestato"),
+                        ],
+                        default="EXPECTED",
+                        max_length=20,
+                        verbose_name="Stato Pagamento",
+                    ),
+                ),
+                (
+                    "gse_practice_number",
+                    models.CharField(
+                        blank=True,
+                        help_text="Numero identificativo della pratica GSE",
+                        max_length=50,
+                        verbose_name="Numero Pratica GSE",
+                    ),
+                ),
+                (
+                    "shared_energy_kwh",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        help_text="kWh di energia condivisa nel periodo",
+                        max_digits=12,
+                        null=True,
+                        verbose_name="Energia Condivisa (kWh)",
+                    ),
+                ),
+                (
+                    "energy_tariff",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=4,
+                        help_text="Tariffa applicata per l'energia condivisa",
+                        max_digits=8,
+                        null=True,
+                        verbose_name="Tariffa Energia (€/kWh)",
+                    ),
+                ),
+                (
+                    "notes",
+                    models.TextField(
+                        blank=True,
+                        help_text="Note aggiuntive sul pagamento",
+                        verbose_name="Note",
+                    ),
+                ),
+                (
+                    "gse_communication",
+                    models.FileField(
+                        blank=True,
+                        help_text="File della comunicazione GSE",
+                        null=True,
+                        upload_to="gse/communications/%Y/%m/",
+                        verbose_name="Comunicazione GSE",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Creato il"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Aggiornato il"),
+                ),
+                (
+                    "cer_configuration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="gse_incomes",
+                        to="core.cerconfiguration",
+                        verbose_name="Configurazione CER",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Tracciamento Incassi GSE',
-                'verbose_name_plural': 'Tracciamento Incassi GSE',
-                'ordering': ['-reference_year', '-reference_month', '-created_at'],
-                'indexes': [models.Index(fields=['cer_configuration', '-reference_year', '-reference_month'], name='core_gseinc_cer_con_2825dd_idx'), models.Index(fields=['payment_status', 'expected_payment_date'], name='core_gseinc_payment_173dd9_idx')],
-                'unique_together': {('cer_configuration', 'payment_type', 'reference_month', 'reference_year')},
+                "verbose_name": "Tracciamento Incassi GSE",
+                "verbose_name_plural": "Tracciamento Incassi GSE",
+                "ordering": ["-reference_year", "-reference_month", "-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=[
+                            "cer_configuration",
+                            "-reference_year",
+                            "-reference_month",
+                        ],
+                        name="core_gseinc_cer_con_2825dd_idx",
+                    ),
+                    models.Index(
+                        fields=["payment_status", "expected_payment_date"],
+                        name="core_gseinc_payment_173dd9_idx",
+                    ),
+                ],
+                "unique_together": {
+                    (
+                        "cer_configuration",
+                        "payment_type",
+                        "reference_month",
+                        "reference_year",
+                    )
+                },
             },
         ),
         migrations.CreateModel(
-            name='MemberRegistry',
+            name="MemberRegistry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('progressive_number', models.PositiveIntegerField(verbose_name='Numero Progressivo')),
-                ('registration_date', models.DateTimeField(auto_now_add=True, verbose_name='Data Registrazione')),
-                ('notes', models.TextField(blank=True, help_text='Note aggiuntive sulla registrazione', verbose_name='Note')),
-                ('cer_configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='member_registry', to='core.cerconfiguration')),
-                ('membership', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='registry_entry', to='core.cermembership')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "progressive_number",
+                    models.PositiveIntegerField(verbose_name="Numero Progressivo"),
+                ),
+                (
+                    "registration_date",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Data Registrazione"
+                    ),
+                ),
+                (
+                    "notes",
+                    models.TextField(
+                        blank=True,
+                        help_text="Note aggiuntive sulla registrazione",
+                        verbose_name="Note",
+                    ),
+                ),
+                (
+                    "cer_configuration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="member_registry",
+                        to="core.cerconfiguration",
+                    ),
+                ),
+                (
+                    "membership",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="registry_entry",
+                        to="core.cermembership",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Registro Soci',
-                'verbose_name_plural': 'Registro Soci',
-                'ordering': ['cer_configuration', 'progressive_number'],
-                'indexes': [models.Index(fields=['cer_configuration', 'progressive_number'], name='core_member_cer_con_5f4734_idx')],
-                'unique_together': {('cer_configuration', 'progressive_number')},
+                "verbose_name": "Registro Soci",
+                "verbose_name_plural": "Registro Soci",
+                "ordering": ["cer_configuration", "progressive_number"],
+                "indexes": [
+                    models.Index(
+                        fields=["cer_configuration", "progressive_number"],
+                        name="core_member_cer_con_5f4734_idx",
+                    )
+                ],
+                "unique_together": {("cer_configuration", "progressive_number")},
             },
         ),
         migrations.CreateModel(
-            name='MembershipCard',
+            name="MembershipCard",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('card_number', models.CharField(help_text='Numero identificativo univoco della tessera', max_length=20, unique=True, verbose_name='Numero Tessera')),
-                ('issue_date', models.DateTimeField(auto_now_add=True, verbose_name='Data Emissione')),
-                ('expiry_date', models.DateTimeField(help_text='Data di scadenza della tessera', verbose_name='Data Scadenza')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attiva')),
-                ('membership_fee_paid', models.BooleanField(default=False, verbose_name='Quota Pagata')),
-                ('fee_payment_date', models.DateTimeField(blank=True, null=True, verbose_name='Data Pagamento Quota')),
-                ('fee_amount', models.DecimalField(decimal_places=2, default=0, help_text='Quota associativa in euro', max_digits=8, verbose_name='Importo Quota')),
-                ('payment_method', models.CharField(blank=True, choices=[('CASH', 'Contanti'), ('BANK_TRANSFER', 'Bonifico'), ('CARD', 'Carta'), ('OTHER', 'Altro')], max_length=50, verbose_name='Metodo Pagamento')),
-                ('membership', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='card', to='core.cermembership')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "card_number",
+                    models.CharField(
+                        help_text="Numero identificativo univoco della tessera",
+                        max_length=20,
+                        unique=True,
+                        verbose_name="Numero Tessera",
+                    ),
+                ),
+                (
+                    "issue_date",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Data Emissione"
+                    ),
+                ),
+                (
+                    "expiry_date",
+                    models.DateTimeField(
+                        help_text="Data di scadenza della tessera",
+                        verbose_name="Data Scadenza",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attiva")),
+                (
+                    "membership_fee_paid",
+                    models.BooleanField(default=False, verbose_name="Quota Pagata"),
+                ),
+                (
+                    "fee_payment_date",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Data Pagamento Quota"
+                    ),
+                ),
+                (
+                    "fee_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0,
+                        help_text="Quota associativa in euro",
+                        max_digits=8,
+                        verbose_name="Importo Quota",
+                    ),
+                ),
+                (
+                    "payment_method",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("CASH", "Contanti"),
+                            ("BANK_TRANSFER", "Bonifico"),
+                            ("CARD", "Carta"),
+                            ("OTHER", "Altro"),
+                        ],
+                        max_length=50,
+                        verbose_name="Metodo Pagamento",
+                    ),
+                ),
+                (
+                    "membership",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="card",
+                        to="core.cermembership",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Tessera Associativa',
-                'verbose_name_plural': 'Tessere Associative',
-                'ordering': ['-issue_date'],
-                'indexes': [models.Index(fields=['card_number'], name='core_member_card_nu_38cc12_idx'), models.Index(fields=['is_active', 'expiry_date'], name='core_member_is_acti_5000dd_idx')],
+                "verbose_name": "Tessera Associativa",
+                "verbose_name_plural": "Tessere Associative",
+                "ordering": ["-issue_date"],
+                "indexes": [
+                    models.Index(
+                        fields=["card_number"], name="core_member_card_nu_38cc12_idx"
+                    ),
+                    models.Index(
+                        fields=["is_active", "expiry_date"],
+                        name="core_member_is_acti_5000dd_idx",
+                    ),
+                ],
             },
         ),
         migrations.AddIndex(
-            model_name='plant',
-            index=models.Index(fields=['latitude', 'longitude'], name='core_plant_latitud_9034a5_idx'),
+            model_name="plant",
+            index=models.Index(
+                fields=["latitude", "longitude"], name="core_plant_latitud_9034a5_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='alert',
-            index=models.Index(fields=['status', 'created_at'], name='core_alert_status_b34d9c_idx'),
+            model_name="alert",
+            index=models.Index(
+                fields=["status", "created_at"], name="core_alert_status_b34d9c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='alert',
-            index=models.Index(fields=['plant', 'status'], name='core_alert_plant_i_8231cc_idx'),
+            model_name="alert",
+            index=models.Index(
+                fields=["plant", "status"], name="core_alert_plant_i_8231cc_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='alert',
-            index=models.Index(fields=['cer_configuration', 'status'], name='core_alert_cer_con_e7a092_idx'),
+            model_name="alert",
+            index=models.Index(
+                fields=["cer_configuration", "status"],
+                name="core_alert_cer_con_e7a092_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='plantmeasurement',
-            index=models.Index(fields=['plant', '-timestamp'], name='core_plantm_plant_i_38340a_idx'),
+            model_name="plantmeasurement",
+            index=models.Index(
+                fields=["plant", "-timestamp"], name="core_plantm_plant_i_38340a_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='plantmeasurement',
-            index=models.Index(fields=['variable_type', '-timestamp'], name='core_plantm_variabl_79102c_idx'),
+            model_name="plantmeasurement",
+            index=models.Index(
+                fields=["variable_type", "-timestamp"],
+                name="core_plantm_variabl_79102c_idx",
+            ),
         ),
     ]

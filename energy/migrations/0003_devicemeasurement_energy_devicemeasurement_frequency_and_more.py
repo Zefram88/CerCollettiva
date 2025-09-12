@@ -7,23 +7,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('energy', '0002_deviceconfiguration_name_mqttbroker_keepalive_and_more'),
+        ("energy", "0002_deviceconfiguration_name_mqttbroker_keepalive_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='devicemeasurement',
-            name='energy',
-            field=models.FloatField(default=0, help_text='Energia in kWh', validators=[django.core.validators.MinValueValidator(0)]),
+            model_name="devicemeasurement",
+            name="energy",
+            field=models.FloatField(
+                default=0,
+                help_text="Energia in kWh",
+                validators=[django.core.validators.MinValueValidator(0)],
+            ),
         ),
         migrations.AddField(
-            model_name='devicemeasurement',
-            name='frequency',
-            field=models.FloatField(blank=True, default=50, help_text='Frequenza in Hz', null=True, validators=[django.core.validators.MinValueValidator(45), django.core.validators.MaxValueValidator(65)]),
+            model_name="devicemeasurement",
+            name="frequency",
+            field=models.FloatField(
+                blank=True,
+                default=50,
+                help_text="Frequenza in Hz",
+                null=True,
+                validators=[
+                    django.core.validators.MinValueValidator(45),
+                    django.core.validators.MaxValueValidator(65),
+                ],
+            ),
         ),
         migrations.AddField(
-            model_name='devicemeasurement',
-            name='raw_data',
-            field=models.JSONField(blank=True, default=dict, help_text='Dati grezzi in formato JSON'),
+            model_name="devicemeasurement",
+            name="raw_data",
+            field=models.JSONField(
+                blank=True, default=dict, help_text="Dati grezzi in formato JSON"
+            ),
         ),
     ]

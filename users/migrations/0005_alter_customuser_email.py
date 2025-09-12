@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_add_gdpr_timestamp_fields'),
+        ("users", "0004_add_gdpr_timestamp_fields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='email',
-            field=models.EmailField(help_text='Required. Enter a valid email address.', max_length=254, unique=True, verbose_name='email address'),
+            model_name="customuser",
+            name="email",
+            field=models.EmailField(
+                help_text="Required. Enter a valid email address.",
+                max_length=254,
+                unique=True,
+                verbose_name="email address",
+            ),
         ),
     ]

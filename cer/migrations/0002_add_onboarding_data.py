@@ -6,28 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cer', '0001_initial'),
+        ("cer", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameIndex(
-            model_name='memberprofile',
-            new_name='cer_memberp_fiscal__5be0d7_idx',
-            old_name='cer_memberp_fiscal__index',
+            model_name="memberprofile",
+            new_name="cer_memberp_fiscal__5be0d7_idx",
+            old_name="cer_memberp_fiscal__index",
         ),
         migrations.RenameIndex(
-            model_name='memberprofile',
-            new_name='cer_memberp_vat_num_96d863_idx',
-            old_name='cer_memberp_vat_num_index',
+            model_name="memberprofile",
+            new_name="cer_memberp_vat_num_96d863_idx",
+            old_name="cer_memberp_vat_num_index",
         ),
         migrations.RenameIndex(
-            model_name='memberprofile',
-            new_name='cer_memberp_created_2fa493_idx',
-            old_name='cer_memberp_created_index',
+            model_name="memberprofile",
+            new_name="cer_memberp_created_2fa493_idx",
+            old_name="cer_memberp_created_index",
         ),
         migrations.AddField(
-            model_name='memberprofile',
-            name='onboarding_data',
-            field=models.JSONField(blank=True, default=dict, help_text='Dati temporanei del wizard di onboarding', verbose_name='Dati Onboarding'),
+            model_name="memberprofile",
+            name="onboarding_data",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Dati temporanei del wizard di onboarding",
+                verbose_name="Dati Onboarding",
+            ),
         ),
     ]

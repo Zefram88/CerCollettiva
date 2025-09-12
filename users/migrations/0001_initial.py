@@ -11,59 +11,282 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
+        ("auth", "0012_alter_user_first_name_max_length"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CustomUser',
+            name="CustomUser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username')),
-                ('first_name', models.CharField(blank=True, max_length=150, verbose_name='first name')),
-                ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
-                ('email', models.EmailField(blank=True, max_length=254, verbose_name='email address')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('legal_type', models.CharField(choices=[('PRIVATE', 'Privato'), ('BUSINESS', 'Azienda'), ('ASSOCIATION', 'Associazione'), ('CHURCH', 'Ente Religioso'), ('PUBLIC', 'Ente Pubblico')], default='PRIVATE', max_length=20, verbose_name='Tipo Soggetto')),
-                ('profit_type', models.CharField(choices=[('PROFIT', 'Con scopo di lucro'), ('NON_PROFIT', 'Senza scopo di lucro')], default='NON_PROFIT', max_length=20, verbose_name='Finalità')),
-                ('fiscal_code', models.CharField(blank=True, max_length=16, null=True, verbose_name='Codice Fiscale')),
-                ('address', models.CharField(blank=True, max_length=255, null=True, verbose_name='Indirizzo')),
-                ('phone', models.CharField(blank=True, max_length=20, null=True, verbose_name='Telefono')),
-                ('vat_number', models.CharField(blank=True, help_text='11 caratteri per la partita IVA', max_length=11, null=True, verbose_name='Partita IVA')),
-                ('legal_name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Denominazione')),
-                ('pec', models.EmailField(blank=True, max_length=254, null=True, verbose_name='PEC')),
-                ('sdi_code', models.CharField(blank=True, max_length=7, null=True, verbose_name='Codice SDI')),
-                ('registration_number', models.CharField(blank=True, max_length=50, null=True, verbose_name='Numero Registrazione')),
-                ('statute_date', models.DateField(blank=True, null=True, verbose_name='Data Statuto')),
-                ('religious_entity_code', models.CharField(blank=True, max_length=50, null=True, verbose_name='Codice Ente Religioso')),
-                ('privacy_accepted', models.BooleanField(default=False, help_text="Indica se l'utente ha accettato la privacy policy", verbose_name='Privacy Accettata')),
-                ('privacy_acceptance_date', models.DateTimeField(blank=True, null=True, verbose_name='Data Accettazione Privacy')),
-                ('privacy_last_update', models.DateTimeField(blank=True, null=True, verbose_name='Ultimo Aggiornamento Privacy')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "is_superuser",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        verbose_name="superuser status",
+                    ),
+                ),
+                (
+                    "username",
+                    models.CharField(
+                        error_messages={
+                            "unique": "A user with that username already exists."
+                        },
+                        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        max_length=150,
+                        unique=True,
+                        validators=[
+                            django.contrib.auth.validators.UnicodeUsernameValidator()
+                        ],
+                        verbose_name="username",
+                    ),
+                ),
+                (
+                    "first_name",
+                    models.CharField(
+                        blank=True, max_length=150, verbose_name="first name"
+                    ),
+                ),
+                (
+                    "last_name",
+                    models.CharField(
+                        blank=True, max_length=150, verbose_name="last name"
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        blank=True, max_length=254, verbose_name="email address"
+                    ),
+                ),
+                (
+                    "is_staff",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates whether the user can log into this admin site.",
+                        verbose_name="staff status",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                        verbose_name="active",
+                    ),
+                ),
+                (
+                    "date_joined",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="date joined"
+                    ),
+                ),
+                (
+                    "legal_type",
+                    models.CharField(
+                        choices=[
+                            ("PRIVATE", "Privato"),
+                            ("BUSINESS", "Azienda"),
+                            ("ASSOCIATION", "Associazione"),
+                            ("CHURCH", "Ente Religioso"),
+                            ("PUBLIC", "Ente Pubblico"),
+                        ],
+                        default="PRIVATE",
+                        max_length=20,
+                        verbose_name="Tipo Soggetto",
+                    ),
+                ),
+                (
+                    "profit_type",
+                    models.CharField(
+                        choices=[
+                            ("PROFIT", "Con scopo di lucro"),
+                            ("NON_PROFIT", "Senza scopo di lucro"),
+                        ],
+                        default="NON_PROFIT",
+                        max_length=20,
+                        verbose_name="Finalità",
+                    ),
+                ),
+                (
+                    "fiscal_code",
+                    models.CharField(
+                        blank=True,
+                        max_length=16,
+                        null=True,
+                        verbose_name="Codice Fiscale",
+                    ),
+                ),
+                (
+                    "address",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Indirizzo"
+                    ),
+                ),
+                (
+                    "phone",
+                    models.CharField(
+                        blank=True, max_length=20, null=True, verbose_name="Telefono"
+                    ),
+                ),
+                (
+                    "vat_number",
+                    models.CharField(
+                        blank=True,
+                        help_text="11 caratteri per la partita IVA",
+                        max_length=11,
+                        null=True,
+                        verbose_name="Partita IVA",
+                    ),
+                ),
+                (
+                    "legal_name",
+                    models.CharField(
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Denominazione",
+                    ),
+                ),
+                (
+                    "pec",
+                    models.EmailField(
+                        blank=True, max_length=254, null=True, verbose_name="PEC"
+                    ),
+                ),
+                (
+                    "sdi_code",
+                    models.CharField(
+                        blank=True, max_length=7, null=True, verbose_name="Codice SDI"
+                    ),
+                ),
+                (
+                    "registration_number",
+                    models.CharField(
+                        blank=True,
+                        max_length=50,
+                        null=True,
+                        verbose_name="Numero Registrazione",
+                    ),
+                ),
+                (
+                    "statute_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Data Statuto"
+                    ),
+                ),
+                (
+                    "religious_entity_code",
+                    models.CharField(
+                        blank=True,
+                        max_length=50,
+                        null=True,
+                        verbose_name="Codice Ente Religioso",
+                    ),
+                ),
+                (
+                    "privacy_accepted",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Indica se l'utente ha accettato la privacy policy",
+                        verbose_name="Privacy Accettata",
+                    ),
+                ),
+                (
+                    "privacy_acceptance_date",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Data Accettazione Privacy"
+                    ),
+                ),
+                (
+                    "privacy_last_update",
+                    models.DateTimeField(
+                        blank=True,
+                        null=True,
+                        verbose_name="Ultimo Aggiornamento Privacy",
+                    ),
+                ),
+                (
+                    "groups",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.group",
+                        verbose_name="groups",
+                    ),
+                ),
+                (
+                    "user_permissions",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Specific permissions for this user.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.permission",
+                        verbose_name="user permissions",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Utente',
-                'verbose_name_plural': 'Utenti',
-                'ordering': ['username'],
-                'permissions': [('can_view_all_users', 'Può vedere tutti gli utenti'), ('can_manage_users', 'Può gestire gli utenti'), ('can_approve_users', 'Può approvare gli utenti')],
-                'indexes': [models.Index(fields=['legal_type'], name='users_custo_legal_t_54ba15_idx'), models.Index(fields=['fiscal_code'], name='users_custo_fiscal__3d2665_idx'), models.Index(fields=['vat_number'], name='users_custo_vat_num_bbdc6f_idx')],
+                "verbose_name": "Utente",
+                "verbose_name_plural": "Utenti",
+                "ordering": ["username"],
+                "permissions": [
+                    ("can_view_all_users", "Può vedere tutti gli utenti"),
+                    ("can_manage_users", "Può gestire gli utenti"),
+                    ("can_approve_users", "Può approvare gli utenti"),
+                ],
+                "indexes": [
+                    models.Index(
+                        fields=["legal_type"], name="users_custo_legal_t_54ba15_idx"
+                    ),
+                    models.Index(
+                        fields=["fiscal_code"], name="users_custo_fiscal__3d2665_idx"
+                    ),
+                    models.Index(
+                        fields=["vat_number"], name="users_custo_vat_num_bbdc6f_idx"
+                    ),
+                ],
             },
             managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
         migrations.AddConstraint(
-            model_name='customuser',
-            constraint=models.CheckConstraint(check=models.Q(('legal_type__in', ['PRIVATE', 'BUSINESS', 'ASSOCIATION', 'CHURCH', 'PUBLIC'])), name='valid_legal_type'),
+            model_name="customuser",
+            constraint=models.CheckConstraint(
+                check=models.Q(
+                    (
+                        "legal_type__in",
+                        ["PRIVATE", "BUSINESS", "ASSOCIATION", "CHURCH", "PUBLIC"],
+                    )
+                ),
+                name="valid_legal_type",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='customuser',
-            constraint=models.CheckConstraint(check=models.Q(('profit_type__in', ['PROFIT', 'NON_PROFIT'])), name='valid_profit_type'),
+            model_name="customuser",
+            constraint=models.CheckConstraint(
+                check=models.Q(("profit_type__in", ["PROFIT", "NON_PROFIT"])),
+                name="valid_profit_type",
+            ),
         ),
     ]

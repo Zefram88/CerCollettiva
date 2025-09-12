@@ -15,327 +15,998 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '__first__'),
+        ("core", "__first__"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MQTTBroker',
+            name="MQTTBroker",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Nome configurazione')),
-                ('host', models.CharField(max_length=255, verbose_name='Host')),
-                ('port', models.IntegerField(default=1883, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)], verbose_name='Porta')),
-                ('username', models.CharField(blank=True, max_length=255, null=True, verbose_name='Username')),
-                ('password', models.CharField(blank=True, max_length=255, null=True, verbose_name='Password')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
-                ('use_tls', models.BooleanField(default=True, verbose_name='Usa TLS')),
-                ('verify_cert', models.BooleanField(default=True, verbose_name='Verifica certificato')),
-                ('ca_cert', models.FileField(blank=True, null=True, upload_to='mqtt/certs/', verbose_name='Certificato CA')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('notes', models.TextField(blank=True, verbose_name='Note')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=100, verbose_name="Nome configurazione"
+                    ),
+                ),
+                ("host", models.CharField(max_length=255, verbose_name="Host")),
+                (
+                    "port",
+                    models.IntegerField(
+                        default=1883,
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(65535),
+                        ],
+                        verbose_name="Porta",
+                    ),
+                ),
+                (
+                    "username",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Username"
+                    ),
+                ),
+                (
+                    "password",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Password"
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attivo")),
+                ("use_tls", models.BooleanField(default=True, verbose_name="Usa TLS")),
+                (
+                    "verify_cert",
+                    models.BooleanField(
+                        default=True, verbose_name="Verifica certificato"
+                    ),
+                ),
+                (
+                    "ca_cert",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="mqtt/certs/",
+                        verbose_name="Certificato CA",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("notes", models.TextField(blank=True, verbose_name="Note")),
             ],
             options={
-                'verbose_name': 'Configurazione Broker MQTT',
-                'verbose_name_plural': 'Configurazioni Broker MQTT',
-                'db_table': 'energy_mqtt_broker',
+                "verbose_name": "Configurazione Broker MQTT",
+                "verbose_name_plural": "Configurazioni Broker MQTT",
+                "db_table": "energy_mqtt_broker",
             },
         ),
         migrations.CreateModel(
-            name='DeviceConfiguration',
+            name="DeviceConfiguration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('device_id', models.CharField(max_length=100, unique=True)),
-                ('device_type', models.CharField(choices=[('SHELLY_PRO_3EM', 'Shelly Pro 3EM'), ('SHELLY_PRO_EM', 'Shelly Pro EM'), ('SHELLY_EM3', 'Shelly 3EM'), ('SHELLY_EM', 'Shelly EM'), ('SHELLY_PLUS_PM', 'Shelly Plus PM'), ('CUSTOM', 'Custom')], default='CUSTOM', max_length=50)),
-                ('vendor', models.CharField(choices=[('SHELLY', 'Shelly'), ('CUSTOM', 'Custom')], default='CUSTOM', max_length=50)),
-                ('model', models.CharField(default='custom', max_length=50)),
-                ('last_energy_total', models.FloatField(blank=True, help_text='Ultimo valore di energia totale ricevuto', null=True)),
-                ('mqtt_topic_template', models.CharField(blank=True, max_length=255, null=True)),
-                ('firmware_version', models.CharField(blank=True, max_length=50, null=True)),
-                ('last_seen', models.DateTimeField(blank=True, null=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('plant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='devices', to='core.plant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("device_id", models.CharField(max_length=100, unique=True)),
+                (
+                    "device_type",
+                    models.CharField(
+                        choices=[
+                            ("SHELLY_PRO_3EM", "Shelly Pro 3EM"),
+                            ("SHELLY_PRO_EM", "Shelly Pro EM"),
+                            ("SHELLY_EM3", "Shelly 3EM"),
+                            ("SHELLY_EM", "Shelly EM"),
+                            ("SHELLY_PLUS_PM", "Shelly Plus PM"),
+                            ("CUSTOM", "Custom"),
+                        ],
+                        default="CUSTOM",
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "vendor",
+                    models.CharField(
+                        choices=[("SHELLY", "Shelly"), ("CUSTOM", "Custom")],
+                        default="CUSTOM",
+                        max_length=50,
+                    ),
+                ),
+                ("model", models.CharField(default="custom", max_length=50)),
+                (
+                    "last_energy_total",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Ultimo valore di energia totale ricevuto",
+                        null=True,
+                    ),
+                ),
+                (
+                    "mqtt_topic_template",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "firmware_version",
+                    models.CharField(blank=True, max_length=50, null=True),
+                ),
+                ("last_seen", models.DateTimeField(blank=True, null=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "plant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="devices",
+                        to="core.plant",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Dispositivo',
-                'verbose_name_plural': 'Dispositivi',
-                'ordering': ['-created_at'],
+                "verbose_name": "Dispositivo",
+                "verbose_name_plural": "Dispositivi",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='DeviceMeasurement',
+            name="DeviceMeasurement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('timestamp', models.DateTimeField(db_index=True, default=django.utils.timezone.now, help_text='Timestamp della misurazione')),
-                ('quality', models.CharField(choices=[('GOOD', 'Good'), ('UNCERTAIN', 'Uncertain'), ('BAD', 'Bad'), ('MISSING', 'Missing')], default='GOOD', help_text='Qualità della misurazione', max_length=10)),
-                ('measurement_type', models.CharField(choices=[('DRAWN_POWER', 'Potenza Prelevata'), ('DRAWN_ENERGY', 'Energia Prelevata'), ('INJECTED_POWER', 'Potenza Immessa'), ('INJECTED_ENERGY', 'Energia Immessa'), ('PRODUCTION_POWER', 'Potenza Prodotta'), ('PRODUCTION_ENERGY', 'Energia Prodotta')], db_index=True, max_length=20)),
-                ('power', models.FloatField(help_text='Potenza attiva in W', validators=[django.core.validators.MinValueValidator(-1000000), django.core.validators.MaxValueValidator(1000000)])),
-                ('voltage', models.FloatField(help_text='Tensione in V', validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(500)])),
-                ('current', models.FloatField(help_text='Corrente in A', validators=[django.core.validators.MinValueValidator(-1000), django.core.validators.MaxValueValidator(1000)])),
-                ('energy_total', models.FloatField(default=0, help_text='Energia totale in kWh', validators=[django.core.validators.MinValueValidator(0)])),
-                ('power_factor', models.FloatField(blank=True, help_text='Fattore di potenza', null=True, validators=[django.core.validators.MinValueValidator(-1), django.core.validators.MaxValueValidator(1)])),
-                ('device', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='measurements', to='energy.deviceconfiguration')),
-                ('plant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='device_measurements', to='core.plant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "timestamp",
+                    models.DateTimeField(
+                        db_index=True,
+                        default=django.utils.timezone.now,
+                        help_text="Timestamp della misurazione",
+                    ),
+                ),
+                (
+                    "quality",
+                    models.CharField(
+                        choices=[
+                            ("GOOD", "Good"),
+                            ("UNCERTAIN", "Uncertain"),
+                            ("BAD", "Bad"),
+                            ("MISSING", "Missing"),
+                        ],
+                        default="GOOD",
+                        help_text="Qualità della misurazione",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "measurement_type",
+                    models.CharField(
+                        choices=[
+                            ("DRAWN_POWER", "Potenza Prelevata"),
+                            ("DRAWN_ENERGY", "Energia Prelevata"),
+                            ("INJECTED_POWER", "Potenza Immessa"),
+                            ("INJECTED_ENERGY", "Energia Immessa"),
+                            ("PRODUCTION_POWER", "Potenza Prodotta"),
+                            ("PRODUCTION_ENERGY", "Energia Prodotta"),
+                        ],
+                        db_index=True,
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "power",
+                    models.FloatField(
+                        help_text="Potenza attiva in W",
+                        validators=[
+                            django.core.validators.MinValueValidator(-1000000),
+                            django.core.validators.MaxValueValidator(1000000),
+                        ],
+                    ),
+                ),
+                (
+                    "voltage",
+                    models.FloatField(
+                        help_text="Tensione in V",
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(500),
+                        ],
+                    ),
+                ),
+                (
+                    "current",
+                    models.FloatField(
+                        help_text="Corrente in A",
+                        validators=[
+                            django.core.validators.MinValueValidator(-1000),
+                            django.core.validators.MaxValueValidator(1000),
+                        ],
+                    ),
+                ),
+                (
+                    "energy_total",
+                    models.FloatField(
+                        default=0,
+                        help_text="Energia totale in kWh",
+                        validators=[django.core.validators.MinValueValidator(0)],
+                    ),
+                ),
+                (
+                    "power_factor",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Fattore di potenza",
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(-1),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "device",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="measurements",
+                        to="energy.deviceconfiguration",
+                    ),
+                ),
+                (
+                    "plant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="device_measurements",
+                        to="core.plant",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Misurazione Dispositivo',
-                'verbose_name_plural': 'Misurazioni Dispositivi',
-                'ordering': ['-timestamp'],
-                'permissions': [('can_view_sensitive_data', 'Can view sensitive measurement data'), ('can_export_measurements', 'Can export measurement data')],
-                'get_latest_by': 'timestamp',
+                "verbose_name": "Misurazione Dispositivo",
+                "verbose_name_plural": "Misurazioni Dispositivi",
+                "ordering": ["-timestamp"],
+                "permissions": [
+                    ("can_view_sensitive_data", "Can view sensitive measurement data"),
+                    ("can_export_measurements", "Can export measurement data"),
+                ],
+                "get_latest_by": "timestamp",
             },
         ),
         migrations.CreateModel(
-            name='DeviceMeasurementDetail',
+            name="DeviceMeasurementDetail",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('timestamp', models.DateTimeField(db_index=True, default=django.utils.timezone.now, help_text='Timestamp della misurazione')),
-                ('quality', models.CharField(choices=[('GOOD', 'Good'), ('UNCERTAIN', 'Uncertain'), ('BAD', 'Bad'), ('MISSING', 'Missing')], default='GOOD', help_text='Qualità della misurazione', max_length=10)),
-                ('phase', models.CharField(choices=[('a', 'Fase A'), ('b', 'Fase B'), ('c', 'Fase C'), ('n', 'Neutro')], help_text='Identificativo della fase', max_length=1)),
-                ('voltage', models.FloatField(help_text='Tensione di fase in V', validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(500)])),
-                ('current', models.FloatField(help_text='Corrente di fase in A', validators=[django.core.validators.MinValueValidator(-1000), django.core.validators.MaxValueValidator(1000)])),
-                ('power', models.FloatField(help_text='Potenza attiva di fase in W', validators=[django.core.validators.MinValueValidator(-1000000), django.core.validators.MaxValueValidator(1000000)])),
-                ('power_factor', models.FloatField(help_text='Fattore di potenza di fase', null=True, validators=[django.core.validators.MinValueValidator(-1), django.core.validators.MaxValueValidator(1)])),
-                ('frequency', models.FloatField(default=50, help_text='Frequenza in Hz', validators=[django.core.validators.MinValueValidator(45), django.core.validators.MaxValueValidator(65)])),
-                ('measurement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='phase_details', to='energy.devicemeasurement')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "timestamp",
+                    models.DateTimeField(
+                        db_index=True,
+                        default=django.utils.timezone.now,
+                        help_text="Timestamp della misurazione",
+                    ),
+                ),
+                (
+                    "quality",
+                    models.CharField(
+                        choices=[
+                            ("GOOD", "Good"),
+                            ("UNCERTAIN", "Uncertain"),
+                            ("BAD", "Bad"),
+                            ("MISSING", "Missing"),
+                        ],
+                        default="GOOD",
+                        help_text="Qualità della misurazione",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "phase",
+                    models.CharField(
+                        choices=[
+                            ("a", "Fase A"),
+                            ("b", "Fase B"),
+                            ("c", "Fase C"),
+                            ("n", "Neutro"),
+                        ],
+                        help_text="Identificativo della fase",
+                        max_length=1,
+                    ),
+                ),
+                (
+                    "voltage",
+                    models.FloatField(
+                        help_text="Tensione di fase in V",
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(500),
+                        ],
+                    ),
+                ),
+                (
+                    "current",
+                    models.FloatField(
+                        help_text="Corrente di fase in A",
+                        validators=[
+                            django.core.validators.MinValueValidator(-1000),
+                            django.core.validators.MaxValueValidator(1000),
+                        ],
+                    ),
+                ),
+                (
+                    "power",
+                    models.FloatField(
+                        help_text="Potenza attiva di fase in W",
+                        validators=[
+                            django.core.validators.MinValueValidator(-1000000),
+                            django.core.validators.MaxValueValidator(1000000),
+                        ],
+                    ),
+                ),
+                (
+                    "power_factor",
+                    models.FloatField(
+                        help_text="Fattore di potenza di fase",
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(-1),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "frequency",
+                    models.FloatField(
+                        default=50,
+                        help_text="Frequenza in Hz",
+                        validators=[
+                            django.core.validators.MinValueValidator(45),
+                            django.core.validators.MaxValueValidator(65),
+                        ],
+                    ),
+                ),
+                (
+                    "measurement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="phase_details",
+                        to="energy.devicemeasurement",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Dettaglio Fase',
-                'verbose_name_plural': 'Dettagli Fase',
-                'ordering': ['phase'],
+                "verbose_name": "Dettaglio Fase",
+                "verbose_name_plural": "Dettagli Fase",
+                "ordering": ["phase"],
             },
         ),
         migrations.CreateModel(
-            name='DeviceType',
+            name="DeviceType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True, verbose_name='Nome')),
-                ('vendor', models.CharField(max_length=100, verbose_name='Produttore')),
-                ('model', models.CharField(max_length=100, verbose_name='Modello')),
-                ('description', models.TextField(blank=True, verbose_name='Descrizione')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
-                ('supports_voltage', models.BooleanField(default=False, verbose_name='Supporta Voltaggio')),
-                ('supports_current', models.BooleanField(default=False, verbose_name='Supporta Corrente')),
-                ('supports_power', models.BooleanField(default=False, verbose_name='Supporta Potenza')),
-                ('supports_energy', models.BooleanField(default=False, verbose_name='Supporta Energia')),
-                ('supports_frequency', models.BooleanField(default=False, verbose_name='Supporta Frequenza')),
-                ('supports_power_factor', models.BooleanField(default=False, verbose_name='Supporta Fattore di Potenza')),
-                ('mqtt_topic_template', models.CharField(help_text='Usa {serial} per il numero seriale del dispositivo', max_length=255, verbose_name='Template Topic MQTT')),
-                ('mqtt_payload_format', models.JSONField(default=dict, help_text='Definizione della struttura del payload MQTT', verbose_name='Formato Payload MQTT')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=100, unique=True, verbose_name="Nome"),
+                ),
+                ("vendor", models.CharField(max_length=100, verbose_name="Produttore")),
+                ("model", models.CharField(max_length=100, verbose_name="Modello")),
+                (
+                    "description",
+                    models.TextField(blank=True, verbose_name="Descrizione"),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attivo")),
+                (
+                    "supports_voltage",
+                    models.BooleanField(
+                        default=False, verbose_name="Supporta Voltaggio"
+                    ),
+                ),
+                (
+                    "supports_current",
+                    models.BooleanField(
+                        default=False, verbose_name="Supporta Corrente"
+                    ),
+                ),
+                (
+                    "supports_power",
+                    models.BooleanField(default=False, verbose_name="Supporta Potenza"),
+                ),
+                (
+                    "supports_energy",
+                    models.BooleanField(default=False, verbose_name="Supporta Energia"),
+                ),
+                (
+                    "supports_frequency",
+                    models.BooleanField(
+                        default=False, verbose_name="Supporta Frequenza"
+                    ),
+                ),
+                (
+                    "supports_power_factor",
+                    models.BooleanField(
+                        default=False, verbose_name="Supporta Fattore di Potenza"
+                    ),
+                ),
+                (
+                    "mqtt_topic_template",
+                    models.CharField(
+                        help_text="Usa {serial} per il numero seriale del dispositivo",
+                        max_length=255,
+                        verbose_name="Template Topic MQTT",
+                    ),
+                ),
+                (
+                    "mqtt_payload_format",
+                    models.JSONField(
+                        default=dict,
+                        help_text="Definizione della struttura del payload MQTT",
+                        verbose_name="Formato Payload MQTT",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Tipo Dispositivo',
-                'verbose_name_plural': 'Tipi Dispositivo',
-                'unique_together': {('vendor', 'model')},
+                "verbose_name": "Tipo Dispositivo",
+                "verbose_name_plural": "Tipi Dispositivo",
+                "unique_together": {("vendor", "model")},
             },
         ),
         migrations.CreateModel(
-            name='Device',
+            name="Device",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('serial_number', models.CharField(max_length=100, validators=[django.core.validators.RegexValidator(message='Il numero seriale può contenere solo lettere, numeri, underscore e trattini', regex='^[A-Za-z0-9_-]+$')], verbose_name='Numero Seriale')),
-                ('name', models.CharField(max_length=100, verbose_name='Nome')),
-                ('description', models.TextField(blank=True, verbose_name='Descrizione')),
-                ('installation_date', models.DateField(verbose_name='Data Installazione')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
-                ('mqtt_topic_override', models.CharField(blank=True, help_text='Lasciare vuoto per usare il template del tipo dispositivo', max_length=255, verbose_name='Override Topic MQTT')),
-                ('config', models.JSONField(default=dict, help_text='Configurazione specifica del dispositivo in formato JSON', verbose_name='Configurazione')),
-                ('device_type', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='energy.devicetype', verbose_name='Tipo Dispositivo')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "serial_number",
+                    models.CharField(
+                        max_length=100,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="Il numero seriale può contenere solo lettere, numeri, underscore e trattini",
+                                regex="^[A-Za-z0-9_-]+$",
+                            )
+                        ],
+                        verbose_name="Numero Seriale",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, verbose_name="Nome")),
+                (
+                    "description",
+                    models.TextField(blank=True, verbose_name="Descrizione"),
+                ),
+                (
+                    "installation_date",
+                    models.DateField(verbose_name="Data Installazione"),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attivo")),
+                (
+                    "mqtt_topic_override",
+                    models.CharField(
+                        blank=True,
+                        help_text="Lasciare vuoto per usare il template del tipo dispositivo",
+                        max_length=255,
+                        verbose_name="Override Topic MQTT",
+                    ),
+                ),
+                (
+                    "config",
+                    models.JSONField(
+                        default=dict,
+                        help_text="Configurazione specifica del dispositivo in formato JSON",
+                        verbose_name="Configurazione",
+                    ),
+                ),
+                (
+                    "device_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="energy.devicetype",
+                        verbose_name="Tipo Dispositivo",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Dispositivo',
-                'verbose_name_plural': 'Dispositivi',
+                "verbose_name": "Dispositivo",
+                "verbose_name_plural": "Dispositivi",
             },
         ),
         migrations.CreateModel(
-            name='EnergyAggregate',
+            name="EnergyAggregate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('timestamp', models.DateTimeField(db_index=True, default=django.utils.timezone.now, help_text='Timestamp della misurazione')),
-                ('quality', models.CharField(choices=[('GOOD', 'Good'), ('UNCERTAIN', 'Uncertain'), ('BAD', 'Bad'), ('MISSING', 'Missing')], default='GOOD', help_text='Qualità della misurazione', max_length=10)),
-                ('period', models.CharField(choices=[('15M', '15 Minuti'), ('1H', '1 Ora'), ('1D', '1 Giorno'), ('1W', '1 Settimana'), ('1M', '1 Mese')], help_text='Periodo di aggregazione', max_length=3)),
-                ('start_time', models.DateTimeField(help_text='Inizio del periodo')),
-                ('end_time', models.DateTimeField(help_text='Fine del periodo')),
-                ('energy_in', models.FloatField(default=0, help_text='Energia immessa in kWh')),
-                ('energy_out', models.FloatField(default=0, help_text='Energia prelevata in kWh')),
-                ('peak_power', models.FloatField(help_text='Picco di potenza nel periodo in W', null=True)),
-                ('avg_power', models.FloatField(help_text='Potenza media nel periodo in W', null=True)),
-                ('device', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='energy_aggregates', to='energy.deviceconfiguration')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "timestamp",
+                    models.DateTimeField(
+                        db_index=True,
+                        default=django.utils.timezone.now,
+                        help_text="Timestamp della misurazione",
+                    ),
+                ),
+                (
+                    "quality",
+                    models.CharField(
+                        choices=[
+                            ("GOOD", "Good"),
+                            ("UNCERTAIN", "Uncertain"),
+                            ("BAD", "Bad"),
+                            ("MISSING", "Missing"),
+                        ],
+                        default="GOOD",
+                        help_text="Qualità della misurazione",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "period",
+                    models.CharField(
+                        choices=[
+                            ("15M", "15 Minuti"),
+                            ("1H", "1 Ora"),
+                            ("1D", "1 Giorno"),
+                            ("1W", "1 Settimana"),
+                            ("1M", "1 Mese"),
+                        ],
+                        help_text="Periodo di aggregazione",
+                        max_length=3,
+                    ),
+                ),
+                ("start_time", models.DateTimeField(help_text="Inizio del periodo")),
+                ("end_time", models.DateTimeField(help_text="Fine del periodo")),
+                (
+                    "energy_in",
+                    models.FloatField(default=0, help_text="Energia immessa in kWh"),
+                ),
+                (
+                    "energy_out",
+                    models.FloatField(default=0, help_text="Energia prelevata in kWh"),
+                ),
+                (
+                    "peak_power",
+                    models.FloatField(
+                        help_text="Picco di potenza nel periodo in W", null=True
+                    ),
+                ),
+                (
+                    "avg_power",
+                    models.FloatField(
+                        help_text="Potenza media nel periodo in W", null=True
+                    ),
+                ),
+                (
+                    "device",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="energy_aggregates",
+                        to="energy.deviceconfiguration",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Aggregazione Energia',
-                'verbose_name_plural': 'Aggregazioni Energia',
+                "verbose_name": "Aggregazione Energia",
+                "verbose_name_plural": "Aggregazioni Energia",
             },
         ),
         migrations.CreateModel(
-            name='EnergyInterval',
+            name="EnergyInterval",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_time', models.DateTimeField(help_text="Inizio dell'intervallo di misurazione")),
-                ('end_time', models.DateTimeField(help_text="Fine dell'intervallo di misurazione")),
-                ('energy_value', models.FloatField(help_text="Energia misurata nell'intervallo in kWh", validators=[django.core.validators.MinValueValidator(0)])),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('device', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='energy_intervals', to='energy.deviceconfiguration')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "start_time",
+                    models.DateTimeField(
+                        help_text="Inizio dell'intervallo di misurazione"
+                    ),
+                ),
+                (
+                    "end_time",
+                    models.DateTimeField(
+                        help_text="Fine dell'intervallo di misurazione"
+                    ),
+                ),
+                (
+                    "energy_value",
+                    models.FloatField(
+                        help_text="Energia misurata nell'intervallo in kWh",
+                        validators=[django.core.validators.MinValueValidator(0)],
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "device",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="energy_intervals",
+                        to="energy.deviceconfiguration",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Intervallo Energia',
-                'verbose_name_plural': 'Intervalli Energia',
-                'ordering': ['-start_time'],
+                "verbose_name": "Intervallo Energia",
+                "verbose_name_plural": "Intervalli Energia",
+                "ordering": ["-start_time"],
             },
         ),
         migrations.CreateModel(
-            name='EnergyMeasurement',
+            name="EnergyMeasurement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('timestamp', models.DateTimeField(db_index=True, default=django.utils.timezone.now, help_text='Timestamp della misurazione')),
-                ('quality', models.CharField(choices=[('GOOD', 'Good'), ('UNCERTAIN', 'Uncertain'), ('BAD', 'Bad'), ('MISSING', 'Missing')], default='GOOD', help_text='Qualità della misurazione', max_length=10)),
-                ('measurement_type', models.CharField(choices=[('POWER_DRAW', 'Prelievo'), ('POWER_IN', 'Immissione'), ('ENERGY_TOTAL', 'Energia Totale'), ('ENERGY_RETURNED', 'Energia Restituita')], help_text='Tipo di misurazione energetica', max_length=20)),
-                ('value', models.FloatField(help_text='Valore della misurazione', validators=[django.core.validators.MinValueValidator(0)])),
-                ('unit', models.CharField(choices=[('W', 'Watt'), ('kW', 'Kilowatt'), ('kWh', 'Kilowattora'), ('Wh', 'Wattora')], default='W', help_text='Unità di misura', max_length=5)),
-                ('topic', models.CharField(help_text='Topic MQTT di origine', max_length=255)),
-                ('device_measurement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='energy_measurements', to='energy.devicemeasurement')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "timestamp",
+                    models.DateTimeField(
+                        db_index=True,
+                        default=django.utils.timezone.now,
+                        help_text="Timestamp della misurazione",
+                    ),
+                ),
+                (
+                    "quality",
+                    models.CharField(
+                        choices=[
+                            ("GOOD", "Good"),
+                            ("UNCERTAIN", "Uncertain"),
+                            ("BAD", "Bad"),
+                            ("MISSING", "Missing"),
+                        ],
+                        default="GOOD",
+                        help_text="Qualità della misurazione",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "measurement_type",
+                    models.CharField(
+                        choices=[
+                            ("POWER_DRAW", "Prelievo"),
+                            ("POWER_IN", "Immissione"),
+                            ("ENERGY_TOTAL", "Energia Totale"),
+                            ("ENERGY_RETURNED", "Energia Restituita"),
+                        ],
+                        help_text="Tipo di misurazione energetica",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "value",
+                    models.FloatField(
+                        help_text="Valore della misurazione",
+                        validators=[django.core.validators.MinValueValidator(0)],
+                    ),
+                ),
+                (
+                    "unit",
+                    models.CharField(
+                        choices=[
+                            ("W", "Watt"),
+                            ("kW", "Kilowatt"),
+                            ("kWh", "Kilowattora"),
+                            ("Wh", "Wattora"),
+                        ],
+                        default="W",
+                        help_text="Unità di misura",
+                        max_length=5,
+                    ),
+                ),
+                (
+                    "topic",
+                    models.CharField(help_text="Topic MQTT di origine", max_length=255),
+                ),
+                (
+                    "device_measurement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="energy_measurements",
+                        to="energy.devicemeasurement",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Misurazione Energia',
-                'verbose_name_plural': 'Misurazioni Energia',
+                "verbose_name": "Misurazione Energia",
+                "verbose_name_plural": "Misurazioni Energia",
             },
         ),
         migrations.CreateModel(
-            name='MQTTAuditLog',
+            name="MQTTAuditLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('mqtt_username', models.CharField(max_length=50)),
-                ('operation', models.CharField(choices=[('AUTH', 'Autenticazione'), ('CONNECT', 'Connessione'), ('DISCONNECT', 'Disconnessione'), ('SUBSCRIBE', 'Sottoscrizione'), ('PUBLISH', 'Pubblicazione'), ('CREDENTIALS_CREATE', 'Creazione Credenziali'), ('CREDENTIALS_UPDATE', 'Aggiornamento Credenziali'), ('CREDENTIALS_DELETE', 'Eliminazione Credenziali'), ('ACL_CHECK', 'Verifica ACL')], max_length=20)),
-                ('status', models.BooleanField(default=True)),
-                ('topic', models.CharField(blank=True, max_length=255, null=True)),
-                ('client_id', models.CharField(blank=True, max_length=100, null=True)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('details', models.JSONField(blank=True, encoder=django.core.serializers.json.DjangoJSONEncoder, null=True)),
-                ('retention_date', models.DateTimeField()),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("mqtt_username", models.CharField(max_length=50)),
+                (
+                    "operation",
+                    models.CharField(
+                        choices=[
+                            ("AUTH", "Autenticazione"),
+                            ("CONNECT", "Connessione"),
+                            ("DISCONNECT", "Disconnessione"),
+                            ("SUBSCRIBE", "Sottoscrizione"),
+                            ("PUBLISH", "Pubblicazione"),
+                            ("CREDENTIALS_CREATE", "Creazione Credenziali"),
+                            ("CREDENTIALS_UPDATE", "Aggiornamento Credenziali"),
+                            ("CREDENTIALS_DELETE", "Eliminazione Credenziali"),
+                            ("ACL_CHECK", "Verifica ACL"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("status", models.BooleanField(default=True)),
+                ("topic", models.CharField(blank=True, max_length=255, null=True)),
+                ("client_id", models.CharField(blank=True, max_length=100, null=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                (
+                    "details",
+                    models.JSONField(
+                        blank=True,
+                        encoder=django.core.serializers.json.DjangoJSONEncoder,
+                        null=True,
+                    ),
+                ),
+                ("retention_date", models.DateTimeField()),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Log Audit MQTT',
-                'verbose_name_plural': 'Log Audit MQTT',
+                "verbose_name": "Log Audit MQTT",
+                "verbose_name_plural": "Log Audit MQTT",
             },
         ),
         migrations.CreateModel(
-            name='MQTTConfiguration',
+            name="MQTTConfiguration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mqtt_username', models.CharField(max_length=255, unique=True, verbose_name='Username MQTT')),
-                ('mqtt_password', encrypted_model_fields.fields.EncryptedCharField(verbose_name='Password MQTT')),
-                ('last_connected', models.DateTimeField(blank=True, null=True, verbose_name='Ultima connessione')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Attivo')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('device', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='mqtt_config', to='energy.deviceconfiguration', verbose_name='Dispositivo')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "mqtt_username",
+                    models.CharField(
+                        max_length=255, unique=True, verbose_name="Username MQTT"
+                    ),
+                ),
+                (
+                    "mqtt_password",
+                    encrypted_model_fields.fields.EncryptedCharField(
+                        verbose_name="Password MQTT"
+                    ),
+                ),
+                (
+                    "last_connected",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Ultima connessione"
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Attivo")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "device",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mqtt_config",
+                        to="energy.deviceconfiguration",
+                        verbose_name="Dispositivo",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Configurazione MQTT Dispositivo',
-                'verbose_name_plural': 'Configurazioni MQTT Dispositivi',
-                'db_table': 'energy_mqtt_configuration',
+                "verbose_name": "Configurazione MQTT Dispositivo",
+                "verbose_name_plural": "Configurazioni MQTT Dispositivi",
+                "db_table": "energy_mqtt_configuration",
             },
         ),
         migrations.AddIndex(
-            model_name='deviceconfiguration',
-            index=models.Index(fields=['device_type', 'vendor'], name='energy_devi_device__f5cb5e_idx'),
+            model_name="deviceconfiguration",
+            index=models.Index(
+                fields=["device_type", "vendor"], name="energy_devi_device__f5cb5e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='deviceconfiguration',
-            index=models.Index(fields=['last_seen', 'is_active'], name='energy_devi_last_se_b0b5c5_idx'),
+            model_name="deviceconfiguration",
+            index=models.Index(
+                fields=["last_seen", "is_active"], name="energy_devi_last_se_b0b5c5_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='devicemeasurement',
-            index=models.Index(fields=['device', 'measurement_type', 'timestamp'], name='energy_devi_device__b3570b_idx'),
+            model_name="devicemeasurement",
+            index=models.Index(
+                fields=["device", "measurement_type", "timestamp"],
+                name="energy_devi_device__b3570b_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='devicemeasurement',
-            index=models.Index(fields=['timestamp', 'device'], name='energy_devi_timesta_531569_idx'),
+            model_name="devicemeasurement",
+            index=models.Index(
+                fields=["timestamp", "device"], name="energy_devi_timesta_531569_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='devicemeasurement',
-            index=models.Index(fields=['plant', 'timestamp'], name='energy_devi_plant_i_2e929e_idx'),
+            model_name="devicemeasurement",
+            index=models.Index(
+                fields=["plant", "timestamp"], name="energy_devi_plant_i_2e929e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='devicemeasurement',
-            index=models.Index(fields=['measurement_type', 'timestamp'], name='energy_devi_measure_a8780c_idx'),
+            model_name="devicemeasurement",
+            index=models.Index(
+                fields=["measurement_type", "timestamp"],
+                name="energy_devi_measure_a8780c_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='devicemeasurementdetail',
-            index=models.Index(fields=['measurement', 'phase'], name='energy_devi_measure_130393_idx'),
+            model_name="devicemeasurementdetail",
+            index=models.Index(
+                fields=["measurement", "phase"], name="energy_devi_measure_130393_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='devicemeasurementdetail',
-            unique_together={('measurement', 'phase')},
+            name="devicemeasurementdetail",
+            unique_together={("measurement", "phase")},
         ),
         migrations.AlterUniqueTogether(
-            name='device',
-            unique_together={('device_type', 'serial_number')},
+            name="device",
+            unique_together={("device_type", "serial_number")},
         ),
         migrations.AddIndex(
-            model_name='energyaggregate',
-            index=models.Index(fields=['device', 'period', 'start_time'], name='energy_ener_device__8b602b_idx'),
+            model_name="energyaggregate",
+            index=models.Index(
+                fields=["device", "period", "start_time"],
+                name="energy_ener_device__8b602b_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='energyaggregate',
-            index=models.Index(fields=['period', 'start_time'], name='energy_ener_period_e9617d_idx'),
+            model_name="energyaggregate",
+            index=models.Index(
+                fields=["period", "start_time"], name="energy_ener_period_e9617d_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='energyaggregate',
-            unique_together={('device', 'period', 'start_time')},
+            name="energyaggregate",
+            unique_together={("device", "period", "start_time")},
         ),
         migrations.AddIndex(
-            model_name='energyinterval',
-            index=models.Index(fields=['device', 'start_time'], name='energy_ener_device__791527_idx'),
+            model_name="energyinterval",
+            index=models.Index(
+                fields=["device", "start_time"], name="energy_ener_device__791527_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='energyinterval',
-            index=models.Index(fields=['device', 'end_time'], name='energy_ener_device__7b4eab_idx'),
+            model_name="energyinterval",
+            index=models.Index(
+                fields=["device", "end_time"], name="energy_ener_device__7b4eab_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='energyinterval',
-            index=models.Index(fields=['start_time', 'end_time'], name='energy_ener_start_t_6ebf5f_idx'),
+            model_name="energyinterval",
+            index=models.Index(
+                fields=["start_time", "end_time"], name="energy_ener_start_t_6ebf5f_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='energyinterval',
-            unique_together={('device', 'start_time')},
+            name="energyinterval",
+            unique_together={("device", "start_time")},
         ),
         migrations.AddIndex(
-            model_name='energymeasurement',
-            index=models.Index(fields=['measurement_type', 'timestamp'], name='energy_ener_measure_bca0fc_idx'),
+            model_name="energymeasurement",
+            index=models.Index(
+                fields=["measurement_type", "timestamp"],
+                name="energy_ener_measure_bca0fc_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='energymeasurement',
-            index=models.Index(fields=['topic', 'timestamp'], name='energy_ener_topic_db83d5_idx'),
+            model_name="energymeasurement",
+            index=models.Index(
+                fields=["topic", "timestamp"], name="energy_ener_topic_db83d5_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='mqttauditlog',
-            index=models.Index(fields=['operation', 'timestamp'], name='energy_mqtt_operati_0e1236_idx'),
+            model_name="mqttauditlog",
+            index=models.Index(
+                fields=["operation", "timestamp"], name="energy_mqtt_operati_0e1236_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='mqttauditlog',
-            index=models.Index(fields=['mqtt_username', 'timestamp'], name='energy_mqtt_mqtt_us_86481e_idx'),
+            model_name="mqttauditlog",
+            index=models.Index(
+                fields=["mqtt_username", "timestamp"],
+                name="energy_mqtt_mqtt_us_86481e_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='mqttconfiguration',
-            index=models.Index(fields=['mqtt_username'], name='energy_mqtt_mqtt_us_32a4e3_idx'),
+            model_name="mqttconfiguration",
+            index=models.Index(
+                fields=["mqtt_username"], name="energy_mqtt_mqtt_us_32a4e3_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='mqttconfiguration',
-            index=models.Index(fields=['is_active', 'last_connected'], name='energy_mqtt_is_acti_85a867_idx'),
+            model_name="mqttconfiguration",
+            index=models.Index(
+                fields=["is_active", "last_connected"],
+                name="energy_mqtt_is_acti_85a867_idx",
+            ),
         ),
     ]
