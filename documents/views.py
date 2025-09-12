@@ -34,8 +34,6 @@ from .models import Document, DocumentAccess
 # import magic
 
 
-
-
 logger = logging.getLogger(__name__)
 
 
