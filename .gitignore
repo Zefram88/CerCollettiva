@@ -99,10 +99,10 @@ wheels/
 MANIFEST
 
 # Django specific
-migrations/
-!migrations/__init__.py
-app/*/migrations/
-!app/*/migrations/__init__.py
+# migrations/ - REMOVED: Migration files needed for CI
+# !migrations/__init__.py
+# app/*/migrations/ - REMOVED: Migration files needed for CI  
+# !app/*/migrations/__init__.py
 
 # Temporary files
 *.tmp
