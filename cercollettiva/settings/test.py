@@ -6,11 +6,18 @@ from .base import *
 DEBUG = False
 TESTING = True
 
-# Database per test
+# Database PostgreSQL per test - usa lo stesso container Docker
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'test_cercollettiva',
+        'USER': 'cercollettiva_user',
+        'PASSWORD': 'cercollettiva_pass',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'TEST': {
+            'NAME': 'test_cercollettiva_ci',
+        },
     }
 }
 

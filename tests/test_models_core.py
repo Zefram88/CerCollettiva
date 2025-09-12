@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 from datetime import date, datetime
-from core.models import CERConfiguration, Plant, CERMembership, Alert
+from core.main_models import CERConfiguration, Plant, CERMembership, Alert
 
 User = get_user_model()
 
@@ -17,7 +17,6 @@ class CERConfigurationModelTest(TestCase):
     def setUp(self):
         """Set up test data"""
         self.admin_user = User.objects.create_superuser(
-            username='admin',
             email='admin@example.com',
             password='AdminPass123!',
             first_name='Admin',
@@ -84,7 +83,6 @@ class PlantModelTest(TestCase):
     def setUp(self):
         """Set up test data"""
         self.user = User.objects.create_user(
-            username='plantowner',
             email='owner@example.com',
             password='TestPass123!',
             first_name='Plant',
@@ -92,7 +90,6 @@ class PlantModelTest(TestCase):
         )
         
         self.admin = User.objects.create_superuser(
-            username='admin',
             email='admin@example.com',
             password='AdminPass123!',
             first_name='Admin',
@@ -220,7 +217,6 @@ class CERMembershipModelTest(TestCase):
     def setUp(self):
         """Set up test data"""
         self.admin = User.objects.create_superuser(
-            username='admin',
             email='admin@example.com',
             password='AdminPass123!',
             first_name='Admin',
@@ -228,7 +224,6 @@ class CERMembershipModelTest(TestCase):
         )
         
         self.member = User.objects.create_user(
-            username='member',
             email='member@example.com',
             password='TestPass123!',
             first_name='Member',
@@ -275,7 +270,6 @@ class CERMembershipModelTest(TestCase):
             membership = CERMembership.objects.create(
                 cer_configuration=self.cer,
                 user=User.objects.create_user(
-                    username=f'user_{role}',
                     email=f'{role}@example.com',
                     password='TestPass123!',
                     first_name='Test',
@@ -334,7 +328,6 @@ class AlertModelTest(TestCase):
     def setUp(self):
         """Set up test data"""
         self.admin = User.objects.create_superuser(
-            username='admin',
             email='admin@example.com',
             password='AdminPass123!',
             first_name='Admin',
@@ -342,7 +335,6 @@ class AlertModelTest(TestCase):
         )
         
         self.user = User.objects.create_user(
-            username='user',
             email='user@example.com',
             password='TestPass123!',
             first_name='Test',
