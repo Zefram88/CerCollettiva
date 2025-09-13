@@ -7,14 +7,14 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from core.main_models import Alert, CERConfiguration, CERMembership, Plant
 
 User = get_user_model()
 
 
-class CERConfigurationModelTest(TestCase):
+class CERConfigurationModelTest(TransactionTestCase):
     """Test cases for CERConfiguration model"""
 
     def setUp(self):
@@ -26,9 +26,12 @@ class CERConfigurationModelTest(TestCase):
             last_name="User",
         )
 
+        # Use unique identifiers to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]  # Last 6 digits of timestamp
         self.cer_data = {
-            "name": "Test CER Community",
-            "code": "CER001",
+            "name": f"Test CER Community {unique_id}",
+            "code": f"CER{unique_id}",
             "primary_substation": "Cabina Primaria Test",
             "description": "Test CER Description",
         }
@@ -37,8 +40,8 @@ class CERConfigurationModelTest(TestCase):
         """Test creating a CER configuration"""
         cer = CERConfiguration.objects.create(**self.cer_data)
 
-        self.assertEqual(cer.name, "Test CER Community")
-        self.assertEqual(cer.code, "CER001")
+        self.assertEqual(cer.name, self.cer_data["name"])
+        self.assertEqual(cer.code, self.cer_data["code"])
         self.assertEqual(cer.primary_substation, "Cabina Primaria Test")
         self.assertEqual(cer.description, "Test CER Description")
         self.assertTrue(cer.is_active)
@@ -46,7 +49,8 @@ class CERConfigurationModelTest(TestCase):
     def test_cer_str_method(self):
         """Test string representation of CER"""
         cer = CERConfiguration.objects.create(**self.cer_data)
-        self.assertEqual(str(cer), "Test CER Community (CER001)")
+        expected_str = f"{self.cer_data['name']} ({self.cer_data['code']})"
+        self.assertEqual(str(cer), expected_str)
 
     def test_cer_unique_code(self):
         """Test that CER code must be unique"""
@@ -80,7 +84,7 @@ class CERConfigurationModelTest(TestCase):
         self.assertFalse(cer.is_active)
 
 
-class PlantModelTest(TestCase):
+class PlantModelTest(TransactionTestCase):
     """Test cases for Plant model"""
 
     def setUp(self):
@@ -99,9 +103,12 @@ class PlantModelTest(TestCase):
             last_name="User",
         )
 
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.cer = CERConfiguration.objects.create(
-            name="Test CER",
-            code="CER001",
+            name=f"Test CER {unique_id}",
+            code=f"CER{unique_id}",
             primary_substation="Cabina Primaria Test",
             description="Test CER Description",
         )
@@ -214,7 +221,7 @@ class PlantModelTest(TestCase):
         self.assertEqual(plant.commissioning_date, date(2023, 1, 15))
 
 
-class CERMembershipModelTest(TestCase):
+class CERMembershipModelTest(TransactionTestCase):
     """Test cases for CERMembership model"""
 
     def setUp(self):
@@ -233,9 +240,12 @@ class CERMembershipModelTest(TestCase):
             last_name="User",
         )
 
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.cer = CERConfiguration.objects.create(
-            name="Test CER",
-            code="CER001",
+            name=f"Test CER {unique_id}",
+            code=f"CER{unique_id}",
             primary_substation="Cabina Primaria Test",
             description="Test CER Description",
         )
@@ -319,7 +329,7 @@ class CERMembershipModelTest(TestCase):
         self.assertIsNotNone(membership.updated_at)
 
 
-class AlertModelTest(TestCase):
+class AlertModelTest(TransactionTestCase):
     """Test cases for Alert model"""
 
     def setUp(self):
@@ -338,9 +348,12 @@ class AlertModelTest(TestCase):
             last_name="User",
         )
 
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.cer = CERConfiguration.objects.create(
-            name="Test CER",
-            code="CER001",
+            name=f"Test CER {unique_id}",
+            code=f"CER{unique_id}",
             primary_substation="Cabina Primaria Test",
             description="Test CER Description",
         )

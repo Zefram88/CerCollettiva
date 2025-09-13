@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.utils import timezone
 
 from core.models import CERConfiguration, Plant
@@ -15,37 +15,41 @@ from energy.models import DeviceConfiguration, DeviceMeasurement, MQTTBroker
 User = get_user_model()
 
 
-class DeviceConfigurationModelTest(TestCase):
+class DeviceConfigurationModelTest(TransactionTestCase):
     """Test cases for DeviceConfiguration model"""
     
     def setUp(self):
         """Set up test data"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
+        
         self.user = User.objects.create_user(
-            username='deviceowner',
-            email='owner@example.com',
+            username=f'deviceowner{unique_id}',
+            email=f'owner{unique_id}@example.com',
             password='TestPass123!',
             first_name='Device',
             last_name='Owner'
         )
         
         self.admin = User.objects.create_superuser(
-            username='admin',
-            email='admin@example.com',
+            username=f'admin{unique_id}',
+            email=f'admin{unique_id}@example.com',
             password='AdminPass123!',
             first_name='Admin',
             last_name='User'
         )
         
         self.cer = CERConfiguration.objects.create(
-            name='Test CER',
-            code='CER001',
+            name=f'Test CER {unique_id}',
+            code=f'CER{unique_id}',
             primary_substation='Cabina Primaria Test',
             description='Test CER Description'
         )
         
         self.plant = Plant.objects.create(
-            name='Test Plant',
-            pod_code='PLANT001',
+            name=f'Test Plant {unique_id}',
+            pod_code=f'PLANT{unique_id}',
             plant_type='PRODUCER',
             nominal_power=50.0,
             connection_voltage='400V',
@@ -55,7 +59,7 @@ class DeviceConfigurationModelTest(TestCase):
         )
         
         self.device_data = {
-            'device_id': 'DEVICE001',
+            'device_id': f'DEVICE{unique_id}',
             'device_type': 'SHELLY_EM',
             'vendor': 'SHELLY',
             'model': 'em',
@@ -67,7 +71,7 @@ class DeviceConfigurationModelTest(TestCase):
         """Test creating a device configuration"""
         device = DeviceConfiguration.objects.create(**self.device_data)
         
-        self.assertEqual(device.device_id, 'DEVICE001')
+        self.assertEqual(device.device_id, self.device_data['device_id'])
         self.assertEqual(device.device_type, 'SHELLY_EM')
         self.assertEqual(device.vendor, 'SHELLY')
         self.assertEqual(device.model, 'em')
@@ -95,7 +99,7 @@ class DeviceConfigurationModelTest(TestCase):
         
         for device_type in valid_types:
             device_data = self.device_data.copy()
-            device_data['device_id'] = f'DEV_{device_type}'
+            device_data['device_id'] = f'DEV_{device_type}_{unique_id}'
             device_data['device_type'] = device_type
             
             device = DeviceConfiguration.objects.create(**device_data)
@@ -105,7 +109,7 @@ class DeviceConfigurationModelTest(TestCase):
         """Test device vendor field choices"""
         # Test SHELLY device type
         device_data = self.device_data.copy()
-        device_data['device_id'] = 'DEV_SHELLY'
+        device_data['device_id'] = f'DEV_SHELLY_{unique_id}'
         device_data['device_type'] = 'SHELLY_EM'
         
         device = DeviceConfiguration.objects.create(**device_data)
@@ -114,7 +118,7 @@ class DeviceConfigurationModelTest(TestCase):
         
         # Test CUSTOM device type
         device_data = self.device_data.copy()
-        device_data['device_id'] = 'DEV_CUSTOM'
+        device_data['device_id'] = f'DEV_CUSTOM_{unique_id}'
         device_data['device_type'] = 'CUSTOM'
         
         device = DeviceConfiguration.objects.create(**device_data)
@@ -126,7 +130,7 @@ class DeviceConfigurationModelTest(TestCase):
         device = DeviceConfiguration.objects.create(**self.device_data)
         
         # Test that device has required fields
-        self.assertEqual(device.device_id, 'DEVICE001')
+        self.assertEqual(device.device_id, self.device_data['device_id'])
         self.assertEqual(device.device_type, 'SHELLY_EM')
         self.assertEqual(device.vendor, 'SHELLY')
         self.assertEqual(device.model, 'em')
@@ -166,7 +170,7 @@ class DeviceConfigurationModelTest(TestCase):
         self.assertFalse(device.is_active)
 
 
-class DeviceMeasurementModelTest(TestCase):
+class DeviceMeasurementModelTest(TransactionTestCase):
     """Test cases for DeviceMeasurement model"""
     
     def setUp(self):
@@ -195,8 +199,8 @@ class DeviceMeasurementModelTest(TestCase):
         )
         
         self.plant = Plant.objects.create(
-            name='Test Plant',
-            pod_code='PLANT001',
+            name=f'Test Plant {unique_id}',
+            pod_code=f'PLANT{unique_id}',
             plant_type='PRODUCER',
             nominal_power=50.0,
             connection_voltage='400V',
@@ -206,7 +210,7 @@ class DeviceMeasurementModelTest(TestCase):
         )
         
         self.device = DeviceConfiguration.objects.create(
-            device_id='DEVICE001',
+            device_id=f'DEVICE{unique_id}',
             name='Test Device',
             device_type='METER',
             vendor='SHELLY',
@@ -354,7 +358,7 @@ class DeviceMeasurementModelTest(TestCase):
             measurement2.full_clean()
 
 
-class MQTTBrokerModelTest(TestCase):
+class MQTTBrokerModelTest(TransactionTestCase):
     """Test cases for MQTTBroker model"""
     
     def setUp(self):

@@ -4,23 +4,26 @@ Test suite for Users app models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 User = get_user_model()
 
 
-class CustomUserModelTest(TestCase):
+class CustomUserModelTest(TransactionTestCase):
     """Test cases for CustomUser model"""
     
     def setUp(self):
         """Set up test data"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.user_data = {
-            'username': 'testuser',
-            'email': 'test@example.com',
+            'username': f'testuser{unique_id}',
+            'email': f'test{unique_id}@example.com',
             'password': 'TestPass123!',
             'first_name': 'Test',
             'last_name': 'User',
-            'fiscal_code': 'RSSMRA80A01H501X',
+            'fiscal_code': f'RSSMRA{unique_id}A01H501X',
             'phone': '+393331234567'
         }
     
