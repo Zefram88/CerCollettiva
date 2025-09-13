@@ -83,7 +83,7 @@ class DeviceConfigurationModelTest(TransactionTestCase):
     def test_device_str_method(self):
         """Test string representation of device"""
         device = DeviceConfiguration.objects.create(**self.device_data)
-        self.assertEqual(str(device), "DEVICE001 (Shelly EM)")
+        self.assertEqual(str(device), f"{device.device_id} (Shelly EM)")
 
     def test_device_unique_id(self):
         """Test that device_id must be unique"""

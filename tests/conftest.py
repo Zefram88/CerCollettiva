@@ -2,13 +2,13 @@
 Test configuration and fixtures for CerCollettiva test suite
 """
 
+import time
 from datetime import date
 from decimal import Decimal
 
 import pytest
 
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from django.test import TestCase
 
 from core.main_models import CERConfiguration, CERMembership, Plant
@@ -21,8 +21,14 @@ class TestFixtures:
     """Test fixtures for consistent test data"""
 
     @staticmethod
-    def create_test_user(username="testuser", email="test@example.com", **kwargs):
+    def create_test_user(username=None, email=None, **kwargs):
         """Create a test user with default values"""
+        if username is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            username = f"testuser{unique_id}"
+        if email is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            email = f"test{unique_id}@example.com"
         defaults = {
             "password": "TestPass123!",
             "first_name": "Test",
@@ -32,8 +38,14 @@ class TestFixtures:
         return User.objects.create_user(username=username, email=email, **defaults)
 
     @staticmethod
-    def create_test_admin(username="admin", email="admin@example.com", **kwargs):
+    def create_test_admin(username=None, email=None, **kwargs):
         """Create a test admin user with default values"""
+        if username is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            username = f"admin{unique_id}"
+        if email is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            email = f"admin{unique_id}@example.com"
         defaults = {
             "password": "AdminPass123!",
             "first_name": "Admin",
@@ -43,8 +55,14 @@ class TestFixtures:
         return User.objects.create_superuser(username=username, email=email, **defaults)
 
     @staticmethod
-    def create_test_cer(name="Test CER", code="CER001", **kwargs):
+    def create_test_cer(name=None, code=None, **kwargs):
         """Create a test CER with default values"""
+        if name is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            name = f"Test CER {unique_id}"
+        if code is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            code = f"CER{unique_id}"
         defaults = {
             "primary_substation": "Cabina Primaria Test",
             "description": "Test CER Description",
@@ -87,8 +105,11 @@ class TestFixtures:
         )
 
     @staticmethod
-    def create_test_device(plant, device_id="DEV001", **kwargs):
+    def create_test_device(plant, device_id=None, **kwargs):
         """Create a test device configuration with default values"""
+        if device_id is None:
+            unique_id = str(int(time.time() * 1000))[-6:]
+            device_id = f"DEV{unique_id}"
         defaults = {
             "name": "Test Device",
             "device_type": "INVERTER",
@@ -130,25 +151,30 @@ class TestDataSetup:
 
     def setup_basic_data(self):
         """Set up basic test data structure"""
+        unique_id = str(int(time.time() * 1000))[-6:]
         # Create users
         self.users["admin"] = TestFixtures.create_test_admin()
         self.users["user1"] = TestFixtures.create_test_user(
-            "user1", "user1@example.com"
+            f"user1{unique_id}", f"user1{unique_id}@example.com"
         )
         self.users["user2"] = TestFixtures.create_test_user(
-            "user2", "user2@example.com"
+            f"user2{unique_id}", f"user2{unique_id}@example.com"
         )
 
         # Create CERs
-        self.cers["cer1"] = TestFixtures.create_test_cer("Test CER 1", "CER001")
-        self.cers["cer2"] = TestFixtures.create_test_cer("Test CER 2", "CER002")
+        self.cers["cer1"] = TestFixtures.create_test_cer(
+            f"Test CER 1 {unique_id}", f"CER1{unique_id}"
+        )
+        self.cers["cer2"] = TestFixtures.create_test_cer(
+            f"Test CER 2 {unique_id}", f"CER2{unique_id}"
+        )
 
         # Create plants
         self.plants["plant1"] = TestFixtures.create_test_plant(
-            self.users["user1"], self.cers["cer1"], "Test Plant 1"
+            self.users["user1"], self.cers["cer1"], f"Test Plant 1 {unique_id}"
         )
         self.plants["plant2"] = TestFixtures.create_test_plant(
-            self.users["user2"], self.cers["cer2"], "Test Plant 2"
+            self.users["user2"], self.cers["cer2"], f"Test Plant 2 {unique_id}"
         )
 
         # Create memberships
@@ -161,15 +187,19 @@ class TestDataSetup:
 
         # Create devices
         self.devices["device1"] = TestFixtures.create_test_device(
-            self.plants["plant1"], "DEV001"
+            self.plants["plant1"], f"DEV1{unique_id}"
         )
         self.devices["device2"] = TestFixtures.create_test_device(
-            self.plants["plant2"], "DEV002"
+            self.plants["plant2"], f"DEV2{unique_id}"
         )
 
         # Create MQTT brokers
-        self.brokers["broker1"] = TestFixtures.create_test_mqtt_broker("Test Broker 1")
-        self.brokers["broker2"] = TestFixtures.create_test_mqtt_broker("Test Broker 2")
+        self.brokers["broker1"] = TestFixtures.create_test_mqtt_broker(
+            f"Test Broker 1 {unique_id}"
+        )
+        self.brokers["broker2"] = TestFixtures.create_test_mqtt_broker(
+            f"Test Broker 2 {unique_id}"
+        )
 
         return self
 

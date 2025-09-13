@@ -39,8 +39,8 @@ class CustomUserModelTest(TransactionTestCase):
             last_name=self.user_data["last_name"],
         )
 
-        self.assertEqual(user.username, "test@example.com")  # username == email policy
-        self.assertEqual(user.email, "test@example.com")
+        self.assertEqual(user.username, user.email)  # username == email policy
+        self.assertEqual(user.email, self.user_data["email"])
         self.assertTrue(user.check_password("TestPass123!"))
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
