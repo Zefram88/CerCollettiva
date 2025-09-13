@@ -3,7 +3,7 @@
 
 Write-Host "🎨 Formattazione codice con Black..." -ForegroundColor Cyan
 
-# Controlla se Black è installato
+# Controlla se Black e isort sono installati
 try {
     python -m black --version | Out-Null
     Write-Host "✅ Black trovato" -ForegroundColor Green
@@ -12,8 +12,20 @@ try {
     pip install black
 }
 
+try {
+    python -m isort --version | Out-Null
+    Write-Host "✅ isort trovato" -ForegroundColor Green
+} catch {
+    Write-Host "❌ isort non trovato. Installazione..." -ForegroundColor Red
+    pip install isort
+}
+
+# Ordina gli import con isort
+Write-Host "📝 Ordinamento import con isort..." -ForegroundColor Yellow
+python -m isort . --profile black
+
 # Formatta tutti i file Python escludendo le directory specificate
-Write-Host "📝 Formattazione file Python..." -ForegroundColor Yellow
+Write-Host "📝 Formattazione file Python con Black..." -ForegroundColor Yellow
 python -m black . --exclude "venv|node_modules|tests|cercollettiva/settings"
 
 # Controlla se ci sono modifiche

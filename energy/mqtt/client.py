@@ -22,10 +22,6 @@ from .manager import DeviceManager
 # from typing import Optional
 
 
-
-
-
-
 logger = logging.getLogger("energy.mqtt")
 
 

@@ -5,14 +5,23 @@
 
 echo "🎨 Formattazione codice con Black..."
 
-# Controlla se Black è installato
+# Controlla se Black e isort sono installati
 if ! command -v black &> /dev/null; then
     echo "❌ Black non trovato. Installazione..."
     pip install black
 fi
 
+if ! command -v isort &> /dev/null; then
+    echo "❌ isort non trovato. Installazione..."
+    pip install isort
+fi
+
+# Ordina gli import con isort
+echo "📝 Ordinamento import con isort..."
+isort . --profile black
+
 # Formatta tutti i file Python escludendo le directory specificate
-echo "📝 Formattazione file Python..."
+echo "📝 Formattazione file Python con Black..."
 black . --exclude "venv|node_modules|tests|cercollettiva/settings"
 
 # Controlla se ci sono modifiche

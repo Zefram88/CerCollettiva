@@ -22,8 +22,6 @@ from ..models import DeviceConfiguration
 # from typing import List
 
 
-
-
 # from ..models import DeviceMeasurement, MQTTAuditLog
 
 # from ..models.device import DeviceConfiguration, DeviceMeasurementDetail

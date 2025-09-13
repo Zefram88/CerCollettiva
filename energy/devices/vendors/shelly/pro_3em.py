@@ -12,7 +12,6 @@ from .base import BaseShellyMeter
 # from typing import Dict
 
 
-
 # Configurazione del logger
 logger = logging.getLogger(__name__)
 

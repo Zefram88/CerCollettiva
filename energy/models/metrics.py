@@ -5,7 +5,6 @@ from .base import BaseTimestampModel
 # from django.utils import timezone
 
 
-
 class TopicMetrics(BaseTimestampModel):
     """Metriche per topic MQTT"""
 
