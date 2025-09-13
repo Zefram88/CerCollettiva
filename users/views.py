@@ -5,7 +5,6 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import ValidationError
@@ -19,7 +18,6 @@ from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from core.validators import (
     EMAIL_UNIQUE_VALIDATOR,
-    USERNAME_UNIQUE_VALIDATOR,
     APIValidationMixin,
     ValidationMixin,
 )
@@ -28,10 +26,8 @@ from core.validators import (
 from .forms import (
     BusinessProfileForm,
     MinimalRegistrationForm,
-    PrivateProfileForm,
     UserLoginForm,
     UserProfileForm,
-    UserRegistrationForm,
     UserUpdateForm,
 )
 from .models import CustomUser
@@ -94,7 +90,10 @@ def register(request):
                 user = form.save()
 
                 logger.info(
-                    f"Nuovo utente registrato (minimale) - Username: {user.username} - Email: {user.email} - Onboarding: {user.onboarding_status} - Timestamp: {timezone.now()}"
+                    f"Nuovo utente registrato (minimale) - "
+                    f"Username: {user.username} - Email: {user.email} - "
+                    f"Onboarding: {user.onboarding_status} - "
+                    f"Timestamp: {timezone.now()}"
                 )
 
                 # Login automatico dopo registrazione
@@ -104,7 +103,8 @@ def register(request):
 
                 messages.success(
                     request,
-                    "Registrazione completata! Ora completa il tuo profilo per procedere.",
+                    "Registrazione completata! Ora completa il tuo profilo "
+                    "per procedere.",
                 )
                 return redirect(
                     "users:profile_complete"
@@ -115,7 +115,8 @@ def register(request):
                 messages.error(request, "Email già esistente.")
         else:
             messages.error(
-                request, "Ci sono errori nel form. Controlla i campi evidenziati."
+                request,
+                "Ci sono errori nel form. Controlla i campi evidenziati.",
             )
     else:
         form = MinimalRegistrationForm()
@@ -131,7 +132,10 @@ def register(request):
 @login_required
 def profile_complete(request):
     """Redirect al completamento profilo anagrafico nell'app cer"""
-    if request.user.onboarding_status != CustomUser.OnboardingStatus.REGISTRATO:
+    if (
+        request.user.onboarding_status
+        != CustomUser.OnboardingStatus.REGISTRATO
+    ):
         return redirect("core:dashboard")
 
     return redirect("cer:profile_completion")
@@ -151,7 +155,9 @@ def login_view(request):
                 user.last_login = timezone.now()
                 user.save(skip_validation=True)
                 login(request, user)
-                return redirect("core:home")  # o qualsiasi altra pagina dopo il login
+                return redirect(
+                    "core:home"
+                )  # o qualsiasi altra pagina dopo il login
         else:
             # Non aggiungere messaggi qui, lascia che sia il form a gestire gli errori
             # Rimuovi qualsiasi chiamata a messages.error o messages.add_message
@@ -228,11 +234,15 @@ class ProfileView(LoginRequiredMixin, View):
         context.update(
             {
                 "privacy_status": {
-                    "accepted": getattr(request.user, "privacy_accepted", False),
+                    "accepted": getattr(
+                        request.user, "privacy_accepted", False
+                    ),
                     "acceptance_date": getattr(
                         request.user, "privacy_acceptance_date", None
                     ),
-                    "last_update": getattr(request.user, "last_privacy_update", None),
+                    "last_update": getattr(
+                        request.user, "last_privacy_update", None
+                    ),
                 }
             }
         )
@@ -252,8 +262,8 @@ class ProfileView(LoginRequiredMixin, View):
 
             # Documenti aziendali
             if hasattr(request.user, "documents"):
-                context["business_documents"] = request.user.documents.all().order_by(
-                    "-upload_date"
+                context["business_documents"] = (
+                    request.user.documents.all().order_by("-upload_date")
                 )
 
         # Attività recenti
@@ -270,7 +280,9 @@ class ProfileView(LoginRequiredMixin, View):
         business_form = None
 
         if request.user.legal_type == "BUSINESS":
-            business_form = BusinessProfileForm(request.POST, instance=request.user)
+            business_form = BusinessProfileForm(
+                request.POST, instance=request.user
+            )
             if user_form.is_valid() and business_form.is_valid():
                 # Additional validation using centralized validators
                 try:
@@ -312,7 +324,9 @@ class ProfileView(LoginRequiredMixin, View):
                 "acceptance_date": getattr(
                     request.user, "privacy_acceptance_date", None
                 ),
-                "last_update": getattr(request.user, "last_privacy_update", None),
+                "last_update": getattr(
+                    request.user, "last_privacy_update", None
+                ),
             },
         }
 
@@ -347,7 +361,6 @@ class DeleteAccountView(LoginRequiredMixin, View):
 
     def post(self, request):
         # Log dell'eliminazione account per GDPR
-        user_id = request.user.id
         request.user.delete()
         messages.success(request, "Account eliminato con successo.")
         # Qui potresti aggiungere la logica per conservare i dati necessari per GDPR
@@ -377,13 +390,17 @@ class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["show_sensitive"] = self.request.GET.get("show_sensitive", False)
+        context["show_sensitive"] = self.request.GET.get(
+            "show_sensitive", False
+        )
         context["search"] = self.request.GET.get("search", "")
         context["legal_type_labels"] = dict(CustomUser.LEGAL_TYPES)
         return context
 
 
-class AdminUserProfileView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class AdminUserProfileView(
+    LoginRequiredMixin, UserPassesTestMixin, UpdateView
+):
     model = CustomUser
     template_name = "users/admin_profile.html"
     form_class = UserProfileForm
@@ -395,7 +412,9 @@ class AdminUserProfileView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse_lazy("users:management")
 
     def form_valid(self, form):
-        messages.success(self.request, "Profilo utente aggiornato con successo")
+        messages.success(
+            self.request, "Profilo utente aggiornato con successo"
+        )
         return super().form_valid(form)
 
 

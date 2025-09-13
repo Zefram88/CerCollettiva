@@ -103,13 +103,21 @@ class CustomUser(AbstractUser):
 
     # Campi per associazioni
     registration_number = models.CharField(
-        max_length=50, blank=True, null=True, verbose_name="Numero Registrazione"
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Numero Registrazione",
     )
-    statute_date = models.DateField(blank=True, null=True, verbose_name="Data Statuto")
+    statute_date = models.DateField(
+        blank=True, null=True, verbose_name="Data Statuto"
+    )
 
     # Campi per enti religiosi
     religious_entity_code = models.CharField(
-        max_length=50, blank=True, null=True, verbose_name="Codice Ente Religioso"
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Codice Ente Religioso",
     )
 
     # Consensi GDPR
@@ -127,7 +135,9 @@ class CustomUser(AbstractUser):
 
     # Consensi GDPR estesi
     privacy_policy = models.BooleanField(
-        "Privacy Policy", default=False, help_text="Consenso alla privacy policy"
+        "Privacy Policy",
+        default=False,
+        help_text="Consenso alla privacy policy",
     )
     data_processing = models.BooleanField(
         "Trattamento Dati",
@@ -152,7 +162,10 @@ class CustomUser(AbstractUser):
         REGISTRATO = "REGISTRATO", "Registrato"
         ANAGRAFICA_COMPLETA = "ANAGRAFICA_COMPLETA", "Anagrafica Completa"
         CER_COMPLETA = "CER_COMPLETA", "CER Completa"
-        ONBOARDING_COMPLETATO = "ONBOARDING_COMPLETATO", "Onboarding Completato"
+        ONBOARDING_COMPLETATO = (
+            "ONBOARDING_COMPLETATO",
+            "Onboarding Completato",
+        )
 
     onboarding_status = models.CharField(
         max_length=25,
@@ -210,7 +223,10 @@ class CustomUser(AbstractUser):
     @property
     def is_onboarding_complete(self):
         """Verifica se l'onboarding è completato"""
-        return self.onboarding_status == self.OnboardingStatus.ONBOARDING_COMPLETATO
+        return (
+            self.onboarding_status
+            == self.OnboardingStatus.ONBOARDING_COMPLETATO
+        )
 
     @property
     def needs_profile_completion(self):
@@ -220,12 +236,19 @@ class CustomUser(AbstractUser):
     @property
     def needs_cer_setup(self):
         """Verifica se l'utente deve configurare la partecipazione CER"""
-        return self.onboarding_status == self.OnboardingStatus.ANAGRAFICA_COMPLETA
+        return (
+            self.onboarding_status == self.OnboardingStatus.ANAGRAFICA_COMPLETA
+        )
 
     @property
     def requires_vat(self):
         """Verifica se l'utente richiede partita IVA"""
-        return self.legal_type in ["BUSINESS", "ASSOCIATION", "CHURCH", "PUBLIC"]
+        return self.legal_type in [
+            "BUSINESS",
+            "ASSOCIATION",
+            "CHURCH",
+            "PUBLIC",
+        ]
 
     @property
     def requires_pec(self):
@@ -261,10 +284,16 @@ class CustomUser(AbstractUser):
                 raise ValidationError(
                     "Nome e cognome sono obbligatori per gli utenti privati."
                 )
-        elif self.legal_type in ["BUSINESS", "ASSOCIATION", "CHURCH", "PUBLIC"]:
+        elif self.legal_type in [
+            "BUSINESS",
+            "ASSOCIATION",
+            "CHURCH",
+            "PUBLIC",
+        ]:
             if not all([self.vat_number, self.legal_name, self.pec]):
                 raise ValidationError(
-                    "Partita IVA, denominazione e PEC sono obbligatori per aziende, associazioni, enti religiosi e pubblici."
+                    "Partita IVA, denominazione e PEC sono obbligatori per "
+                    "aziende, associazioni, enti religiosi e pubblici."
                 )
 
     def save(self, *args, **kwargs):

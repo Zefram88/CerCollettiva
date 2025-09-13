@@ -1,7 +1,6 @@
 # users/signals.py
 import logging
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.db.models.signals import post_save
@@ -21,7 +20,9 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
 # Formato del log
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 file_handler.setFormatter(formatter)
 console_handler.setFormatter(formatter)
 

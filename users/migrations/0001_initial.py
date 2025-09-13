@@ -27,7 +27,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "password",
+                    models.CharField(max_length=128, verbose_name="password"),
+                ),
                 (
                     "last_login",
                     models.DateTimeField(
@@ -72,7 +75,9 @@ class Migration(migrations.Migration):
                 (
                     "email",
                     models.EmailField(
-                        blank=True, max_length=254, verbose_name="email address"
+                        blank=True,
+                        max_length=254,
+                        verbose_name="email address",
                     ),
                 ),
                 (
@@ -94,7 +99,8 @@ class Migration(migrations.Migration):
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
+                        default=django.utils.timezone.now,
+                        verbose_name="date joined",
                     ),
                 ),
                 (
@@ -136,13 +142,19 @@ class Migration(migrations.Migration):
                 (
                     "address",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="Indirizzo"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Indirizzo",
                     ),
                 ),
                 (
                     "phone",
                     models.CharField(
-                        blank=True, max_length=20, null=True, verbose_name="Telefono"
+                        blank=True,
+                        max_length=20,
+                        null=True,
+                        verbose_name="Telefono",
                     ),
                 ),
                 (
@@ -167,13 +179,19 @@ class Migration(migrations.Migration):
                 (
                     "pec",
                     models.EmailField(
-                        blank=True, max_length=254, null=True, verbose_name="PEC"
+                        blank=True,
+                        max_length=254,
+                        null=True,
+                        verbose_name="PEC",
                     ),
                 ),
                 (
                     "sdi_code",
                     models.CharField(
-                        blank=True, max_length=7, null=True, verbose_name="Codice SDI"
+                        blank=True,
+                        max_length=7,
+                        null=True,
+                        verbose_name="Codice SDI",
                     ),
                 ),
                 (
@@ -211,7 +229,9 @@ class Migration(migrations.Migration):
                 (
                     "privacy_acceptance_date",
                     models.DateTimeField(
-                        blank=True, null=True, verbose_name="Data Accettazione Privacy"
+                        blank=True,
+                        null=True,
+                        verbose_name="Data Accettazione Privacy",
                     ),
                 ),
                 (
@@ -256,13 +276,16 @@ class Migration(migrations.Migration):
                 ],
                 "indexes": [
                     models.Index(
-                        fields=["legal_type"], name="users_custo_legal_t_54ba15_idx"
+                        fields=["legal_type"],
+                        name="users_custo_legal_t_54ba15_idx",
                     ),
                     models.Index(
-                        fields=["fiscal_code"], name="users_custo_fiscal__3d2665_idx"
+                        fields=["fiscal_code"],
+                        name="users_custo_fiscal__3d2665_idx",
                     ),
                     models.Index(
-                        fields=["vat_number"], name="users_custo_vat_num_bbdc6f_idx"
+                        fields=["vat_number"],
+                        name="users_custo_vat_num_bbdc6f_idx",
                     ),
                 ],
             },
@@ -276,7 +299,13 @@ class Migration(migrations.Migration):
                 check=models.Q(
                     (
                         "legal_type__in",
-                        ["PRIVATE", "BUSINESS", "ASSOCIATION", "CHURCH", "PUBLIC"],
+                        [
+                            "PRIVATE",
+                            "BUSINESS",
+                            "ASSOCIATION",
+                            "CHURCH",
+                            "PUBLIC",
+                        ],
                     )
                 ),
                 name="valid_legal_type",

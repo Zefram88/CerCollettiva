@@ -31,7 +31,11 @@ class Migration(migrations.Migration):
                 check=models.Q(
                     (
                         "onboarding_status__in",
-                        ["REGISTRATO", "ANAGRAFICA_COMPLETA", "ONBOARDING_COMPLETATO"],
+                        [
+                            "REGISTRATO",
+                            "ANAGRAFICA_COMPLETA",
+                            "ONBOARDING_COMPLETATO",
+                        ],
                     )
                 ),
                 name="valid_onboarding_status",

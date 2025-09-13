@@ -9,19 +9,31 @@ urlpatterns = [
     path("register/", views.register, name="register"),
     path("profile/complete/", views.profile_complete, name="profile_complete"),
     path("login/", views.login_view, name="login"),
-    path("privacy-policy/", views.PrivacyPolicyView.as_view(), name="privacy_policy"),
+    path(
+        "privacy-policy/",
+        views.PrivacyPolicyView.as_view(),
+        name="privacy_policy",
+    ),
     path("logout/", views.logout_view, name="logout"),
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path(
-        "profile/<int:pk>/", views.AdminUserProfileView.as_view(), name="admin_profile"
+        "profile/<int:pk>/",
+        views.AdminUserProfileView.as_view(),
+        name="admin_profile",
     ),  # profilo di altri utenti (admin only)
     path(
         "password_change/",
         views.CustomPasswordChangeView.as_view(),
         name="password_change",
     ),
-    path("delete_account/", views.DeleteAccountView.as_view(), name="delete_account"),
-    path("detail/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
+    path(
+        "delete_account/",
+        views.DeleteAccountView.as_view(),
+        name="delete_account",
+    ),
+    path(
+        "detail/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"
+    ),
     # Password Reset URLs
     path(
         "password_reset/",
