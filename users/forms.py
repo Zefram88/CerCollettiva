@@ -520,9 +520,7 @@ class UserRegistrationForm(UserCreationForm):
             if not cleaned_data.get("pec"):
                 self.add_error("pec", _("La PEC è obbligatoria"))
             if not cleaned_data.get("legal_name"):
-                self.add_error(
-                    "legal_name", _("La denominazione è obbligatoria")
-                )
+                self.add_error("legal_name", _("La denominazione è obbligatoria"))
         # Se non è privato ma manca profit_type, solleva errore
         elif not cleaned_data.get("profit_type"):
             raise ValidationError(
