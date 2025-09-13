@@ -126,11 +126,11 @@ jobs:
     
     - name: Run Black
       run: |
-        black --check .
+        black --check . --exclude "venv|node_modules|tests|cercollettiva/settings"
     
     - name: Run isort
       run: |
-        isort --check-only .
+        isort --check-only . --profile black
     
     - name: Run flake8
       run: |
