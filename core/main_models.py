@@ -9,10 +9,12 @@ import paho.mqtt.client as mqtt
 # from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
 
-from energy.models import DeviceMeasurement
+# Import lazy per evitare dipendenze circolari
+# from energy.models import DeviceMeasurement
 # from energy.models import DeviceConfiguration
 # from paho.mqtt.client import CallbackAPIVersion
 
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
@@ -1287,6 +1289,9 @@ class Plant(models.Model):
         """
         time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
 
+        # Import lazy per evitare dipendenze circolari
+        DeviceMeasurement = apps.get_model("energy", "DeviceMeasurement")
+        
         # Costruisci la query base
         query = DeviceMeasurement.objects.filter(
             device__is_active=True, timestamp__gte=time_threshold, quality="GOOD"
@@ -1315,7 +1320,8 @@ class Plant(models.Model):
         # Import locale per evitare l'importazione circolare
         from django.db.models import Max, Sum
 
-        from energy.models import DeviceMeasurement
+        # Import lazy per evitare dipendenze circolari
+        DeviceMeasurement = apps.get_model("energy", "DeviceMeasurement")
 
         time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
 
