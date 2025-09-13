@@ -36,16 +36,13 @@ jobs:
       id: black
       run: |
         # Controlla se ci sono file da formattare
-        black --check --diff . > black_output.txt 2>&1 || true
-        
-        # Se ci sono modifiche, formatta i file
-        if [ -s black_output.txt ]; then
+        if black --check . --exclude "venv|node_modules|tests|cercollettiva/settings"; then
+          echo "All files are already formatted."
+          echo "formatted=false" >> $GITHUB_OUTPUT
+        else
           echo "Files need formatting. Running Black..."
           black . --exclude "venv|node_modules|tests|cercollettiva/settings"
           echo "formatted=true" >> $GITHUB_OUTPUT
-        else
-          echo "All files are already formatted."
-          echo "formatted=false" >> $GITHUB_OUTPUT
         fi
     
     - name: Check for changes
