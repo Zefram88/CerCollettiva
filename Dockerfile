@@ -34,6 +34,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia codice sorgente
 COPY . .
 
+# Copia script di entrypoint e wait-for-db
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
+COPY scripts/wait-for-db.py /app/scripts/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Crea directory necessarie
 RUN mkdir -p /app/logs /app/media /app/staticfiles && \
     chown -R cercollettiva:cercollettiva /app
@@ -45,8 +50,11 @@ USER cercollettiva
 EXPOSE 8000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/monitoring/health/ || exit 1
+
+# Entrypoint per setup automatico
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Comando di default - usa runserver_plus in sviluppo, gunicorn in produzione
 CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then python manage.py runserver_plus 0.0.0.0:8000; else gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 cercollettiva.wsgi:application; fi"]

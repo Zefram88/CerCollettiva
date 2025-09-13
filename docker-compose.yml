@@ -87,6 +87,7 @@ services:
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
       - ./logs:/app/logs
+      - setup_complete:/app/.setup_complete  # Persist setup state
     ports:
       - "8000:8000"
     networks:
@@ -104,6 +105,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s  # Give time for setup
 
   # Nginx Reverse Proxy
   nginx:
@@ -298,6 +300,8 @@ volumes:
   prometheus_data:
     driver: local
   grafana_data:
+    driver: local
+  setup_complete:
     driver: local
 
 networks:
