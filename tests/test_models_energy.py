@@ -181,16 +181,16 @@ class DeviceMeasurementModelTest(TransactionTestCase):
         import time
         unique_id = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
         )
 
         self.admin = User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
+            username=f"admin{unique_id}",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",

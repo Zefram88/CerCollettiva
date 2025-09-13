@@ -48,16 +48,19 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_create_superuser(self):
         """Test creating a superuser"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         admin_user = User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
+            username=f"admin{unique_id}",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",
         )
 
         self.assertEqual(
-            admin_user.username, "admin@example.com"
+            admin_user.username, f"admin{unique_id}@example.com"
         )  # username == email policy
         self.assertTrue(admin_user.is_staff)
         self.assertTrue(admin_user.is_superuser)
@@ -65,22 +68,28 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_user_str_method(self):
         """Test the string representation of user"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
         )
         self.assertEqual(
-            str(user), "test@example.com (Privato)"
+            str(user), f"test{unique_id}@example.com (Privato)"
         )  # username == email policy
 
     def test_user_full_name(self):
         """Test user full name property"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="John",
             last_name="Doe",
@@ -89,9 +98,12 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_unique_email(self):
         """Test that email must be unique (and username follows email)"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         User.objects.create_user(
-            username="testuser",  # Will be overridden to email
-            email="test@example.com",
+            username=f"testuser{unique_id}",  # Will be overridden to email
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
@@ -100,7 +112,7 @@ class CustomUserModelTest(TransactionTestCase):
         with self.assertRaises(IntegrityError):
             User.objects.create_user(
                 username="different",  # Will be overridden to email
-                email="test@example.com",  # Same email should fail
+                email=f"test{unique_id}@example.com",  # Same email should fail
                 password="TestPass123!",
                 first_name="Test",
                 last_name="User",
@@ -108,16 +120,19 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_email_field(self):
         """Test email field validation"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
         )
 
         # Test valid email format
-        user.email = "newemail@example.com"
+        user.email = f"newemail{unique_id}@example.com"
         user.full_clean()  # Should not raise
 
         # Test invalid email format
@@ -127,9 +142,12 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_user_permissions(self):
         """Test user permission methods"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
@@ -141,8 +159,8 @@ class CustomUserModelTest(TransactionTestCase):
 
         # Superuser should have all permissions
         admin = User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
+            username=f"admin{unique_id}",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",
@@ -154,9 +172,12 @@ class CustomUserModelTest(TransactionTestCase):
         """Test user group relationships"""
         from django.contrib.auth.models import Group
 
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
@@ -170,9 +191,12 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_user_profile_fields(self):
         """Test custom profile fields if they exist"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
@@ -192,9 +216,12 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_user_timestamps(self):
         """Test that user has timestamp fields"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
@@ -205,9 +232,12 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_user_active_status(self):
         """Test user active/inactive status"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",

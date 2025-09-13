@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import Client, TestCase
+from django.test import Client, TransactionTestCase
 from django.urls import reverse
 
 from core.main_models import CERConfiguration, CERMembership, Plant
@@ -16,13 +16,16 @@ from .models import MemberProfile
 User = get_user_model()
 
 
-class MemberProfileModelTest(TestCase):
+class MemberProfileModelTest(TransactionTestCase):
     """Test per il modello MemberProfile"""
 
     def setUp(self):
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="testpass123",
             first_name="Mario",
             last_name="Rossi",
@@ -64,14 +67,17 @@ class MemberProfileModelTest(TestCase):
         self.assertEqual(profile.onboarding_data["step_1"]["member_type"], "PRIVATE")
 
 
-class OnboardingViewsTest(TestCase):
+class OnboardingViewsTest(TransactionTestCase):
     """Test per le view del wizard onboarding"""
 
     def setUp(self):
         self.client = Client()
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser{unique_id}",
+            email=f"test{unique_id}@example.com",
             password="testpass123",
             first_name="Mario",
             last_name="Rossi",

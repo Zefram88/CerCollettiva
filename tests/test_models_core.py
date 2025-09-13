@@ -19,8 +19,11 @@ class CERConfigurationModelTest(TransactionTestCase):
 
     def setUp(self):
         """Set up test data"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.admin_user = User.objects.create_superuser(
-            email="admin@example.com",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",
@@ -89,15 +92,18 @@ class PlantModelTest(TransactionTestCase):
 
     def setUp(self):
         """Set up test data"""
+        # Use unique identifier to avoid conflicts
+        import time
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
-            email="owner@example.com",
+            email=f"owner{unique_id}@example.com",
             password="TestPass123!",
             first_name="Plant",
             last_name="Owner",
         )
 
         self.admin = User.objects.create_superuser(
-            email="admin@example.com",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",
@@ -227,14 +233,14 @@ class CERMembershipModelTest(TransactionTestCase):
     def setUp(self):
         """Set up test data"""
         self.admin = User.objects.create_superuser(
-            email="admin@example.com",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",
         )
 
         self.member = User.objects.create_user(
-            email="member@example.com",
+            email=f"member{unique_id}@example.com",
             password="TestPass123!",
             first_name="Member",
             last_name="User",
@@ -278,10 +284,13 @@ class CERMembershipModelTest(TransactionTestCase):
         valid_roles = ["ADMIN", "MEMBER", "TECHNICAL"]
 
         for role in valid_roles:
+            # Use unique identifier to avoid conflicts
+            import time
+            unique_id = str(int(time.time() * 1000))[-6:]
             membership = CERMembership.objects.create(
                 cer_configuration=self.cer,
                 user=User.objects.create_user(
-                    email=f"{role}@example.com",
+                    email=f"{role}{unique_id}@example.com",
                     password="TestPass123!",
                     first_name="Test",
                     last_name="User",
@@ -335,14 +344,14 @@ class AlertModelTest(TransactionTestCase):
     def setUp(self):
         """Set up test data"""
         self.admin = User.objects.create_superuser(
-            email="admin@example.com",
+            email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
             first_name="Admin",
             last_name="User",
         )
 
         self.user = User.objects.create_user(
-            email="user@example.com",
+            email=f"user{unique_id}@example.com",
             password="TestPass123!",
             first_name="Test",
             last_name="User",
