@@ -173,8 +173,7 @@ def mark_fee_paid(request, card_id):
             {
                 "success": True,
                 "message": (
-                    f"Quota segnata come pagata per "
-                    f"{card.membership.user.username}"
+                    f"Quota segnata come pagata per " f"{card.membership.user.username}"
                 ),
                 "payment_date": card.fee_payment_date.strftime("%d/%m/%Y %H:%M"),
             }

@@ -175,7 +175,7 @@ class MemberProfile(models.Model):
                     missing_fields.append("PEC")
                 raise ValidationError(
                     {
-                        "vat_number": f'Campi obbligatori mancanti: '
+                        "vat_number": f"Campi obbligatori mancanti: "
                         f'{", ".join(missing_fields)}'
                     }
                 )

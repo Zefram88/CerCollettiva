@@ -261,9 +261,7 @@ class Document(models.Model):
                 result = processor.process()
             except UnicodeDecodeError as ude:
                 # Log the specific encoding error
-                logger.error(
-                    f"Encoding error processing file: {str(ude)}"
-                )
+                logger.error(f"Encoding error processing file: {str(ude)}")
                 self.processing_status = "FAILED"
                 self.processing_errors = (
                     "Errore di codifica nel file. Il file potrebbe "

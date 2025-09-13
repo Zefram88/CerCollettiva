@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from django.db.models import Avg, Max, Min, Q, Sum
+
 # from django.utils import timezone
 
 from ..models import DeviceMeasurement, EnergyAggregate, EnergyMeasurement

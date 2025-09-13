@@ -612,8 +612,7 @@ class PlantCreateFromGaudiView(GaudiAddressMixin, BasePlantView, FormView):
 
         except Exception as e:
             logger.error(
-                f"Errore nell'elaborazione dei dati iniziali: {str(e)}",
-                exc_info=True
+                f"Errore nell'elaborazione dei dati iniziali: {str(e)}", exc_info=True
             )
             # In caso di errore, restituiamo comunque un dizionario con
             # valori di default

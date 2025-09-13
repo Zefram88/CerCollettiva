@@ -441,9 +441,7 @@ class GaudiProcessor:
         Verifica se stiamo usando la data di convalida come fallback per la
         data di presunto esercizio.
         """
-        return self.data.get(
-            "using_validation_date_as_fallback", False
-        )
+        return self.data.get("using_validation_date_as_fallback", False)
 
     def get_date_fallback_message(self) -> Optional[str]:
         """

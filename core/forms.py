@@ -6,6 +6,7 @@ from crispy_forms.layout import HTML, Column, Div, Field, Layout, Row, Submit
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+
 # from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -455,9 +456,7 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
     privacy_consent = forms.BooleanField(
         label="Consenso Privacy",
         required=True,
-        widget=forms.CheckboxInput(
-            attrs={"class": "form-check-input"}
-        ),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
         help_text="Accetto l'informativa sulla privacy e autorizzo "
         "il trattamento dei dati personali",
     )
@@ -465,9 +464,7 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
     data_processing_consent = forms.BooleanField(
         label="Trattamento Dati Energetici",
         required=True,
-        widget=forms.CheckboxInput(
-            attrs={"class": "form-check-input"}
-        ),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
         help_text="Autorizzo il trattamento dei dati di consumo/produzione "
         "per la gestione CER",
     )
@@ -497,9 +494,7 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
                     "id": "member_type_select",  # Per JavaScript
                 }
             ),
-            "role": forms.Select(
-                attrs={"class": "form-control"}
-            ),
+            "role": forms.Select(attrs={"class": "form-control"}),
             "panels_serial_list": forms.Textarea(
                 attrs={
                     "class": "form-control producer-field",
@@ -546,20 +541,16 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
                 "OBBLIGATORIO per produttori"
             ),
             "gse_practice": (
-                "Documentazione GSE completa (PDF) - "
-                "OBBLIGATORIO per produttori"
+                "Documentazione GSE completa (PDF) - " "OBBLIGATORIO per produttori"
             ),
             "panels_photo": (
-                "Foto dei pannelli installati - "
-                "OBBLIGATORIA per produttori"
+                "Foto dei pannelli installati - " "OBBLIGATORIA per produttori"
             ),
             "inverter_photo": (
-                "Foto dell'inverter installato - "
-                "OBBLIGATORIA per produttori"
+                "Foto dell'inverter installato - " "OBBLIGATORIA per produttori"
             ),
             "panels_serial_list": (
-                "Numeri seriali dei pannelli - "
-                "OBBLIGATORIO per produttori"
+                "Numeri seriali dei pannelli - " "OBBLIGATORIO per produttori"
             ),
         }
 
@@ -800,9 +791,7 @@ class PlantForm(ValidationMixin, forms.ModelForm):
             ),
             "nominal_power": _("Potenza nominale dell'impianto in kW"),
             "expected_yearly_production": _("Stima della produzione annuale in kWh"),
-            "connection_voltage": _(
-                "Tensione di connessione alla rete (default 230V)"
-            ),
+            "connection_voltage": _("Tensione di connessione alla rete (default 230V)"),
         }
 
     def __init__(self, *args, from_gaudi=False, **kwargs):
@@ -845,9 +834,7 @@ class PlantForm(ValidationMixin, forms.ModelForm):
         cleaned_data = super().clean()
 
         # Validazione date correlate
-        expected_operation_date = cleaned_data.get(
-            "expected_operation_date"
-        )
+        expected_operation_date = cleaned_data.get("expected_operation_date")
         validation_date = cleaned_data.get("validation_date")
 
         if validation_date and expected_operation_date:

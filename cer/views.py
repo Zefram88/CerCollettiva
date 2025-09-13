@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 # from django.views.decorators.http import require_http_methods  # Unused
 
 from core.main_models import CERConfiguration, CERMembership, Plant
@@ -510,9 +511,7 @@ def profile_completion(request):
                     _("Tipo di soggetto aggiornato. Compila i campi appropriati."),
                 )
 
-        form = ProfileCompletionForm(
-            request.POST, instance=member_profile, user=user
-        )
+        form = ProfileCompletionForm(request.POST, instance=member_profile, user=user)
 
         if form.is_valid():
             # Salva il profilo membro

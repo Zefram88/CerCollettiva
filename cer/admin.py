@@ -28,10 +28,7 @@ class MemberProfileAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at", "updated_at", "is_complete_display"]
 
     fieldsets = (
-        (
-            "Informazioni Utente",
-            {"fields": ("user", "created_at", "updated_at")}
-        ),
+        ("Informazioni Utente", {"fields": ("user", "created_at", "updated_at")}),
         (
             "Dati Anagrafici",
             {

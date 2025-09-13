@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.core.cache import cache
+
 # from django.db import transaction
 # from django.db.models import Sum
 # from django.db.models import F
@@ -148,9 +149,7 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
             return
 
         for interval_type in ["1H", "1D", "1M", "1Y"]:
-            cache_key = self._get_cache_key(
-                device_id, interval_type, timestamp
-            )
+            cache_key = self._get_cache_key(device_id, interval_type, timestamp)
             cache.delete(cache_key)
             logger.debug(
                 f"Cache INVALIDATED - Device: {device_id}, "
@@ -172,17 +171,11 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
                 # Costruisci un pattern per eliminare tutte le chiavi relative
                 # al dispositivo
                 if interval_type == "1M":
-                    pattern = (
-                        f"{self._cache_prefixes[interval_type]}{device_id}_*"
-                    )
+                    pattern = f"{self._cache_prefixes[interval_type]}{device_id}_*"
                 elif interval_type == "1Y":
-                    pattern = (
-                        f"{self._cache_prefixes[interval_type]}{device_id}_*"
-                    )
+                    pattern = f"{self._cache_prefixes[interval_type]}{device_id}_*"
                 else:
-                    pattern = (
-                        f"{self._cache_prefixes[interval_type]}{device_id}_*"
-                    )
+                    pattern = f"{self._cache_prefixes[interval_type]}{device_id}_*"
 
                 # Usa le wildcards per eliminare le chiavi in modo efficiente
                 cache.delete_pattern(pattern)
@@ -192,9 +185,7 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
                 )
 
         except Exception as e:
-            logger.error(
-                f"Error clearing cache for device {device_id}: {str(e)}"
-            )
+            logger.error(f"Error clearing cache for device {device_id}: {str(e)}")
 
     def bulk_update_cache(
         self, intervals: List[Tuple[str, datetime, datetime, str, float]]
@@ -219,9 +210,7 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
             {k: v[0] for k, v in cache_data.items()},
             timeout=max(v[1] for v in cache_data.values()),
         )
-        logger.info(
-            f"Bulk cache update completed for {len(intervals)} intervals"
-        )
+        logger.info(f"Bulk cache update completed for {len(intervals)} intervals")
 
         # Invalida le cache superiori per ogni intervallo aggiornato
         for device_id, start_time, _, _, _ in intervals:
@@ -289,12 +278,7 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
 
             # Ricalcola annuale
             year_start = start_time.replace(
-                month=1,
-                day=1,
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0
+                month=1, day=1, hour=0, minute=0, second=0, microsecond=0
             )
             yearly_energy = self.calculate_yearly_energy(device_id, year_start.year)
             if yearly_energy is not None:

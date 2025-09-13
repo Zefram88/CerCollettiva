@@ -1,8 +1,10 @@
 # energy/devices/vendors/shelly/base.py
 # import json
 import logging
+
 # from datetime import datetime
 from typing import Any, Optional
+
 # from typing import Dict
 
 from ....models import DeviceMeasurement

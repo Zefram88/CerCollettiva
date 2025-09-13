@@ -5,6 +5,7 @@ import threading
 import time
 from collections import deque
 from queue import Queue
+
 # from typing import Optional
 
 import paho.mqtt.client as mqtt
@@ -13,8 +14,10 @@ import paho.mqtt.client as mqtt
 from django.utils import timezone
 
 from ..models import MQTTBroker
+
 # from ..models import MQTTAuditLog
 from .core import get_mqtt_service
+
 # from .core import MQTTMessage
 from .manager import DeviceManager
 

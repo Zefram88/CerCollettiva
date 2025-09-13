@@ -1,7 +1,9 @@
 # energy/devices/vendors/shelly/pro_3em.py
 import logging
+
 # from datetime import datetime
 from typing import Any, List, Optional
+
 # from typing import Dict
 
 from django.utils import timezone

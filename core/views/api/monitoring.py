@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
+
 # from django.views.decorators.http import require_http_methods
 
 # Import monitoring models

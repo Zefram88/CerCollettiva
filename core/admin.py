@@ -5,6 +5,7 @@ Admin configuration for CerCollettiva - Django Admin Standard
 # from datetime import datetime, time, timedelta
 
 from django.contrib import admin
+
 # from django.contrib import messages
 # from django.contrib.admin.views.decorators import staff_member_required
 # from django.contrib.auth import get_user_model
@@ -13,6 +14,7 @@ from django.contrib import admin
 # from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.urls import path
+
 # from django.urls import reverse
 # from django.utils.decorators import method_decorator
 # from django.utils.html import format_html

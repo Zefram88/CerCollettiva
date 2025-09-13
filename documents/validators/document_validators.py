@@ -87,7 +87,7 @@ class DocumentCreateValidator(BaseModel):
         allowed_classifications = ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PERSONAL"]
         if v not in allowed_classifications:
             raise ValueError(
-                f'Classificazione dati non valida. Consentite: '
+                f"Classificazione dati non valida. Consentite: "
                 f'{", ".join(allowed_classifications)}'
             )
         return v
@@ -203,7 +203,7 @@ class DocumentUpdateValidator(BaseModel):
             allowed_classifications = ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PERSONAL"]
             if v not in allowed_classifications:
                 raise ValueError(
-                    f'Classificazione dati non valida. Consentite: '
+                    f"Classificazione dati non valida. Consentite: "
                     f'{", ".join(allowed_classifications)}'
                 )
         return v
@@ -245,7 +245,7 @@ class DocumentUpdateValidator(BaseModel):
             allowed_statuses = ["PENDING", "PROCESSING", "COMPLETED", "FAILED"]
             if v not in allowed_statuses:
                 raise ValueError(
-                    f'Stato elaborazione non valido. Consentiti: '
+                    f"Stato elaborazione non valido. Consentiti: "
                     f'{", ".join(allowed_statuses)}'
                 )
         return v

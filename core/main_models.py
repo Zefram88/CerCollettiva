@@ -1,11 +1,13 @@
 # core\models.py
 import logging
+
 # import re
 import time
 import uuid
 from datetime import timedelta
 
 import paho.mqtt.client as mqtt
+
 # from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
 
@@ -384,11 +386,7 @@ class GSEIncomeTracking(models.Model):
         ordering = ["-reference_year", "-reference_month", "-created_at"]
         indexes = [
             models.Index(
-                fields=[
-                    "cer_configuration",
-                    "-reference_year",
-                    "-reference_month"
-                ]
+                fields=["cer_configuration", "-reference_year", "-reference_month"]
             ),
             models.Index(fields=["payment_status", "expected_payment_date"]),
         ]
@@ -919,13 +917,9 @@ class Plant(models.Model):
         if verification_data:
             # Process additional verification data
             pass
-        self.save(
-            update_fields=["gaudi_verified", "gaudi_verification_date"]
-        )
+        self.save(update_fields=["gaudi_verified", "gaudi_verification_date"])
 
-    def verify_gaudi(
-        self, document=None, verification_data=None
-    ):
+    def verify_gaudi(self, document=None, verification_data=None):
         try:
             if self.gaudi_verified:
                 logger.warning(
@@ -940,9 +934,7 @@ class Plant(models.Model):
                     if hasattr(self, field):
                         setattr(self, field, value)
                     else:
-                        logger.warning(
-                            f"Campo {field} non presente nel modello Plant"
-                        )
+                        logger.warning(f"Campo {field} non presente nel modello Plant")
             if document:
                 document.type = "GAUDI"
                 document.plant = self
@@ -1000,12 +992,8 @@ class Plant(models.Model):
         geolocator.timeout = 10
 
         try:
-            search_address = (
-                f"{self.address}, {self.city}, {self.province}, Italy"
-            )
-            logger.info(
-                f"[GEOCODING] Searching: '{search_address}'"
-            )
+            search_address = f"{self.address}, {self.city}, {self.province}, Italy"
+            logger.info(f"[GEOCODING] Searching: '{search_address}'")
 
             location = geolocator.geocode(search_address, exactly_one=True)
 
@@ -1291,7 +1279,7 @@ class Plant(models.Model):
 
         # Import lazy per evitare dipendenze circolari
         DeviceMeasurement = apps.get_model("energy", "DeviceMeasurement")
-        
+
         # Costruisci la query base
         query = DeviceMeasurement.objects.filter(
             device__is_active=True, timestamp__gte=time_threshold, quality="GOOD"
@@ -1634,18 +1622,13 @@ class AccessibilityAudit(models.Model):
     accessibility_score = models.IntegerField(default=100)
 
     # Issue details
-    issues_data = models.JSONField(
-        default=list,
-        help_text="Detailed issues data"
-    )
+    issues_data = models.JSONField(default=list, help_text="Detailed issues data")
 
     class Meta:
         ordering = ["-timestamp"]
         indexes = [
             models.Index(fields=["session_id", "timestamp"]),
-            models.Index(
-                fields=["accessibility_score", "timestamp"]
-            ),
+            models.Index(fields=["accessibility_score", "timestamp"]),
         ]
 
     def __str__(self):
@@ -1688,9 +1671,7 @@ class UserFeedback(models.Model):
         null=True, blank=True, help_text="Session duration (ms)"
     )
     page_time = models.BigIntegerField(
-        null=True,
-        blank=True,
-        help_text="Page time (ms)"
+        null=True, blank=True, help_text="Page time (ms)"
     )
     interactions_count = models.IntegerField(default=0)
 
@@ -1701,9 +1682,7 @@ class UserFeedback(models.Model):
         ordering = ["-timestamp"]
         indexes = [
             models.Index(fields=["session_id", "timestamp"]),
-            models.Index(
-                fields=["overall_rating", "timestamp"]
-            ),
+            models.Index(fields=["overall_rating", "timestamp"]),
         ]
 
     def __str__(self):

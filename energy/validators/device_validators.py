@@ -137,7 +137,7 @@ class DeviceUpdateValidator(BaseModel):
             ]
             if v.upper() not in allowed_types:
                 raise ValueError(
-                    f'Tipo dispositivo non valido. Consentiti: '
+                    f"Tipo dispositivo non valido. Consentiti: "
                     f'{", ".join(allowed_types)}'
                 )
             return v.upper()
