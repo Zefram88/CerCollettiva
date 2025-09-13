@@ -136,25 +136,20 @@ class OnboardingViewsTest(TransactionTestCase):
         self.client.login(username="testuser", password="testpass123")
 
         data = {
-            "member_type": "PRIVATE",
+            "legal_type": "PERSON",
             "profit_type": "NON_PROFIT",
-            "legal_representative_name": "Mario Rossi",
-            "legal_representative_surname": "Rossi",
-            "legal_representative_fiscal_code": "RSSMRA80A01H501U",
-            "legal_representative_birth_date": "1980-01-01",
-            "legal_representative_birth_place": "Roma",
-            "legal_representative_birth_province": "RM",
-            "legal_representative_birth_country": "IT",
-            "legal_representative_residence_address": "Via Roma 1",
-            "legal_representative_residence_city": "Roma",
-            "legal_representative_residence_province": "RM",
-            "legal_representative_residence_cap": "00100",
-            "legal_representative_residence_country": "IT",
-            "legal_representative_domicile_address": "Via Roma 1",
-            "legal_representative_domicile_city": "Roma",
-            "legal_representative_domicile_province": "RM",
-            "legal_representative_domicile_cap": "00100",
-            "legal_representative_domicile_country": "IT",
+            "fiscal_code": "RSSMRA80A01H501U",
+            "first_name": "Mario",
+            "last_name": "Rossi",
+            "phone": "+393401234567",
+            "address": "Via Roma 1",
+            "vat_number": "",
+            "legal_name": "",
+            "pec": "",
+            "sdi_code": "",
+            "registration_number": "",
+            "statute_date": "",
+            "religious_entity_code": "",
             "next": "1",  # Pulsante per andare al prossimo step
         }
 
@@ -165,4 +160,4 @@ class OnboardingViewsTest(TransactionTestCase):
         profile = self.user.member_profile
         profile.refresh_from_db()  # Ricarica dal database
         self.assertIn("step_1", profile.onboarding_data)
-        self.assertEqual(profile.onboarding_data["step_1"]["member_type"], "PRIVATE")
+        self.assertEqual(profile.onboarding_data["step_1"]["legal_type"], "PERSON")
