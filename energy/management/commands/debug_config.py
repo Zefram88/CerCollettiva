@@ -11,13 +11,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("\n=== Active Plants ===")
         plants = Plant.objects.all()
-        
+
         for plant in plants:
             self.stdout.write(f"\nPlant ID: {plant.id}")
             self.stdout.write(f"Name: {plant.name}")
             self.stdout.write(f"POD: {plant.pod_code}")
             self.stdout.write(f"Active: {plant.is_active}")
-            
+
             devices = DeviceConfiguration.objects.filter(plant=plant)
             self.stdout.write("\nAssociated Devices:")
             for device in devices:
@@ -30,7 +30,10 @@ class Command(BaseCommand):
 """)
 
             # Get latest measurement for this plant
-            latest_measurement = device.measurements.order_by('-timestamp').first() if device.measurements.exists() else None
+            latest_measurement = (
+                device.measurements.order_by('-timestamp').first()
+                if device.measurements.exists() else None
+            )
             if latest_measurement:
                 self.stdout.write(f"""
 Latest Measurement:
@@ -42,5 +45,5 @@ Latest Measurement:
 """)
             else:
                 self.stdout.write("\nNo measurements found for this plant")
-            
+
             self.stdout.write("-" * 50)

@@ -4,14 +4,14 @@ from django.db import models
 from django.utils import timezone
 
 from .base import BaseMeasurementModel
-from .device import DeviceConfiguration, DeviceMeasurement
+from .device import DeviceMeasurement
 
 
 class EnergyInterval(models.Model):
     """Misurazioni di energia per intervalli di 15 minuti"""
 
-    class Meta:
-        app_label = "energy"
+    # class Meta:
+    #     app_label = "energy"
 
     device = models.ForeignKey(
         "energy.DeviceConfiguration",
@@ -57,8 +57,8 @@ class EnergyInterval(models.Model):
 class EnergyMeasurement(BaseMeasurementModel):
     """Misurazioni di energia"""
 
-    class Meta:
-        app_label = "energy"
+    # class Meta:
+    #     app_label = "energy"
 
     MEASUREMENT_TYPES = [
         ("POWER_DRAW", "Prelievo"),
@@ -121,8 +121,8 @@ class EnergyMeasurement(BaseMeasurementModel):
 class EnergyAggregate(BaseMeasurementModel):
     """Aggregazioni di misurazioni energetiche"""
 
-    class Meta:
-        app_label = "energy"
+    # class Meta:
+    #     app_label = "energy"
 
     PERIOD_CHOICES = [
         ("15M", "15 Minuti"),

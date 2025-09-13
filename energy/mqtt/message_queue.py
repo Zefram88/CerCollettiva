@@ -83,7 +83,8 @@ class MessageQueue:
                 self._not_empty.notify()
 
                 logger.debug(
-                    f"Message enqueued: {message.event_type} (queue size: {len(self._queue)})"
+                    f"Message enqueued: {message.event_type} "
+                    f"(queue size: {len(self._queue)})"
                 )
                 return True
 
@@ -118,7 +119,8 @@ class MessageQueue:
                 self._not_full.notify()
 
                 logger.debug(
-                    f"Message dequeued: {message.event_type} (queue size: {len(self._queue)})"
+                    f"Message dequeued: {message.event_type} "
+                    f"(queue size: {len(self._queue)})"
                 )
                 return message
 

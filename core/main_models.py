@@ -1,21 +1,23 @@
 # core\models.py
 import logging
-import re
+# import re
 import time
 import uuid
 from datetime import timedelta
 
 import paho.mqtt.client as mqtt
-from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+# from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
 
-# from energy.models import DeviceMeasurement, DeviceConfiguration
-from paho.mqtt.client import CallbackAPIVersion
+from energy.models import DeviceMeasurement
+# from energy.models import DeviceConfiguration
+# from paho.mqtt.client import CallbackAPIVersion
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models import Max, Sum
 
 # Monitoring models will be imported at the end of this file
 from django.utils import timezone
@@ -26,8 +28,6 @@ logger = logging.getLogger(__name__)
 
 def generate_mqtt_client_id():
     """Genera un ID client MQTT univoco"""
-    import uuid
-
     return f"cercollettiva-{str(uuid.uuid4())}"
 
 
@@ -120,7 +120,8 @@ class CERDistributionConfiguration(models.Model):
         max_digits=5,
         decimal_places=2,
         default=20.00,
-        help_text="Percentuale per spese di gestione (commercialista, spese vive, bancarie, legali, marketing)",
+        help_text="Percentuale per spese di gestione "
+        "(commercialista, spese vive, bancarie, legali, marketing)",
     )
     investment_fund_percentage = models.DecimalField(
         "Percentuale Fondo Investimento (%)",
@@ -171,11 +172,13 @@ class CERDistributionConfiguration(models.Model):
 
         if abs(total_percentage - 100) > 0.01:  # Tolleranza per arrotondamenti
             raise ValidationError(
-                f"La somma delle percentuali deve essere 100%. Attuale: {total_percentage}%"
+                f"La somma delle percentuali deve essere 100%. "
+                f"Attuale: {total_percentage}%"
             )
 
     def get_distribution_breakdown(self, total_amount):
-        """Calcola la ripartizione dell'importo totale secondo le percentuali configurate"""
+        """Calcola la ripartizione dell'importo totale secondo le percentuali
+        configurate"""
         from decimal import Decimal
 
         if isinstance(total_amount, (int, float)):
@@ -216,7 +219,11 @@ class CERDistributionConfiguration(models.Model):
         verbose_name_plural = "Configurazioni Ripartizione Economica CER"
 
     def __str__(self):
-        return f"Ripartizione {self.cer_configuration.name} - P:{self.producer_percentage}% C:{self.consumer_percentage}% G:{self.management_percentage}%"
+        return (
+            f"Ripartizione {self.cer_configuration.name} - "
+            f"P:{self.producer_percentage}% C:{self.consumer_percentage}% "
+            f"G:{self.management_percentage}%"
+        )
 
 
 class GSEIncomeTracking(models.Model):
@@ -375,13 +382,22 @@ class GSEIncomeTracking(models.Model):
         ordering = ["-reference_year", "-reference_month", "-created_at"]
         indexes = [
             models.Index(
-                fields=["cer_configuration", "-reference_year", "-reference_month"]
+                fields=[
+                    "cer_configuration",
+                    "-reference_year",
+                    "-reference_month"
+                ]
             ),
             models.Index(fields=["payment_status", "expected_payment_date"]),
         ]
 
     def __str__(self):
-        return f"{self.cer_configuration.name} - {self.get_payment_type_display()} {self.reference_month.strftime('%m/%Y')} - €{self.net_amount}"
+        return (
+            f"{self.cer_configuration.name} - "
+            f"{self.get_payment_type_display()} "
+            f"{self.reference_month.strftime('%m/%Y')} - "
+            f"€{self.net_amount}"
+        )
 
 
 class CERMembership(models.Model):
@@ -665,7 +681,11 @@ class MemberRegistry(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.cer_configuration.code} - {self.progressive_number:04d} - {self.membership.user.username}"
+        return (
+            f"{self.cer_configuration.code} - "
+            f"{self.progressive_number:04d} - "
+            f"{self.membership.user.username}"
+        )
 
 
 class Plant(models.Model):
@@ -897,13 +917,18 @@ class Plant(models.Model):
         if verification_data:
             # Process additional verification data
             pass
-        self.save(update_fields=["gaudi_verified", "gaudi_verification_date"])
+        self.save(
+            update_fields=["gaudi_verified", "gaudi_verification_date"]
+        )
 
-    def verify_gaudi(self, document=None, verification_data=None):
+    def verify_gaudi(
+        self, document=None, verification_data=None
+    ):
         try:
             if self.gaudi_verified:
                 logger.warning(
-                    f"Impianto {self.id} già verificato Gaudì in data {self.gaudi_verification_date}"
+                    f"Impianto {self.id} già verificato Gaudì in data "
+                    f"{self.gaudi_verification_date}"
                 )
                 return False
             self.gaudi_verified = True
@@ -913,21 +938,25 @@ class Plant(models.Model):
                     if hasattr(self, field):
                         setattr(self, field, value)
                     else:
-                        logger.warning(f"Campo {field} non presente nel modello Plant")
+                        logger.warning(
+                            f"Campo {field} non presente nel modello Plant"
+                        )
             if document:
                 document.type = "GAUDI"
                 document.plant = self
                 try:
                     document.save()
                     logger.info(
-                        f"Documento Gaudì (ID: {document.id}) associato all'impianto {self.id}"
+                        f"Documento Gaudì (ID: {document.id}) associato "
+                        f"all'impianto {self.id}"
                     )
                 except Exception as e:
                     logger.error(f"Errore nel salvare il documento Gaudì: {str(e)}")
                     raise ValidationError("Impossibile salvare il documento Gaudì")
             self.save()
             logger.info(
-                f"Impianto {self.id} verificato Gaudì con successo in data {self.gaudi_verification_date}"
+                f"Impianto {self.id} verificato Gaudì con successo in data "
+                f"{self.gaudi_verification_date}"
             )
             return True
         except Exception as e:
@@ -969,15 +998,20 @@ class Plant(models.Model):
         geolocator.timeout = 10
 
         try:
-            search_address = f"{self.address}, {self.city}, {self.province}, Italy"
-            logger.info(f"[GEOCODING] Searching: '{search_address}'")
+            search_address = (
+                f"{self.address}, {self.city}, {self.province}, Italy"
+            )
+            logger.info(
+                f"[GEOCODING] Searching: '{search_address}'"
+            )
 
             location = geolocator.geocode(search_address, exactly_one=True)
 
             if location:
                 logger.info(f"[GEOCODING] Found: {location.address}")
                 logger.info(
-                    f"[GEOCODING] Coordinates: {location.latitude}, {location.longitude}"
+                    f"[GEOCODING] Coordinates: {location.latitude}, "
+                    f"{location.longitude}"
                 )
 
                 self.latitude = location.latitude
@@ -1003,7 +1037,8 @@ class Plant(models.Model):
             if not membership:
                 raise ValidationError(
                     _(
-                        "Il proprietario dell'impianto deve essere membro attivo della CER"
+                        "Il proprietario dell'impianto deve essere membro "
+                        "attivo della CER"
                     )
                 )
 
@@ -1052,17 +1087,17 @@ class Plant(models.Model):
 
                 return self.mqtt_connected
 
-            except Exception as e:
+            except Exception:
                 self.mqtt_connected = False
                 self.save(update_fields=["mqtt_connected"])
                 return False
             finally:
                 try:
                     client.disconnect()
-                except:
+                except Exception:
                     pass
 
-        except Exception as e:
+        except Exception:
             self.mqtt_connected = False
             self.save(update_fields=["mqtt_connected"])
             return False
@@ -1238,11 +1273,14 @@ class Plant(models.Model):
     @classmethod
     def get_total_system_power(cls, user=None, time_window_minutes=5):
         """
-        Calcola la potenza totale di tutti gli impianti (o di un utente specifico).
+        Calcola la potenza totale di tutti gli impianti (o di un utente
+        specifico).
 
         Args:
-            user (User, optional): Se specificato, calcola solo per gli impianti dell'utente
-            time_window_minutes (int): Finestra temporale in minuti per le misurazioni valide
+            user (User, optional): Se specificato, calcola solo per gli
+            impianti dell'utente
+            time_window_minutes (int): Finestra temporale in minuti per le
+            misurazioni valide
 
         Returns:
             float: Potenza totale del sistema in kW, arrotondata a 2 decimali
@@ -1270,7 +1308,8 @@ class Plant(models.Model):
 
     def get_total_power(self, time_window_minutes=5):
         """
-        Calcola la potenza totale attuale dell'impianto considerando solo le misurazioni recenti
+        Calcola la potenza totale attuale dell'impianto considerando solo le
+        misurazioni recenti
         dei dispositivi attivi.
         """
         # Import locale per evitare l'importazione circolare
@@ -1295,33 +1334,33 @@ class Plant(models.Model):
 
         return round(total_power / 1000.0, 2)
 
-    @classmethod
-    def get_total_system_power(cls, user=None, time_window_minutes=5):
-        """
-        Calcola la potenza totale di tutti gli impianti.
-        """
-        # Import locale per evitare l'importazione circolare
-        from django.db.models import Max, Sum
+    # @classmethod
+    # def get_total_system_power(cls, user=None, time_window_minutes=5):
+    #     """
+    #     Calcola la potenza totale di tutti gli impianti.
+    #     """
+    #     # Import locale per evitare l'importazione circolare
+    #     from django.db.models import Max, Sum
 
-        from energy.models import DeviceMeasurement
+    #     from energy.models import DeviceMeasurement
 
-        time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
+    #     time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
 
-        query = DeviceMeasurement.objects.filter(
-            device__is_active=True, timestamp__gte=time_threshold, quality="GOOD"
-        )
+    #     query = DeviceMeasurement.objects.filter(
+    #         device__is_active=True, timestamp__gte=time_threshold, quality="GOOD"
+    #     )
 
-        if user and not user.is_staff:
-            query = query.filter(device__plant__owner=user)
+    #     if user and not user.is_staff:
+    #         query = query.filter(device__plant__owner=user)
 
-        total_power = (
-            query.values("device")
-            .annotate(latest_power=Max("power"))
-            .aggregate(total=Sum("latest_power"))["total"]
-            or 0
-        )
+    #     total_power = (
+    #         query.values("device")
+    #         .annotate(latest_power=Max("power"))
+    #         .aggregate(total=Sum("latest_power"))["total"]
+    #         or 0
+    #     )
 
-        return round(total_power / 1000.0, 2)
+    #     return round(total_power / 1000.0, 2)
 
 
 def test_mqtt_connection(self):
@@ -1368,17 +1407,17 @@ def test_mqtt_connection(self):
 
             return self.mqtt_connected
 
-        except Exception as e:
+        except Exception:
             self.mqtt_connected = False
             self.save(update_fields=["mqtt_connected"])
             return False
         finally:
             try:
                 client.disconnect()
-            except:
+            except Exception:
                 pass
 
-    except Exception as e:
+    except Exception:
         self.mqtt_connected = False
         self.save(update_fields=["mqtt_connected"])
         return False
@@ -1589,17 +1628,25 @@ class AccessibilityAudit(models.Model):
     accessibility_score = models.IntegerField(default=100)
 
     # Issue details
-    issues_data = models.JSONField(default=list, help_text="Detailed issues data")
+    issues_data = models.JSONField(
+        default=list,
+        help_text="Detailed issues data"
+    )
 
     class Meta:
         ordering = ["-timestamp"]
         indexes = [
             models.Index(fields=["session_id", "timestamp"]),
-            models.Index(fields=["accessibility_score", "timestamp"]),
+            models.Index(
+                fields=["accessibility_score", "timestamp"]
+            ),
         ]
 
     def __str__(self):
-        return f"Accessibility {self.session_id} - {self.total_issues} issues - {self.timestamp}"
+        return (
+            f"Accessibility {self.session_id} - {self.total_issues} issues - "
+            f"{self.timestamp}"
+        )
 
 
 class UserFeedback(models.Model):
@@ -1635,7 +1682,9 @@ class UserFeedback(models.Model):
         null=True, blank=True, help_text="Session duration (ms)"
     )
     page_time = models.BigIntegerField(
-        null=True, blank=True, help_text="Page time (ms)"
+        null=True,
+        blank=True,
+        help_text="Page time (ms)"
     )
     interactions_count = models.IntegerField(default=0)
 
@@ -1646,11 +1695,16 @@ class UserFeedback(models.Model):
         ordering = ["-timestamp"]
         indexes = [
             models.Index(fields=["session_id", "timestamp"]),
-            models.Index(fields=["overall_rating", "timestamp"]),
+            models.Index(
+                fields=["overall_rating", "timestamp"]
+            ),
         ]
 
     def __str__(self):
-        return f"Feedback {self.session_id} - Rating: {self.overall_rating} - {self.timestamp}"
+        return (
+            f"Feedback {self.session_id} - Rating: {self.overall_rating} - "
+            f"{self.timestamp}"
+        )
 
 
 class SessionData(models.Model):

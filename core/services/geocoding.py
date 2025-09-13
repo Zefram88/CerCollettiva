@@ -38,7 +38,8 @@ class GeocodingService:
             address: Indirizzo completo da geocodificare
 
         Returns:
-            Tuple[float, float] | None: Coppia (latitudine, longitudine) o None se non trovato
+            Tuple[float, float] | None: Coppia (latitudine, longitudine) o None
+            se non trovato
         """
         if not address:
             return None
@@ -90,7 +91,8 @@ class GeocodingService:
                         return coordinates
                     else:
                         logger.warning(
-                            f"Coordinate fuori dall'Italia per indirizzo hash: {hash(address)}"
+                            f"Coordinate fuori dall'Italia per indirizzo hash: "
+                            f"{hash(address)}"
                         )
                         return None
 

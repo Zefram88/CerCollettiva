@@ -7,9 +7,10 @@ from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DetailView, FormView, ListView
+from django.views.generic import DetailView, ListView
+# from django.views.generic import CreateView, FormView
 
-from ..forms import CERConfigurationForm, CERMembershipForm
+from ..forms import CERMembershipForm
 from ..models import CERConfiguration, CERMembership, Plant, PlantMeasurement
 from .base import BaseCERView
 from .mixins.gdpr import GDPRConsentRequiredMixin
@@ -83,7 +84,7 @@ class CERPublicDetailView(LoginRequiredMixin, DetailView):
         distribution_config = None
         try:
             distribution_config = cer.distribution_config
-        except:
+        except Exception:
             pass
 
         context.update(
@@ -302,7 +303,8 @@ class CERJoinView(BaseCERView, GDPRConsentRequiredMixin):
             messages.success(
                 self.request,
                 _(
-                    f"Adesione completata! Tessera n. {card.card_number} generata automaticamente."
+                    f"Adesione completata! Tessera n. {card.card_number} "
+                    f"generata automaticamente."
                 ),
             )
         else:
@@ -310,7 +312,8 @@ class CERJoinView(BaseCERView, GDPRConsentRequiredMixin):
             messages.success(
                 self.request,
                 _(
-                    "Richiesta di adesione inviata. I documenti verranno verificati dall'amministrazione."
+                    "Richiesta di adesione inviata. I documenti verranno "
+                    "verificati dall'amministrazione."
                 ),
             )
 
@@ -404,7 +407,7 @@ class MemberRegistryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
         # Statistiche per tipo
         stats = {}
-        for member_type, _ in context["member_types"]:
+        for member_type, unused in context["member_types"]:
             stats[member_type] = cer.member_registry.filter(
                 membership__member_type=member_type
             ).count()

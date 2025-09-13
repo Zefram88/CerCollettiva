@@ -27,7 +27,10 @@ class Command(BaseCommand):
             self.stdout.write(f"Elaborazione impianto {i}/{total}: {plant.name}")
 
             # Costruisci l'indirizzo completo
-            full_address = f"{plant.address}, {plant.zip_code} {plant.city} {plant.province}, Italy"
+            full_address = (
+                f"{plant.address}, {plant.zip_code} {plant.city} "
+                f"{plant.province}, Italy"
+            )
 
             # Tentativi multipli con pause più lunghe
             for attempt in range(5):  # Aumenta il numero di tentativi a 5
@@ -54,7 +57,7 @@ class Command(BaseCommand):
                         )
                         break
 
-                except (GeocoderTimedOut, GeocoderServiceError) as e:
+                except (GeocoderTimedOut, GeocoderServiceError):
                     if attempt == 4:  # Ultimo tentativo
                         self.stdout.write(
                             self.style.ERROR(

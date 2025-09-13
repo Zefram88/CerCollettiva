@@ -4,7 +4,7 @@ Implements protection against DoS attacks and abuse
 """
 
 import logging
-import time
+# import time
 
 from django.conf import settings
 from django.core.cache import cache
@@ -44,7 +44,8 @@ class RateLimitMiddleware(MiddlewareMixin):
         # Verificare rate limit
         if self._is_rate_limited(identifier, endpoint_type):
             logger.warning(
-                f"Rate limit exceeded for {identifier} on {endpoint_type} endpoint: {request.path}"
+                f"Rate limit exceeded for {identifier} on {endpoint_type} "
+                f"endpoint: {request.path}"
             )
             return self._rate_limit_response(request)
 

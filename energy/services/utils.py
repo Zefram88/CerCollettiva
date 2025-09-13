@@ -1,9 +1,9 @@
 # energy/services/utils.py
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from django.db.models import Avg, Max, Min, Q, Sum
-from django.utils import timezone
+# from django.utils import timezone
 
 from ..models import DeviceMeasurement, EnergyAggregate, EnergyMeasurement
 
@@ -42,8 +42,8 @@ def calculate_period_aggregates(
             energy_values = EnergyMeasurement.objects.filter(
                 device_measurement__in=measurements
             ).aggregate(
-                energy_in=Sum("value", filter=models.Q(measurement_type="POWER_IN")),
-                energy_out=Sum("value", filter=models.Q(measurement_type="POWER_DRAW")),
+                energy_in=Sum("value", filter=Q(measurement_type="POWER_IN")),
+                energy_out=Sum("value", filter=Q(measurement_type="POWER_DRAW")),
             )
 
             # Crea o aggiorna l'aggregazione

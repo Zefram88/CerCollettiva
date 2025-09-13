@@ -4,9 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DeleteView, ListView
 
 from ..forms import PlantDocumentForm
 from ..models import Plant, PlantDocument

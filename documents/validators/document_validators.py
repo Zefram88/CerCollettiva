@@ -87,7 +87,8 @@ class DocumentCreateValidator(BaseModel):
         allowed_classifications = ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PERSONAL"]
         if v not in allowed_classifications:
             raise ValueError(
-                f'Classificazione dati non valida. Consentite: {", ".join(allowed_classifications)}'
+                f'Classificazione dati non valida. Consentite: '
+                f'{", ".join(allowed_classifications)}'
             )
         return v
 
@@ -115,7 +116,8 @@ class DocumentCreateValidator(BaseModel):
             if v < date.today():
                 raise ValueError("Data di conservazione non può essere nel passato")
 
-            # La data di conservazione non può essere troppo lontana nel futuro (max 50 anni)
+            # La data di conservazione non può essere troppo lontana nel
+            # futuro (max 50 anni)
             max_future_date = date.today().replace(year=date.today().year + 50)
             if v > max_future_date:
                 raise ValueError(
@@ -201,7 +203,8 @@ class DocumentUpdateValidator(BaseModel):
             allowed_classifications = ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PERSONAL"]
             if v not in allowed_classifications:
                 raise ValueError(
-                    f'Classificazione dati non valida. Consentite: {", ".join(allowed_classifications)}'
+                    f'Classificazione dati non valida. Consentite: '
+                    f'{", ".join(allowed_classifications)}'
                 )
         return v
 
@@ -242,7 +245,8 @@ class DocumentUpdateValidator(BaseModel):
             allowed_statuses = ["PENDING", "PROCESSING", "COMPLETED", "FAILED"]
             if v not in allowed_statuses:
                 raise ValueError(
-                    f'Stato elaborazione non valido. Consentiti: {", ".join(allowed_statuses)}'
+                    f'Stato elaborazione non valido. Consentiti: '
+                    f'{", ".join(allowed_statuses)}'
                 )
         return v
 
@@ -260,7 +264,10 @@ class DocumentAccessValidator(BaseModel):
         """Valida l'IP di accesso"""
         if v is not None:
             # Validazione formato IP (IPv4 o IPv6)
-            ipv4_pattern = r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            ipv4_pattern = (
+                r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
+                r"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            )
             ipv6_pattern = r"^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"
 
             if not (re.match(ipv4_pattern, v) or re.match(ipv6_pattern, v)):

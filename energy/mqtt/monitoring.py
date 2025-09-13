@@ -4,7 +4,8 @@ import logging
 import threading
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
+# from datetime import timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -224,7 +225,8 @@ class MQTTHealthMonitor:
 
     def _get_recent_message_count(self, seconds: int) -> int:
         """Ottiene il numero di messaggi negli ultimi N secondi"""
-        # Implementazione semplificata - in un sistema reale si userebbe una coda temporale
+        # Implementazione semplificata - in un sistema reale si userebbe
+        # una coda temporale
         return min(self._message_count, seconds * 10)  # Stima approssimativa
 
     def _get_metric_status(self, value: float, metric_type: str) -> HealthStatus:
@@ -306,7 +308,8 @@ class MQTTHealthMonitor:
                     for metric in health.metrics:
                         if metric.status != HealthStatus.HEALTHY:
                             logger.warning(
-                                f"  {metric.name}: {metric.value} {metric.unit} ({metric.status.value})"
+                                f"  {metric.name}: {metric.value} {metric.unit} "
+                                f"({metric.status.value})"
                             )
 
                 # Salva le metriche nella cache per accesso rapido

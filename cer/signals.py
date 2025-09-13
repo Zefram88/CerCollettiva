@@ -16,7 +16,7 @@ def create_member_profile(sender, instance, created, **kwargs):
     if created:
         try:
             MemberProfile.objects.create(user=instance)
-        except Exception as e:
+        except Exception:
             # Se il profilo esiste già, non fare nulla
             pass
 

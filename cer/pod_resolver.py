@@ -4,7 +4,8 @@ GSE POD Resolver - Python Module
 ================================
 
 Modulo Python per la risoluzione di POD (Point of Delivery) tramite servizi GSE diretti.
-Fornisce informazioni su Cabina Primaria, Fornitore, Regioni, Province e Comuni associati.
+Fornisce informazioni su Cabina Primaria, Fornitore, Regioni, Province e Comuni "
+"associati.
 
 Author: GSE POD Resolver
 Version: 1.0.0

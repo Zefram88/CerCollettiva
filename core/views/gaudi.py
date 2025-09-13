@@ -4,13 +4,10 @@ import logging
 import re
 from datetime import date, datetime
 
-from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.dateparse import parse_datetime
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
@@ -332,7 +329,8 @@ class NewPlantFromGaudiView(GaudiAddressMixin, BasePlantView, FormView):
                 messages.success(
                     self.request,
                     _(
-                        "Attestato elaborato con successo. Seleziona la tipologia dell'impianto."
+                        "Attestato elaborato con successo. Seleziona la "
+                        "tipologia dell'impianto."
                     ),
                 )
 
@@ -536,7 +534,9 @@ class PlantCreateFromGaudiView(GaudiAddressMixin, BasePlantView, FormView):
             }
 
             # Elaborazione dell'indirizzo utilizzando la funzione dedicata
-            address_components = self._parse_address(gaudi_data.get("address", ""))
+            # address_components = self._parse_address(
+            #     gaudi_data.get("address", "")
+            # )  # Unused variable
 
             # Gestione della tensione di connessione
             connection_voltage = None
@@ -585,16 +585,17 @@ class PlantCreateFromGaudiView(GaudiAddressMixin, BasePlantView, FormView):
                     "nominal_power": nominal_power,
                     "connection_voltage": connection_voltage,
                     "expected_yearly_production": expected_production,
-                    "plant_type": "PRODUCER",  # Impianto fotovoltaico è sempre produttore
+                    "plant_type": "PRODUCER",  # Impianto fotovoltaico è sempre
+                    # produttore
                     # Date
                     "installation_date": dates["installation_date"],
                     "validation_date": dates["validation_date"],
                     "expected_operation_date": dates["expected_operation_date"],
                     # Componenti dell'indirizzo
-                    #'address': address_components['address'],
-                    #'city': address_components['city'],
-                    #'province': address_components['province'],
-                    #'zip_code': address_components['zip_code'],
+                    # 'address': address_components['address'],
+                    # 'city': address_components['city'],
+                    # 'province': address_components['province'],
+                    # 'zip_code': address_components['zip_code'],
                     "address": parsed_address.get("address", ""),
                     "city": parsed_address.get("city", ""),
                     "province": parsed_address.get("province", ""),
@@ -611,9 +612,11 @@ class PlantCreateFromGaudiView(GaudiAddressMixin, BasePlantView, FormView):
 
         except Exception as e:
             logger.error(
-                f"Errore nell'elaborazione dei dati iniziali: {str(e)}", exc_info=True
+                f"Errore nell'elaborazione dei dati iniziali: {str(e)}",
+                exc_info=True
             )
-            # In caso di errore, restituiamo comunque un dizionario con valori di default
+            # In caso di errore, restituiamo comunque un dizionario con
+            # valori di default
             return {
                 "name": gaudi_data.get("plant_name", ""),
                 "pod_code": gaudi_data.get("pod_code", ""),
@@ -749,152 +752,154 @@ class PlantCreateFromGaudiView(GaudiAddressMixin, BasePlantView, FormView):
             messages.error(self.request, "Errore durante la creazione dell'impianto")
             return self.form_invalid(form)
 
-    def get_initial(self):
-        """Inizializza i dati del form dai dati Gaudì in sessione"""
-        initial = super().get_initial()
-        gaudi_data = self.request.session.get("plant_gaudi_data", {})
+    # def get_initial(self):
+    #     """Inizializza i dati del form dai dati Gaudì in sessione"""
+    #     initial = super().get_initial()
+    #     gaudi_data = self.request.session.get("plant_gaudi_data", {})
 
-        logger.debug("[INITIAL DATA] Getting gaudi data from session")
-        logger.debug(f"[INITIAL DATA] Raw gaudi_data:")
-        logger.debug(f"- Plant address: {gaudi_data.get('address')}")
+    #     logger.debug("[INITIAL DATA] Getting gaudi data from session")
+    #     logger.debug(f"[INITIAL DATA] Raw gaudi_data:")
+    #     logger.debug(f"- Plant address: {gaudi_data.get('address')}")
 
-        # Converti le date
-        installation_date = self._convert_date_str(gaudi_data.get("installation_date"))
-        validation_date = self._convert_date_str(gaudi_data.get("validation_date"))
-        expected_operation_date = self._convert_date_str(
-            gaudi_data.get("expected_operation_date")
-        )
+    #     # Converti le date
+    #     installation_date = self._convert_date_str(
+    #         gaudi_data.get("installation_date")
+    #     )
+    #     validation_date = self._convert_date_str(gaudi_data.get("validation_date"))
+    #     expected_operation_date = self._convert_date_str(
+    #         gaudi_data.get("expected_operation_date")
+    #     )
 
-        # Elabora l'indirizzo dell'impianto
-        full_address = gaudi_data.get("address", "")
-        address = ""
-        city = ""
-        province = ""
-        zip_code = gaudi_data.get(
-            "cap", ""
-        )  # Usiamo il CAP già estratto se disponibile
+    #     # Elabora l'indirizzo dell'impianto
+    #     full_address = gaudi_data.get("address", "")
+    #     address = ""
+    #     city = ""
+    #     province = ""
+    #     zip_code = gaudi_data.get(
+    #         "cap", ""
+    #     )  # Usiamo il CAP già estratto se disponibile
 
-        if full_address:
-            # Rimuovi eventuali riferimenti a Italia e spazi multipli
-            clean_address = (
-                full_address.replace("Italia", "").replace("  ", " ").strip()
-            )
+    #     if full_address:
+    #         # Rimuovi eventuali riferimenti a Italia e spazi multipli
+    #         clean_address = (
+    #             full_address.replace("Italia", "").replace("  ", " ").strip()
+    #         )
 
-            # Split l'indirizzo in parti
-            parts = [p.strip() for p in clean_address.split(",")]
+    #         # Split l'indirizzo in parti
+    #         parts = [p.strip() for p in clean_address.split(",")]
 
-            # Estrai via e numero civico (primi due elementi)
-            if len(parts) >= 2:
-                # Prendi solo via e numero civico
-                address = f"{parts[0].strip()}, {parts[1].strip()}"
-            elif parts:
-                address = parts[0].strip()
+    #         # Estrai via e numero civico (primi due elementi)
+    #         if len(parts) >= 2:
+    #             # Prendi solo via e numero civico
+    #             address = f"{parts[0].strip()}, {parts[1].strip()}"
+    #         elif parts:
+    #             address = parts[0].strip()
 
-            # Se il CAP non è stato trovato nei dati Gaudì, cercalo nell'indirizzo
-            if not zip_code:
-                cap_match = re.search(r"(\d{5})", clean_address)
-                if cap_match:
-                    zip_code = cap_match.group(1)
+    #         # Se il CAP non è stato trovato nei dati Gaudì, cercalo nell'indirizzo
+    #         if not zip_code:
+    #             cap_match = re.search(r"(\d{5})", clean_address)
+    #             if cap_match:
+    #                 zip_code = cap_match.group(1)
 
-            # Estrai la provincia e la città
-            for part in parts:
-                if "(" in part:
-                    # Estrai la provincia
-                    prov_match = re.search(r"\(([^)]+)\)", part)
-                    if prov_match:
-                        province = prov_match.group(1)
-                        # Converti la provincia nel codice di due lettere
-                        province = self._get_province_code(province)
+    #         # Estrai la provincia e la città
+    #         for part in parts:
+    #             if "(" in part:
+    #                 # Estrai la provincia
+    #                 prov_match = re.search(r"\(([^)]+)\)", part)
+    #                 if prov_match:
+    #                     province = prov_match.group(1)
+    #                     # Converti la provincia nel codice di due lettere
+    #                     province = self._get_province_code(province)
 
-                    # Estrai la città rimuovendo la parte tra parentesi e il CAP
-                    city_part = part.split("(")[0].strip()
-                    if zip_code:
-                        city_part = city_part.replace(zip_code, "").strip()
-                    city_part = re.sub(r"\d+", "", city_part).strip()
+    #                 # Estrai la città rimuovendo la parte tra parentesi e il CAP
+    #                 city_part = part.split("(")[0].strip()
+    #                 if zip_code:
+    #                     city_part = city_part.replace(zip_code, "").strip()
+    #                 city_part = re.sub(r"\d+", "", city_part).strip()
 
-                    # Gestisci il caso di MIRA duplicato
-                    if "MIRA" in city_part.upper():
-                        city = "Mira"
-                    else:
-                        # Altrimenti formatta in Title Case
-                        city = " ".join(w.capitalize() for w in city_part.split())
-                    break
+    #                 # Gestisci il caso di MIRA duplicato
+    #                 if "MIRA" in city_part.upper():
+    #                     city = "Mira"
+    #                 else:
+    #                     # Altrimenti formatta in Title Case
+    #                     city = " ".join(w.capitalize() for w in city_part.split())
+    #                 break
 
-        logger.debug(f"[ADDRESS PROCESSING] Extracted from plant location:")
-        logger.debug(f"- address: {address}")
-        logger.debug(f"- city: {city}")
-        logger.debug(f"- province: {province}")
-        logger.debug(f"- zip_code: {zip_code}")
+    #     logger.debug(f"[ADDRESS PROCESSING] Extracted from plant location:")
+    #     logger.debug(f"- address: {address}")
+    #     logger.debug(f"- city: {city}")
+    #     logger.debug(f"- province: {province}")
+    #     logger.debug(f"- zip_code: {zip_code}")
 
-        initial.update(
-            {
-                "name": gaudi_data.get("plant_name", ""),
-                "pod_code": gaudi_data.get("pod_code", ""),
-                "nominal_power": gaudi_data.get("nominal_power", 0),
-                "connection_voltage": gaudi_data.get("connection_voltage", ""),
-                "address": address,
-                "city": city,
-                "province": province,
-                "zip_code": zip_code,
-                "plant_type": "PRODUCER",  # Impianto fotovoltaico è sempre produttore
-                "installation_date": installation_date,
-                "validation_date": validation_date,
-                "expected_operation_date": expected_operation_date,
-                "gaudi_request_code": gaudi_data.get("gaudi_request_code", ""),
-                "censimp_code": gaudi_data.get("censimp_code", ""),
-                "expected_yearly_production": gaudi_data.get(
-                    "expected_yearly_production", 0
-                ),
-            }
-        )
+    #     initial.update(
+    #         {
+    #             "name": gaudi_data.get("plant_name", ""),
+    #             "pod_code": gaudi_data.get("pod_code", ""),
+    #             "nominal_power": gaudi_data.get("nominal_power", 0),
+    #             "connection_voltage": gaudi_data.get("connection_voltage", ""),
+    #             "address": address,
+    #             "city": city,
+    #             "province": province,
+    #             "zip_code": zip_code,
+    #             "plant_type": "PRODUCER",  # Impianto fotovoltaico è sempre produttore
+    #             "installation_date": installation_date,
+    #             "validation_date": validation_date,
+    #             "expected_operation_date": expected_operation_date,
+    #             "gaudi_request_code": gaudi_data.get("gaudi_request_code", ""),
+    #             "censimp_code": gaudi_data.get("censimp_code", ""),
+    #             "expected_yearly_production": gaudi_data.get(
+    #                 "expected_yearly_production", 0
+    #             ),
+    #         }
+    #     )
 
-        logger.debug(f"[INITIAL DATA] Final initial data: {initial}")
-        return initial
+    #     logger.debug(f"[INITIAL DATA] Final initial data: {initial}")
+    #     return initial
 
-    def get_context_data(self, **kwargs):
-        """Aggiunge i dati Gaudì al contesto del template"""
-        context = super().get_context_data(**kwargs)
+    # def get_context_data(self, **kwargs):
+    #     """Aggiunge i dati Gaudì al contesto del template"""
+    #     context = super().get_context_data(**kwargs)
 
-        # Recupera i dati Gaudì dalla sessione
-        gaudi_data = self.request.session.get("plant_gaudi_data", {}).copy()
+    #     # Recupera i dati Gaudì dalla sessione
+    #     gaudi_data = self.request.session.get("plant_gaudi_data", {}).copy()
 
-        # Pulisci l'indirizzo per la visualizzazione
-        if gaudi_data.get("address"):
-            raw_address = gaudi_data["address"]
-            # Rimuovi le parti duplicate e superflue
-            clean_address = raw_address.replace("Italia", "")
-            # Rimuovi il CAP
-            if gaudi_data.get("cap"):
-                clean_address = clean_address.replace(gaudi_data["cap"], "")
-            # Rimuovi la parte tra parentesi e MIRA duplicato
-            clean_address = re.sub(r"\s+MIRA\s+\(VENEZIA\)", "", clean_address)
-            clean_address = re.sub(r"\s+MIRA\s+MIRA", " MIRA", clean_address)
-            # Rimuovi spazi multipli e virgole ripetute
-            clean_address = re.sub(r"\s+", " ", clean_address)
-            clean_address = re.sub(r",\s*,", ",", clean_address)
-            clean_address = clean_address.strip(" ,")
+    #     # Pulisci l'indirizzo per la visualizzazione
+    #     if gaudi_data.get("address"):
+    #         raw_address = gaudi_data["address"]
+    #         # Rimuovi le parti duplicate e superflue
+    #         clean_address = raw_address.replace("Italia", "")
+    #         # Rimuovi il CAP
+    #         if gaudi_data.get("cap"):
+    #             clean_address = clean_address.replace(gaudi_data["cap"], "")
+    #         # Rimuovi la parte tra parentesi e MIRA duplicato
+    #         clean_address = re.sub(r"\s+MIRA\s+\(VENEZIA\)", "", clean_address)
+    #         clean_address = re.sub(r"\s+MIRA\s+MIRA", " MIRA", clean_address)
+    #         # Rimuovi spazi multipli e virgole ripetute
+    #         clean_address = re.sub(r"\s+", " ", clean_address)
+    #         clean_address = re.sub(r",\s*,", ",", clean_address)
+    #         clean_address = clean_address.strip(" ,")
 
-            # Aggiorna l'indirizzo nei dati
-            gaudi_data["address"] = clean_address
+    #         # Aggiorna l'indirizzo nei dati
+    #         gaudi_data["address"] = clean_address
 
-        # Aggiungi i dati Gaudì al contesto
-        context["gaudi_data"] = gaudi_data
+    #     # Aggiungi i dati Gaudì al contesto
+    #     context["gaudi_data"] = gaudi_data
 
-        # Il resto del codice rimane invariato...
-        if settings.DEBUG:
-            context["debug"] = {
-                "initial_data": self.get_initial(),
-                "form_data": self.get_form().initial if self.get_form() else None,
-                "raw_gaudi_data": gaudi_data,
-            }
+    #     # Il resto del codice rimane invariato...
+    #     if settings.DEBUG:
+    #         context["debug"] = {
+    #             "initial_data": self.get_initial(),
+    #             "form_data": self.get_form().initial if self.get_form() else None,
+    #             "raw_gaudi_data": gaudi_data,
+    #         }
 
-        context.update(
-            {
-                "title": "Nuovo Impianto da Attestato Gaudì",
-                "submit_label": "Crea Impianto",
-                "can_edit_gaudi_data": False,
-                "show_gaudi_preview": True,
-            }
-        )
+    #     context.update(
+    #         {
+    #             "title": "Nuovo Impianto da Attestato Gaudì",
+    #             "submit_label": "Crea Impianto",
+    #             "can_edit_gaudi_data": False,
+    #             "show_gaudi_preview": True,
+    #         }
+    #     )
 
-        return context
+    #     return context

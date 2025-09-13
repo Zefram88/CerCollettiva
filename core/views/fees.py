@@ -4,19 +4,15 @@ import json
 import logging
 from decimal import Decimal
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Count, Q, Sum
+from django.db.models import Sum
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, FormView, ListView
+from django.views.generic import DetailView, ListView
 
-from ..forms import MembershipFeeForm
-from ..models import CERConfiguration, CERMembership, MemberRegistry, MembershipCard
+from ..models import CERConfiguration, MembershipCard
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +138,10 @@ def set_membership_fee(request, card_id):
         return JsonResponse(
             {
                 "success": True,
-                "message": f"Quota impostata a €{amount} per {card.membership.user.username}",
+                "message": (
+                    f"Quota impostata a €{amount} per "
+                    f"{card.membership.user.username}"
+                ),
             }
         )
 
@@ -173,7 +172,10 @@ def mark_fee_paid(request, card_id):
         return JsonResponse(
             {
                 "success": True,
-                "message": f"Quota segnata come pagata per {card.membership.user.username}",
+                "message": (
+                    f"Quota segnata come pagata per "
+                    f"{card.membership.user.username}"
+                ),
                 "payment_date": card.fee_payment_date.strftime("%d/%m/%Y %H:%M"),
             }
         )

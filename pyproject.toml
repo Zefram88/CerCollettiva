@@ -222,6 +222,26 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
+# flake8 configuration
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503", "F401", "E501", "W293", "F403", "F405", "F811", "F841", "E722", "F541", "E265", "W291", "W292", "E402", "F402", "F821", "F811", "F541", "E265", "W291", "W292", "E402", "F402"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".venv",
+    ".env",
+    "migrations",
+    "*/migrations",
+    "staticfiles",
+    "media",
+    "logs",
+    "cercollettiva/settings/*.py",
+]
+
 # Bandit configuration
 [tool.bandit]
 exclude_dirs = ["tests", "test_*", "*/tests/*", "*/test_*"]

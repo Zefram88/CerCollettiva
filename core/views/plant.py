@@ -1,21 +1,24 @@
 # core/views/plant.py
+import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Count, Q, Sum
+from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView
 
-from energy.models import DeviceConfiguration, DeviceMeasurement
+from energy.models import DeviceConfiguration
 
 from ..forms import PlantForm, PlantMQTTConfigForm
 from ..models import CERConfiguration, Plant
+
 from .base import BasePlantView
-from .mixins.gdpr import GDPRDataProtectionMixin
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -264,7 +267,8 @@ class PlantUpdateView(UpdateView, BasePlantView):
                 self.request.user.is_staff or self.request.user.is_superuser
             ) and self.object.owner != self.request.user:
                 logger.info(
-                    f"Admin {self.request.user.username} ha modificato l'impianto {self.object.id} di {self.object.owner.username}"
+                    f"Admin {self.request.user.username} ha modificato "
+                    f"l'impianto {self.object.id} di {self.object.owner.username}"
                 )
 
             response = super().form_valid(form)

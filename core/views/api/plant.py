@@ -62,7 +62,7 @@ class APIResponseHelper(ValidationMixin, APIValidationMixin):
 
 def validate_api_parameters(request, valid_params):
     """Validate API parameters using centralized validation"""
-    helper = APIResponseHelper()
+    # helper = APIResponseHelper()  # Unused variable
     errors = {}
 
     for param, validator in valid_params.items():
@@ -83,7 +83,7 @@ def get_plant_data(request, pk):
     """API per dati impianto in formato JSON"""
     try:
         # Validate API parameters
-        from core.validators import POWER_VALIDATOR
+        # from core.validators import POWER_VALIDATOR
 
         param_validators = {
             "hours": lambda x: min(float(x), 48) if float(x) > 0 else 24,
@@ -112,7 +112,7 @@ def get_plant_data(request, pk):
 
         # Parametri di query - limita a max 48 ore
         hours = min(float(request.GET.get("hours", 24)), 48)
-        interval = int(request.GET.get("interval", 600))  # Intervallo in secondi
+        # interval = int(request.GET.get("interval", 600))  # Unused variable
         time_threshold = timezone.now() - timedelta(hours=hours)
 
         # Recupera dispositivo

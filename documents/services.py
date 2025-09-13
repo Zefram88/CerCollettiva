@@ -1,12 +1,10 @@
 # documents/services.py
 import hashlib
-from pathlib import Path
 
 import pdfkit
 
 from django.core.files import File
 from django.template.loader import render_to_string
-from django.utils import timezone
 
 from .models import Document
 

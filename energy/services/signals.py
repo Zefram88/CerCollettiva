@@ -8,12 +8,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models.signals import post_delete, post_migrate, post_save
 from django.dispatch import receiver
-from django.utils import timezone
+# from django.utils import timezone
 
 from energy.models import (
     DeviceConfiguration,
     DeviceMeasurement,
-    EnergyMeasurement,
+    # EnergyMeasurement,
     MQTTBroker,
 )
 from energy.mqtt.client import get_mqtt_client
@@ -146,7 +146,7 @@ def handle_new_measurement(sender, instance, created, **kwargs):
 def handle_device_configuration(sender, instance, created, **kwargs):
     """Gestisce modifiche alle configurazioni dei dispositivi"""
     try:
-        action = "created" if created else "updated"
+        # action = "created" if created else "updated"  # Unused variable
         # logger.info(f"Device {instance.device_id} {action}")
 
         client = get_mqtt_client()
@@ -173,13 +173,15 @@ def handle_device_configuration(sender, instance, created, **kwargs):
 @receiver(post_save, sender=MQTTBroker)
 def mqtt_broker_changed(sender, instance, created, **kwargs):
     """
-    Signal handler chiamato quando viene salvata/modificata una configurazione del broker MQTT
+    Signal handler chiamato quando viene salvata/modificata una configurazione
+    del broker MQTT
     """
     if instance.is_active:
         client = get_mqtt_client()
         if not client.is_connected:
             logger.info(
-                f"Initiating delayed MQTT connection after broker configuration change for {instance.name}"
+                f"Initiating delayed MQTT connection after broker "
+                f"configuration change for {instance.name}"
             )
             threading.Thread(target=delayed_mqtt_connect, daemon=True).start()
 

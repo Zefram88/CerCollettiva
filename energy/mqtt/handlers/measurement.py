@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from django.utils import timezone
+# from django.utils import timezone
 
 from ...devices.base.device import MeasurementData
 from ...mqtt.router import MessageContext
@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class MeasurementHandler(BaseHandler):
-    """Handler specializzato per messaggi di misurazione - Decoupled from business logic"""
+    """Handler specializzato per messaggi di misurazione -
+    Decoupled from business logic"""
 
     def __init__(self):
         super().__init__()
@@ -103,7 +104,7 @@ class MeasurementHandler(BaseHandler):
         """
         try:
             # Converte Event in MessageContext per compatibilità con service layer
-            from ..router import MessageContext
+            # from ..router import MessageContext  # Already imported at top
 
             context = MessageContext(
                 topic=event.topic,
@@ -151,7 +152,8 @@ class MeasurementHandler(BaseHandler):
         """Processa il calcolo del delta energia"""
         try:
             from django.db import transaction
-            from django.utils import timezone
+
+            # # from django.utils import timezone  # Already imported at top
 
             from ...models import DeviceMeasurement
 
@@ -172,11 +174,14 @@ class MeasurementHandler(BaseHandler):
                 if 0 <= energy_delta <= 100000:  # max 100 kWh in 15 min
                     # Crea la misurazione con il delta calcolato
                     with transaction.atomic():
-                        measurement = DeviceMeasurement.objects.create(
+                        # measurement = DeviceMeasurement.objects.create(
+                        # Unused variable
+                        DeviceMeasurement.objects.create(
                             device=device_config,
                             plant=device_config.plant,
                             timestamp=current_timestamp,
-                            power=0,  # Per i messaggi di energia, la potenza istantanea non è disponibile
+                            power=0,  # Per i messaggi di energia, la potenza
+                            # istantanea non è disponibile
                             voltage=0,  # Valore di default
                             current=0,  # Valore di default
                             energy_total=energy_delta
@@ -190,25 +195,25 @@ class MeasurementHandler(BaseHandler):
                         device_config.save(update_fields=["last_seen"])
 
                         logger.info(
-                            f"""
-                            Energy delta calculated for device {device_config.device_id}:
-                            - Previous reading: {last_energy:.3f} Wh
-                            - Current reading: {current_energy_total:.3f} Wh
-                            - Delta: {energy_delta:.3f} Wh ({energy_delta/1000.0:.3f} kWh)
-                        """
+                            f"Energy delta calculated for device "
+                            f"{device_config.device_id}: "
+                            f"- Previous reading: {last_energy:.3f} Wh "
+                            f"- Current reading: {current_energy_total:.3f} Wh "
+                            f"- Delta: {energy_delta:.3f} Wh "
+                            f"({energy_delta/1000.0:.3f} kWh)"
                         )
                 else:
                     logger.warning(
-                        f"""
-                        Invalid energy delta for device {device_config.device_id}:
-                        - Previous reading: {last_energy:.3f} Wh
-                        - Current reading: {current_energy_total:.3f} Wh
-                        - Delta: {energy_delta:.3f} Wh
-                    """
+                        f"Invalid energy delta for device "
+                        f"{device_config.device_id}: "
+                        f"- Previous reading: {last_energy:.3f} Wh "
+                        f"- Current reading: {current_energy_total:.3f} Wh "
+                        f"- Delta: {energy_delta:.3f} Wh"
                     )
             else:
                 logger.info(
-                    f"First energy reading for device {device_config.device_id}: {current_energy_total:.3f} Wh"
+                    f"First energy reading for device "
+                    f"{device_config.device_id}: {current_energy_total:.3f} Wh"
                 )
 
             return True

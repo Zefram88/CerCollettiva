@@ -1,7 +1,7 @@
 # core/models/audit.py
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
+# from django.contrib.contenttypes.fields import GenericForeignKey
+# from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils import timezone
@@ -102,7 +102,11 @@ class EconomicTransactionAudit(models.Model):
         ]
 
     def __str__(self):
-        return f"Audit {self.operation_type} - Transazione {self.transaction_id} - {self.operation_timestamp}"
+        return (
+            f"Audit {self.operation_type} - "
+            f"Transazione {self.transaction_id} - "
+            f"{self.operation_timestamp}"
+        )
 
     def save(self, *args, **kwargs):
         # Imposta data di scadenza a 2 anni dalla creazione
@@ -230,7 +234,11 @@ class CERDocumentAudit(models.Model):
         ]
 
     def __str__(self):
-        return f"Audit {self.operation_type} - {self.document_name} - {self.operation_timestamp}"
+        return (
+            f"Audit {self.operation_type} - "
+            f"{self.document_name} - "
+            f"{self.operation_timestamp}"
+        )
 
     def save(self, *args, **kwargs):
         # Imposta data di scadenza a 3 anni dalla creazione

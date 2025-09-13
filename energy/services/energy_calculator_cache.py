@@ -2,15 +2,16 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import transaction
-from django.db.models import F, Sum
-from django.utils import timezone
+# from django.db import transaction
+# from django.db.models import Sum
+# from django.db.models import F
+# from django.utils import timezone
 
-from ..models import EnergyInterval
+# from ..models import EnergyInterval
 from .energy_calculator_aggregations import EnergyCalculatorAggregations
 
 logger = logging.getLogger("energy.calculator.cache")
@@ -83,7 +84,8 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
             interval_type: Tipo di intervallo ('15MIN', '1H', '1D', '1M', '1Y').
 
         Returns:
-            Optional[float]: Valore dell'energia in kWh se presente in cache, altrimenti None.
+            Optional[float]: Valore dell'energia in kWh se presente in cache,
+            altrimenti None.
         """
         if not self.cache_enabled:
             return None
@@ -93,12 +95,14 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
 
         if cached_value is not None:
             logger.debug(
-                f"Cache HIT - Device: {device_id}, Interval: {interval_type}, Start: {start_time}"
+                f"Cache HIT - Device: {device_id}, Interval: {interval_type}, "
+                f"Start: {start_time}"
             )
             return cached_value
         else:
             logger.debug(
-                f"Cache MISS - Device: {device_id}, Interval: {interval_type}, Start: {start_time}"
+                f"Cache MISS - Device: {device_id}, Interval: {interval_type}, "
+                f"Start: {start_time}"
             )
             return None
 
@@ -128,7 +132,8 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
 
         cache.set(cache_key, energy, timeout)
         logger.debug(
-            f"Cache SET - Device: {device_id}, Interval: {interval_type}, Start: {start_time}, Energy: {energy:.3f} kWh"
+            f"Cache SET - Device: {device_id}, Interval: {interval_type}, "
+            f"Start: {start_time}, Energy: {energy:.3f} kWh"
         )
 
     def _invalidate_higher_caches(self, device_id: str, timestamp: datetime):
@@ -143,10 +148,13 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
             return
 
         for interval_type in ["1H", "1D", "1M", "1Y"]:
-            cache_key = self._get_cache_key(device_id, interval_type, timestamp)
+            cache_key = self._get_cache_key(
+                device_id, interval_type, timestamp
+            )
             cache.delete(cache_key)
             logger.debug(
-                f"Cache INVALIDATED - Device: {device_id}, Interval: {interval_type}, Time: {timestamp}"
+                f"Cache INVALIDATED - Device: {device_id}, "
+                f"Interval: {interval_type}, Time: {timestamp}"
             )
 
     def clear_device_cache(self, device_id: str):
@@ -161,22 +169,32 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
 
         try:
             for interval_type in self.INTERVAL_TYPES:
-                # Costruisci un pattern per eliminare tutte le chiavi relative al dispositivo
+                # Costruisci un pattern per eliminare tutte le chiavi relative
+                # al dispositivo
                 if interval_type == "1M":
-                    pattern = f"{self._cache_prefixes[interval_type]}{device_id}_*"
+                    pattern = (
+                        f"{self._cache_prefixes[interval_type]}{device_id}_*"
+                    )
                 elif interval_type == "1Y":
-                    pattern = f"{self._cache_prefixes[interval_type]}{device_id}_*"
+                    pattern = (
+                        f"{self._cache_prefixes[interval_type]}{device_id}_*"
+                    )
                 else:
-                    pattern = f"{self._cache_prefixes[interval_type]}{device_id}_*"
+                    pattern = (
+                        f"{self._cache_prefixes[interval_type]}{device_id}_*"
+                    )
 
                 # Usa le wildcards per eliminare le chiavi in modo efficiente
                 cache.delete_pattern(pattern)
                 logger.info(
-                    f"Cache CLEARED for device: {device_id}, interval type: {interval_type}"
+                    f"Cache CLEARED for device: {device_id}, "
+                    f"interval type: {interval_type}"
                 )
 
         except Exception as e:
-            logger.error(f"Error clearing cache for device {device_id}: {str(e)}")
+            logger.error(
+                f"Error clearing cache for device {device_id}: {str(e)}"
+            )
 
     def bulk_update_cache(
         self, intervals: List[Tuple[str, datetime, datetime, str, float]]
@@ -185,7 +203,8 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
         Aggiorna la cache con più intervalli in un'unica operazione.
 
         Args:
-            intervals: Lista di tuple (device_id, start_time, end_time, interval_type, energy).
+            intervals: Lista di tuple (device_id, start_time, end_time,
+            interval_type, energy).
         """
         if not self.cache_enabled:
             return
@@ -200,7 +219,9 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
             {k: v[0] for k, v in cache_data.items()},
             timeout=max(v[1] for v in cache_data.values()),
         )
-        logger.info(f"Bulk cache update completed for {len(intervals)} intervals")
+        logger.info(
+            f"Bulk cache update completed for {len(intervals)} intervals"
+        )
 
         # Invalida le cache superiori per ogni intervallo aggiornato
         for device_id, start_time, _, _, _ in intervals:
@@ -210,12 +231,14 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
         self, device_id: str, start_time: datetime, interval_type: str
     ):
         """
-        Ricalcola le aggregazioni per gli intervalli superiori e le salva in cache.
+        Ricalcola le aggregazioni per gli intervalli superiori e le salva
+        in cache.
 
         Args:
             device_id: ID del dispositivo.
             start_time: Timestamp di inizio dell'intervallo modificato.
-            interval_type: Tipo di intervallo modificato ('15MIN', '1H', '1D', '1M', '1Y').
+            interval_type: Tipo di intervallo modificato
+            ('15MIN', '1H', '1D', '1M', '1Y').
         """
         if not self.cache_enabled:
             return
@@ -266,7 +289,12 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
 
             # Ricalcola annuale
             year_start = start_time.replace(
-                month=1, day=1, hour=0, minute=0, second=0, microsecond=0
+                month=1,
+                day=1,
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0
             )
             yearly_energy = self.calculate_yearly_energy(device_id, year_start.year)
             if yearly_energy is not None:
@@ -279,5 +307,6 @@ class EnergyCalculatorCache(EnergyCalculatorAggregations):
                 )
 
         logger.info(
-            f"Aggregations recalculated and cached for device: {device_id}, starting from: {start_time}, interval type: {interval_type}"
+            f"Aggregations recalculated and cached for device: {device_id}, "
+            f"starting from: {start_time}, interval type: {interval_type}"
         )

@@ -4,12 +4,12 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from django.core.cache import cache
-from django.db import transaction
-from django.db.models import Avg, F, Max, Min, Sum
+# from django.core.cache import cache
+# from django.db import transaction
+# from django.db.models import Avg, F, Max, Min, Sum
 from django.utils import timezone
 
-from ..models import DeviceConfiguration, DeviceMeasurement, EnergyInterval
+from ..models import DeviceConfiguration
 
 logger = logging.getLogger("energy.calculator")
 

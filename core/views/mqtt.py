@@ -5,10 +5,8 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import UpdateView
 
 from energy.models import DeviceConfiguration
 

@@ -1,8 +1,7 @@
 # core/views/mixins/auth.py
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 

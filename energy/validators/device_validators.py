@@ -70,7 +70,8 @@ class DeviceCreateValidator(BaseModel):
         # Solo caratteri alfanumerici, underscore e trattini
         if not re.match(r"^[A-Za-z0-9_-]+$", v):
             raise ValueError(
-                "Numero seriale può contenere solo lettere, numeri, underscore e trattini"
+                "Numero seriale può contenere solo lettere, numeri, "
+                "underscore e trattini"
             )
 
         return v.strip()
@@ -136,7 +137,8 @@ class DeviceUpdateValidator(BaseModel):
             ]
             if v.upper() not in allowed_types:
                 raise ValueError(
-                    f'Tipo dispositivo non valido. Consentiti: {", ".join(allowed_types)}'
+                    f'Tipo dispositivo non valido. Consentiti: '
+                    f'{", ".join(allowed_types)}'
                 )
             return v.upper()
         return v
@@ -148,7 +150,8 @@ class DeviceUpdateValidator(BaseModel):
                 raise ValueError("Numero seriale obbligatorio")
             if not re.match(r"^[A-Za-z0-9_-]+$", v):
                 raise ValueError(
-                    "Numero seriale può contenere solo lettere, numeri, underscore e trattini"
+                    "Numero seriale può contenere solo lettere, numeri, "
+                    "underscore e trattini"
                 )
             return v.strip()
         return v
@@ -209,7 +212,8 @@ class DeviceConfigurationCreateValidator(BaseModel):
         # Solo caratteri alfanumerici, underscore e trattini
         if not re.match(r"^[A-Za-z0-9_-]+$", v):
             raise ValueError(
-                "ID dispositivo può contenere solo lettere, numeri, underscore e trattini"
+                "ID dispositivo può contenere solo lettere, numeri, "
+                "underscore e trattini"
             )
 
         return v.strip()
@@ -300,7 +304,8 @@ class DeviceConfigurationUpdateValidator(BaseModel):
                 raise ValueError("ID dispositivo obbligatorio")
             if not re.match(r"^[A-Za-z0-9_-]+$", v):
                 raise ValueError(
-                    "ID dispositivo può contenere solo lettere, numeri, underscore e trattini"
+                    "ID dispositivo può contenere solo lettere, numeri, "
+                    "underscore e trattini"
                 )
             return v.strip()
         return v

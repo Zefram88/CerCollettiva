@@ -1,17 +1,19 @@
 # cer/tests.py
-import json
-from unittest.mock import MagicMock, patch
+# import json  # Unused
+# from unittest.mock import MagicMock, patch  # Unused
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+# from django.core.exceptions import ValidationError  # Unused
+# from django.db import IntegrityError  # Unused
 from django.test import Client, TransactionTestCase
 from django.urls import reverse
 
-from core.main_models import CERConfiguration, CERMembership, Plant
+from core.main_models import CERConfiguration
+# from core.main_models import CERMembership  # Unused
+# from core.main_models import Plant  # Unused
 from users.models import CustomUser
 
-from .models import MemberProfile
+# from .models import MemberProfile  # Unused
 
 User = get_user_model()
 
@@ -22,6 +24,7 @@ class MemberProfileModelTest(TransactionTestCase):
     def setUp(self):
         # Use unique identifier to avoid conflicts
         import time
+
         unique_id = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
             username=f"testuser{unique_id}",
@@ -74,6 +77,7 @@ class OnboardingViewsTest(TransactionTestCase):
         self.client = Client()
         # Use unique identifier to avoid conflicts
         import time
+
         unique_id = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
             username=f"testuser{unique_id}",

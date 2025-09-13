@@ -1,7 +1,7 @@
 # energy/services/device_service.py
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache

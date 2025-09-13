@@ -2,19 +2,21 @@
 Admin configuration for CerCollettiva - Django Admin Standard
 """
 
-from datetime import datetime, time, timedelta
+# from datetime import datetime, time, timedelta
 
-from django.contrib import admin, messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import get_user_model
-from django.core.paginator import Paginator
-from django.db.models import Count, Q, Sum
-from django.shortcuts import redirect, render
+from django.contrib import admin
+# from django.contrib import messages
+# from django.contrib.admin.views.decorators import staff_member_required
+# from django.contrib.auth import get_user_model
+# from django.core.paginator import Paginator
+# from django.db.models import Count, Q, Sum
+# from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
-from django.urls import path, reverse
-from django.utils.decorators import method_decorator
-from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
+from django.urls import path
+# from django.urls import reverse
+# from django.utils.decorators import method_decorator
+# from django.utils.html import format_html
+# from django.utils.translation import gettext_lazy as _
 
 from core.main_models import (
     Alert,

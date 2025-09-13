@@ -1,9 +1,10 @@
 # energy/services/device_manager.py
 from typing import Any, Dict, Optional
 
-from django.core.cache import cache
+# from django.core.cache import cache
 
-from ..models.device import Device, DeviceType
+from ..models.device import Device
+# from ..models.device import DeviceType
 
 
 class DeviceManager:
@@ -32,6 +33,6 @@ class DeviceManager:
     @classmethod
     def validate_payload(cls, device: Device, payload: Dict[str, Any]) -> bool:
         """Valida il payload MQTT contro il formato atteso"""
-        expected_format = device.device_type.mqtt_payload_format
+        # expected_format = device.device_type.mqtt_payload_format  # Unused variable
         # Implementa la validazione qui
         return True

@@ -5,7 +5,7 @@ Sistema centralizzato di validazione input per prevenire injection e corruzione 
 """
 
 from datetime import datetime
-from decimal import Decimal
+# from decimal import Decimal
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field, validator

@@ -8,4 +8,4 @@ class CerConfig(AppConfig):
 
     def ready(self):
         """Configurazione app quando è pronta"""
-        import cer.signals  # Importa i signal handlers
+        import cer.signals  # noqa: F401  # Importa i signal handlers

@@ -3,10 +3,8 @@ import os
 import re
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.validators import FileTypeValidator
 
 from .models import Document
 
@@ -31,9 +29,10 @@ class DocumentUploadForm(forms.ModelForm):
         self.fields[
             "gdpr_consent"
         ].help_text = """
-            Confermo di aver letto l'informativa sulla privacy e acconsento al trattamento 
-            dei dati personali contenuti in questo documento. I dati saranno utilizzati 
-            esclusivamente per le finalità relative alla gestione della comunità energetica 
+            Confermo di aver letto l'informativa sulla privacy e acconsento al
+            trattamento dei dati personali contenuti in questo documento. I dati
+            saranno utilizzati esclusivamente per le finalità relative alla
+            gestione della comunità energetica
             e conservati secondo i termini di legge.
         """
 
@@ -47,7 +46,8 @@ class DocumentUploadForm(forms.ModelForm):
         if doc_type in ["ID_DOC", "BILL"] or data_classification == "PERSONAL":
             if not gdpr_consent:
                 raise forms.ValidationError(
-                    "Il consenso al trattamento dei dati è obbligatorio per questo tipo di documento"
+                    "Il consenso al trattamento dei dati è obbligatorio per "
+                    "questo tipo di documento"
                 )
 
     def clean_file(self):
@@ -93,7 +93,8 @@ class DocumentUploadForm(forms.ModelForm):
         if not re.match(r"^[a-zA-Z0-9._-]+$", file.name):
             raise forms.ValidationError(
                 _(
-                    "Il nome del file contiene caratteri non validi. Utilizzare solo lettere, numeri, punti, trattini e underscore"
+                    "Il nome del file contiene caratteri non validi. "
+                    "Utilizzare solo lettere, numeri, punti, trattini e underscore"
                 )
             )
 

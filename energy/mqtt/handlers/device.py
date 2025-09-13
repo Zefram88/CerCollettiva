@@ -128,7 +128,7 @@ class DeviceHandler(BaseHandler):
                     f"{pod[:3]}...{pod[-3:]}" if len(pod) > 6 else "***"
                 )
 
-            masked_pod = self._cached_pod_masks[pod]
+            # masked_pod = self._cached_pod_masks[pod]  # Unused variable
 
             # logger.info(
             #    f"Measurement saved - Device: {device_config.device_id} "

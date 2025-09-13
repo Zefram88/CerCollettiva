@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.main_models import CERConfiguration, CERMembership, Plant
+from core.main_models import CERConfiguration, CERMembership, Plant  # noqa: F401
 from users.models import CustomUser
 
 from .models import MemberProfile
@@ -162,7 +162,8 @@ class OnboardingStep2Form(forms.Form):
             }
         ),
         help_text=_(
-            "Codice del Punto di Prelievo (POD) della tua utenza elettrica (14-15 caratteri)"
+            "Codice del Punto di Prelievo (POD) della tua utenza elettrica "
+            "(14-15 caratteri)"
         ),
     )
 
@@ -334,7 +335,8 @@ class OnboardingStep5Form(forms.Form):
             }
         ),
         help_text=_(
-            "Condividi le tue motivazioni per aderire alla Comunità Energetica (opzionale)"
+            "Condividi le tue motivazioni per aderire alla Comunità Energetica "
+            "(opzionale)"
         ),
     )
 
@@ -498,7 +500,8 @@ class ProfileCompletionForm(forms.ModelForm):
             if len(fiscal_code) != 16:
                 raise forms.ValidationError(
                     _(
-                        "Il codice fiscale per persone fisiche deve essere di 16 caratteri."
+                        "Il codice fiscale per persone fisiche deve essere di "
+                        "16 caratteri."
                     )
                 )
         return fiscal_code

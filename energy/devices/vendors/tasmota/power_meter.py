@@ -2,6 +2,7 @@
 from typing import Any, Dict, List, Optional
 
 from ....devices.base.meter import BaseMeter, MeasurementData
+from ....devices.registry import DeviceRegistry
 
 
 class TasmotaPowerMeter(BaseMeter):

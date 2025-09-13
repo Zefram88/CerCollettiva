@@ -1,8 +1,9 @@
 # energy/devices/vendors/shelly/base.py
-import json
+# import json
 import logging
-from datetime import datetime
-from typing import Any, Dict, Optional
+# from datetime import datetime
+from typing import Any, Optional
+# from typing import Dict
 
 from ....models import DeviceMeasurement
 from ...base.meter import BaseMeter
@@ -37,8 +38,8 @@ class BaseShellyMeter(BaseMeter):
             data (Any): I dati del messaggio (possono essere dict, int, etc.)
 
         Returns:
-            Optional[DeviceMeasurement]: L'oggetto misurazione se il parsing ha successo,
-                                       None altrimenti
+            Optional[DeviceMeasurement]: L'oggetto misurazione se il parsing
+            ha successo, None altrimenti
         """
         try:
             # Log per debug iniziale
@@ -95,8 +96,8 @@ class BaseShellyMeter(BaseMeter):
             data (Any): I dati da parsare
 
         Returns:
-            Optional[DeviceMeasurement]: L'oggetto misurazione se il parsing ha successo,
-                                       None altrimenti
+            Optional[DeviceMeasurement]: L'oggetto misurazione se il parsing
+            ha successo, None altrimenti
 
         Raises:
             NotImplementedError: Se la classe figlia non implementa questo metodo

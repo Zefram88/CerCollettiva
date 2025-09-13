@@ -1,8 +1,14 @@
 # energy/devices/models.py
+import logging
+from typing import List
+
 from django.db import models
 from django.utils import timezone
 
 from ..models.base import BaseTimestampModel
+from .registry import DeviceRegistry
+
+logger = logging.getLogger(__name__)
 
 
 class DeviceConfiguration(BaseTimestampModel):

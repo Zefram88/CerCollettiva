@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import F, Sum
+from django.db.models import Max, Sum
 from django.utils import timezone
 
 from ..models import DeviceMeasurement, EnergyInterval
@@ -25,7 +25,8 @@ class EnergyCalculatorMeasurements(EnergyCalculatorBase):
         self, device_id: str, timestamp: datetime, total_energy: float
     ) -> None:
         """
-        Processa una nuova misurazione di energia totale e calcola l'energia nell'intervallo
+        Processa una nuova misurazione di energia totale e calcola l'energia
+        nell'intervallo
 
         Args:
             device_id: ID del dispositivo
@@ -283,7 +284,8 @@ class EnergyCalculatorMeasurements(EnergyCalculatorBase):
 
     def calculate_total_system_power(self, user=None, time_window_minutes=5):
         """
-        Calcola la potenza totale del sistema per tutti gli impianti o per un utente specifico.
+        Calcola la potenza totale del sistema per tutti gli impianti o per un
+        utente specifico.
 
         Args:
             user: Utente per cui calcolare la potenza (None per tutti gli impianti)
@@ -340,7 +342,7 @@ class EnergyCalculatorMeasurements(EnergyCalculatorBase):
             float: Potenza totale dell'impianto in kW
         """
         # Sfrutta la cache esistente se possibile
-        cache_key = f"plant_power_{plant_id}"
+        # cache_key = f"plant_power_{plant_id}"  # Unused variable
         cached_value = self.get_cached_energy_interval(
             plant_id, timezone.now(), None, "5MIN"
         )

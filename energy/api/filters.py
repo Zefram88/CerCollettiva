@@ -1,9 +1,9 @@
 # energy/api/filters.py
-from functools import lru_cache
+# from functools import lru_cache
 
 from django_filters import rest_framework as filters
 
-from django.apps import apps
+# from django.apps import apps
 from django.db.models import Q
 
 from core.main_models import Plant

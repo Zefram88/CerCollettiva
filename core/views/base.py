@@ -1,17 +1,12 @@
 # core/views/base.py
 
-from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Sum
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from energy.models import DeviceConfiguration, DeviceMeasurement
 
 from ..models import CERConfiguration, Plant
-from .mixins.auth import StaffRequiredMixin
 from .mixins.gdpr import GDPRDataProtectionMixin
 
 

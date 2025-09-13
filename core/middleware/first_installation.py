@@ -3,8 +3,8 @@
 import logging
 
 from django.conf import settings
-from django.shortcuts import redirect
-from django.urls import reverse
+# from django.shortcuts import redirect
+# from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 

@@ -6,8 +6,8 @@ from django.utils import timezone
 
 
 class MQTTAuditLog(models.Model):
-    class Meta:
-        app_label = "energy"
+    # class Meta:
+    #     app_label = "energy"
 
     OPERATION_TYPES = [
         ("AUTH", "Autenticazione"),

@@ -1,6 +1,7 @@
 # energy/services/mqtt_auth.py
 import hashlib
 import secrets
+import string
 from typing import Tuple
 
 from ..models import MQTTCredential

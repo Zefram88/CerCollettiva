@@ -62,7 +62,8 @@ class GaudiProcessor:
             self.document.save()
 
             logger.info(
-                f"Attestato Gaudì elaborato con successo per impianto {self.document.plant.pod_code}"
+                f"Attestato Gaudì elaborato con successo per impianto "
+                f"{self.document.plant.pod_code}"
             )
             return self.data
 
@@ -271,7 +272,8 @@ class GaudiProcessor:
             # Se la data di presunto esercizio è vuota, usa la data di convalida
             if not expected_operation_date_str:
                 logger.info(
-                    "Data presunto esercizio non trovata, usando data di convalida come fallback"
+                    "Data presunto esercizio non trovata, usando data di "
+                    "convalida come fallback"
                 )
                 expected_operation_date_str = validation_date_str
                 self.data["using_validation_date_as_fallback"] = True
@@ -436,20 +438,25 @@ class GaudiProcessor:
 
     def is_using_validation_date_fallback(self) -> bool:
         """
-        Verifica se stiamo usando la data di convalida come fallback per la data di presunto esercizio.
+        Verifica se stiamo usando la data di convalida come fallback per la
+        data di presunto esercizio.
         """
-        return self.data.get("using_validation_date_as_fallback", False)
+        return self.data.get(
+            "using_validation_date_as_fallback", False
+        )
 
     def get_date_fallback_message(self) -> Optional[str]:
         """
-        Restituisce un messaggio informativo se stiamo usando la data di convalida come fallback.
+        Restituisce un messaggio informativo se stiamo usando la data di
+        convalida come fallback.
         """
         if self.is_using_validation_date_fallback():
             validation_date = self.data.get("validation_date")
             if validation_date:
                 return _(
                     f"La data di presunto esercizio non era specificata. "
-                    f"È stata utilizzata la data di convalida ({validation_date.strftime('%d/%m/%Y')}) "
+                    f"È stata utilizzata la data di convalida "
+                    f"({validation_date.strftime('%d/%m/%Y')}) "
                     f"come data di presunto esercizio."
                 )
         return None

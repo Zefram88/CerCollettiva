@@ -4,7 +4,7 @@ from .permissions import IsDeviceOwner, IsStaffOrReadOnly, ReadOnly
 from .serializers import (
     DeviceConfigurationSerializer,
     DeviceMeasurementSerializer,
-    EnergyAggregateRequestSerializer,
+    # EnergyAggregateRequestSerializer,
     EnergyAggregateSerializer,
     EnergyMeasurementSerializer,
     PlantSerializer,

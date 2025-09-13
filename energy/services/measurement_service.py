@@ -1,7 +1,7 @@
 # energy/services/measurement_service.py
 
 import logging
-from datetime import datetime
+# from datetime import datetime
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache
@@ -242,7 +242,8 @@ class MeasurementService:
                 else:
                     logger.warning(
                         f"Invalid energy delta for device {device_id}: "
-                        f"{energy_delta} Wh (previous: {last_energy}, current: {current_energy})"
+                        f"{energy_delta} Wh (previous: {last_energy}, "
+                        f"current: {current_energy})"
                     )
                     return None
             else:
@@ -315,7 +316,8 @@ class MeasurementService:
                     device=device_config,
                     plant=device_config.plant,
                     timestamp=context.timestamp,
-                    power=0,  # Per i messaggi di energia, la potenza istantanea non è disponibile
+                    power=0,  # Per i messaggi di energia, la potenza
+                    # istantanea non è disponibile
                     voltage=0,
                     current=0,
                     energy_total=energy_delta / 1000.0,  # Converti da Wh a kWh
@@ -377,7 +379,10 @@ class MeasurementService:
         Verifica se il messaggio è un duplicato
         """
         try:
-            msg_key = f"{context.topic}_{device_config.device_id}_{hash(str(context.payload))}"
+            msg_key = (
+                f"{context.topic}_{device_config.device_id}_"
+                f"{hash(str(context.payload))}"
+            )
             return bool(cache.get(msg_key))
         except Exception as e:
             logger.error(f"Error checking duplicate message: {e}")
@@ -390,7 +395,10 @@ class MeasurementService:
         Cache del messaggio processato per evitare duplicati
         """
         try:
-            msg_key = f"{context.topic}_{device_config.device_id}_{hash(str(context.payload))}"
+            msg_key = (
+                f"{context.topic}_{device_config.device_id}_"
+                f"{hash(str(context.payload))}"
+            )
             cache.set(msg_key, True, timeout=self._cache_timeout)
         except Exception as e:
             logger.error(f"Error caching processed message: {e}")

@@ -3,7 +3,7 @@ Mixin per funzionalità avanzate admin - CerCollettiva
 Export/Import Excel, Filtri avanzati, Report personalizzati
 """
 
-import io
+# import io
 import logging
 from datetime import datetime
 
@@ -70,9 +70,13 @@ class ExcelExportMixin:
 
             # Crea response
             response = HttpResponse(
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                content_type="application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
             )
-            filename = f"{self.model._meta.verbose_name_plural}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            filename = (
+                f"{self.model._meta.verbose_name_plural}_"
+                f"{timezone.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            )
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
             # Salva workbook
@@ -80,7 +84,8 @@ class ExcelExportMixin:
 
             # Log success
             logger.info(
-                f"Excel export completed for {self.model._meta.label}: {queryset.count()} records"
+                f"Excel export completed for {self.model._meta.label}: "
+                f"{queryset.count()} records"
             )
 
             return response
@@ -163,7 +168,7 @@ class ExcelExportMixin:
                 try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except:
+                except Exception:
                     pass
 
             adjusted_width = min(max_length + 2, 50)  # Max width 50
@@ -218,7 +223,8 @@ class ExcelImportMixin:
 
             # Log results
             logger.info(
-                f"Excel import completed for {self.model._meta.label}: {success_count} success, {error_count} errors"
+                f"Excel import completed for {self.model._meta.label}: "
+                f"{success_count} success, {error_count} errors"
             )
 
             return True

@@ -1,5 +1,5 @@
 from ..models import (
-    DeviceConfiguration,
+    # DeviceConfiguration,
     DeviceMeasurement,
     EnergyAggregate,
     EnergyMeasurement,

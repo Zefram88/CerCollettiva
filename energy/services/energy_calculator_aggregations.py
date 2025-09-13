@@ -2,12 +2,13 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from django.core.cache import cache
-from django.db import transaction
-from django.db.models import F, Sum
-from django.utils import timezone
+# from django.db import transaction
+from django.db.models import Sum
+# from django.db.models import F
+# from django.utils import timezone
 
 from ..models import EnergyInterval
 from .energy_calculator_measurements import EnergyCalculatorMeasurements
@@ -44,7 +45,8 @@ class EnergyCalculatorAggregations(EnergyCalculatorMeasurements):
 
             if cached_value is not None:
                 logger.debug(
-                    f"Cache hit for hourly energy - Device: {device_id}, Hour: {hour_start}"
+                    f"Cache hit for hourly energy - Device: {device_id}, "
+                    f"Hour: {hour_start}"
                 )
                 return cached_value
 
@@ -112,7 +114,8 @@ class EnergyCalculatorAggregations(EnergyCalculatorMeasurements):
 
             if cached_value is not None:
                 logger.debug(
-                    f"Cache hit for daily energy - Device: {device_id}, Date: {date.date()}"
+                    f"Cache hit for daily energy - Device: {device_id}, "
+                    f"Date: {date.date()}"
                 )
                 return cached_value
 
@@ -186,7 +189,8 @@ class EnergyCalculatorAggregations(EnergyCalculatorMeasurements):
 
             if cached_value is not None:
                 logger.debug(
-                    f"Cache hit for monthly energy - Device: {device_id}, Month: {month_start}"
+                    f"Cache hit for monthly energy - Device: {device_id}, "
+                    f"Month: {month_start}"
                 )
                 return cached_value
 

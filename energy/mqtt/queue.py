@@ -1,16 +1,17 @@
 # energy/mqtt/queue.py
 
-import json
+# import json
 import logging
 import threading
 import time
 from collections import deque
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
+# from datetime import timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from django.core.cache import cache
+# from django.core.cache import cache
 from django.utils import timezone
 
 logger = logging.getLogger("energy.mqtt")
@@ -203,7 +204,8 @@ class MessageQueue:
                     self._queue.append(message)
                     self._stats["retry_messages"] += 1
                     logger.warning(
-                        f"Message failed, will retry: {message_id} (attempt {message.retry_count})"
+                        f"Message failed, will retry: {message_id} "
+                        f"(attempt {message.retry_count})"
                     )
                 else:
                     # Messaggio morto, sposta nella dead letter queue
@@ -214,7 +216,8 @@ class MessageQueue:
                     self._stats["failed_messages"] += 1
                     self._stats["dead_letter_messages"] += 1
                     logger.error(
-                        f"Message failed permanently, moved to dead letter queue: {message_id}"
+                        f"Message failed permanently, moved to dead letter queue: "
+                        f"{message_id}"
                     )
 
                 return True
@@ -266,7 +269,8 @@ class MessageQueue:
             # Crea il contesto del messaggio
             from .router import MessageContext
 
-            context = MessageContext(
+            # context = MessageContext(  # Unused variable
+            MessageContext(
                 topic=message.topic,
                 payload=message.payload,
                 timestamp=message.timestamp,

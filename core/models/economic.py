@@ -173,7 +173,11 @@ class EconomicTransaction(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.transaction_number} - {self.get_transaction_type_display()} - €{self.amount}"
+        return (
+            f"{self.transaction_number} - "
+            f"{self.get_transaction_type_display()} - "
+            f"€{self.amount}"
+        )
 
     def save(self, *args, **kwargs):
         # Genera numero transazione se non presente
@@ -336,7 +340,10 @@ class TransactionApproval(models.Model):
         ]
 
     def __str__(self):
-        return f"Approvazione {self.transaction.transaction_number} - {self.get_status_display()}"
+        return (
+            f"Approvazione {self.transaction.transaction_number} - "
+            f"{self.get_status_display()}"
+        )
 
     def save(self, *args, **kwargs):
         # Imposta data di scadenza se non presente (7 giorni)

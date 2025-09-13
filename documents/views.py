@@ -14,16 +14,13 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import DeleteView
 
 from core.main_models import Plant
 from core.validators import (
-    IMAGE_VALIDATOR,
-    PDF_VALIDATOR,
     APIValidationMixin,
-    FileTypeValidator,
     ValidationMixin,
 )
 
@@ -47,14 +44,16 @@ def validate_file_upload_security(file):
     # Validazione dimensione
     if file.size > MAX_FILE_SIZE:
         raise ValidationError(
-            f"File troppo grande. Dimensione massima: {MAX_FILE_SIZE / (1024*1024):.1f}MB"
+            f"File troppo grande. Dimensione massima: "
+            f"{MAX_FILE_SIZE / (1024*1024):.1f}MB"
         )
 
     # Validazione estensione
     ext = os.path.splitext(file.name)[1].lower().lstrip(".")
     if ext not in ALLOWED_EXTENSIONS:
         raise ValidationError(
-            f"Tipo di file non consentito. Tipi consentiti: {', '.join(ALLOWED_EXTENSIONS)}"
+            f"Tipo di file non consentito. Tipi consentiti: "
+            f"{', '.join(ALLOWED_EXTENSIONS)}"
         )
 
     # Validazione nome file
@@ -66,7 +65,8 @@ def validate_file_upload_security(file):
     # Validazione caratteri speciali nel nome
     if not re.match(r"^[a-zA-Z0-9._-]+$", file.name):
         raise ValidationError(
-            "Il nome del file contiene caratteri non validi. Utilizzare solo lettere, numeri, punti, trattini e underscore"
+            "Il nome del file contiene caratteri non validi. "
+            "Utilizzare solo lettere, numeri, punti, trattini e underscore"
         )
 
     # Validazione nome file pericoloso

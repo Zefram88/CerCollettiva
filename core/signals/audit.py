@@ -3,7 +3,8 @@ import logging
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_logged_out
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import post_delete, post_save
+# from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -152,7 +153,8 @@ def cleanup_expired_audit_logs():
         expired_actions.delete()
 
         logger.info(
-            f"Pulizia audit logs completata: {economic_count} economic, {docs_count} docs, {actions_count} actions"
+            f"Pulizia audit logs completata: {economic_count} economic, "
+            f"{docs_count} docs, {actions_count} actions"
         )
 
     except Exception as e:

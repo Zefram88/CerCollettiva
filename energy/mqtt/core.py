@@ -3,19 +3,25 @@ import json
 import logging
 import re
 import threading
+import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+# from datetime import timedelta
+from typing import Any, Dict, Optional
+# from typing import List
 
 import paho.mqtt.client as mqtt
 
-from django.conf import settings
+# from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
 from ..devices.registry import DeviceRegistry
-from ..models import DeviceConfiguration, DeviceMeasurement, MQTTAuditLog
-from ..models.device import DeviceConfiguration, DeviceMeasurementDetail
+from ..models import DeviceConfiguration
+# from ..models import DeviceMeasurement, MQTTAuditLog
+
+# from ..models.device import DeviceConfiguration, DeviceMeasurementDetail
+# Duplicate import
 
 logger = logging.getLogger("energy.mqtt")
 
@@ -129,7 +135,8 @@ class MQTTService:
         self._initialize_default_handlers()
 
     def _initialize_default_handlers(self):
-        """Inizializza gli handler predefiniti basati sul device registry - Event-driven"""
+        """Inizializza gli handler predefiniti basati sul device registry
+        - Event-driven"""
         # Registra event handlers con EventBus
         from .event_bus import get_event_bus
         from .handlers.device import DeviceHandler
@@ -246,7 +253,8 @@ class MQTTService:
                     5: "Non autorizzato",
                 }
                 logger.error(
-                    f"Connessione fallita: {error_msgs.get(rc, f'Errore sconosciuto {rc}')}"
+                    f"Connessione fallita: "
+                    f"{error_msgs.get(rc, f'Errore sconosciuto {rc}')}"
                 )
                 self._circuit_breaker.record_failure()
         except Exception as e:

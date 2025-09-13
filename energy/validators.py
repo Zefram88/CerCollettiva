@@ -43,7 +43,8 @@ class EnergyDataValidator(BaseValidator):
         if not re.match(r"^[A-Za-z0-9_-]+$", value):
             raise ValidationError(
                 _(
-                    "L'ID dispositivo può contenere solo lettere, numeri, underscore e trattini"
+                    "L'ID dispositivo può contenere solo lettere, numeri, "
+                    "underscore e trattini"
                 )
             )
 
@@ -62,7 +63,8 @@ class EnergyDataValidator(BaseValidator):
         if not re.match(r"^/[A-Za-z0-9_/]+$", value):
             raise ValidationError(
                 _(
-                    "Il template MQTT può contenere solo lettere, numeri, underscore e slash"
+                    "Il template MQTT può contenere solo lettere, numeri, "
+                    "underscore e slash"
                 )
             )
 
@@ -209,7 +211,8 @@ class EnergyDataValidator(BaseValidator):
             if time_diff > period_limits[period]:
                 raise ValidationError(
                     _(
-                        f"Il periodo {period} non è appropriato per range superiori a {period_limits[period].days} giorni"
+                        f"Il periodo {period} non è appropriato per range "
+                        f"superiori a {period_limits[period].days} giorni"
                     )
                 )
 
@@ -265,7 +268,8 @@ class EnergyDataValidator(BaseValidator):
         if value not in valid_qualities:
             raise ValidationError(
                 _(
-                    f"Qualità non valida. Valori consentiti: {', '.join(valid_qualities)}"
+                    f"Qualità non valida. Valori consentiti: "
+                    f"{', '.join(valid_qualities)}"
                 )
             )
 
@@ -287,7 +291,8 @@ class EnergyDataValidator(BaseValidator):
         if value not in valid_types:
             raise ValidationError(
                 _(
-                    f"Tipo misurazione non valido. Valori consentiti: {', '.join(valid_types)}"
+                    f"Tipo misurazione non valido. Valori consentiti: "
+                    f"{', '.join(valid_types)}"
                 )
             )
 

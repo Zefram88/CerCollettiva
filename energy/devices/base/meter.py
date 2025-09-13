@@ -29,7 +29,8 @@ class BaseMeter(BaseDevice):
             data (dict): Dati ricevuti dal dispositivo
 
         Returns:
-            Optional[MeasurementData]: Dati di misurazione formattati o None se non validi
+            Optional[MeasurementData]: Dati di misurazione formattati o None
+            se non validi
         """
         try:
             # Estrai i valori base richiesti

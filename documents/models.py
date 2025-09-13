@@ -1,6 +1,5 @@
 # documents/models.py
 import logging
-import os
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -107,7 +106,8 @@ class Document(models.Model):
     gdpr_consent = models.BooleanField(
         default=False,
         verbose_name="Consenso GDPR",
-        help_text="L'utente ha acconsentito al trattamento dei dati contenuti nel documento",
+        help_text="L'utente ha acconsentito al trattamento dei dati contenuti "
+        "nel documento",
     )
     retention_date = models.DateField(
         null=True,
@@ -151,7 +151,10 @@ class Document(models.Model):
 
     def __str__(self):
         source_text = "Sistema" if self.source == "SYSTEM" else "Utente"
-        return f"{self.get_type_display()} ({source_text}) - {self.uploaded_at.strftime('%d/%m/%Y')}"
+        return (
+            f"{self.get_type_display()} ({source_text}) - "
+            f"{self.uploaded_at.strftime('%d/%m/%Y')}"
+        )
 
     def save(self, *args, **kwargs):
         # Genera il checksum se è un nuovo file
@@ -258,9 +261,14 @@ class Document(models.Model):
                 result = processor.process()
             except UnicodeDecodeError as ude:
                 # Log the specific encoding error
-                logger.error(f"Encoding error processing file: {str(ude)}")
+                logger.error(
+                    f"Encoding error processing file: {str(ude)}"
+                )
                 self.processing_status = "FAILED"
-                self.processing_errors = "Errore di codifica nel file. Il file potrebbe contenere caratteri speciali non supportati."
+                self.processing_errors = (
+                    "Errore di codifica nel file. Il file potrebbe "
+                    "contenere caratteri speciali non supportati."
+                )
                 self.save()
                 return False
 

@@ -1,13 +1,10 @@
 # core/views/dashboard.py
 
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Sum
-from django.shortcuts import render
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
-from energy.models import DeviceMeasurement
+from energy.models import DeviceConfiguration, DeviceMeasurement
 
 from ..models import Alert, CERConfiguration, CERMembership, Plant
 from .base import CerBaseView
@@ -129,7 +126,10 @@ class DashboardView(CerBaseView):
             return {
                 "show_onboarding_cta": True,
                 "onboarding_status": onboarding_status,
-                "onboarding_message": "Completa il tuo profilo anagrafico per procedere con l'adesione alla CER",
+                "onboarding_message": (
+                    "Completa il tuo profilo anagrafico per procedere "
+                    "con l'adesione alla CER"
+                ),
                 "onboarding_action_url": "users:profile_complete",
                 "onboarding_action_text": "Completa Profilo",
                 "onboarding_icon": "fas fa-user-edit",
@@ -139,7 +139,10 @@ class DashboardView(CerBaseView):
             return {
                 "show_onboarding_cta": True,
                 "onboarding_status": onboarding_status,
-                "onboarding_message": "Configura la tua partecipazione alla Comunità Energetica Rinnovabile",
+                "onboarding_message": (
+                    "Configura la tua partecipazione alla "
+                    "Comunità Energetica Rinnovabile"
+                ),
                 "onboarding_action_url": "cer:onboarding_wizard",  # Da implementare
                 "onboarding_action_text": "Configura CER",
                 "onboarding_icon": "fas fa-cogs",

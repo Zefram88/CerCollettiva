@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_http_methods
+# from django.views.decorators.http import require_http_methods  # Unused
 
 from core.main_models import CERConfiguration, CERMembership, Plant
 from users.models import CustomUser
@@ -247,7 +247,7 @@ def _complete_onboarding(request, member_profile):
 
         # Crea la membership CER
         membership_data = member_profile.onboarding_data.get("step_1", {})
-        membership = CERMembership.objects.create(
+        CERMembership.objects.create(
             user=user,
             cer_configuration=cer_config,
             role="MEMBER",
@@ -308,9 +308,9 @@ def _create_new_cer(request, pod_data, user):
         cer_code = f"CER_{uuid.uuid4().hex[:8].upper()}"
 
         # Ottieni informazioni dal POD per la localizzazione
-        pod_info = pod_data.get("pod_info", {})
-        regioni = pod_info.get("regioni", [])
-        province = pod_info.get("province", [])
+        # pod_info = pod_data.get("pod_info", {})  # Unused
+        # regioni = pod_info.get("regioni", [])  # Unused
+        # province = pod_info.get("province", [])  # Unused
 
         # Crea la nuova CER
         cer_config = CERConfiguration.objects.create(
@@ -324,7 +324,8 @@ def _create_new_cer(request, pod_data, user):
         )
 
         logger.info(
-            f"Nuova CER creata: {cer_config.name} (ID: {cer_config.id}) da utente {user.id}"
+            f"Nuova CER creata: {cer_config.name} (ID: {cer_config.id}) "
+            f"da utente {user.id}"
         )
         messages.success(request, _("Nuova CER creata con successo!"))
 
@@ -395,12 +396,14 @@ def resolve_pod(request):
     except ValueError as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
     except RuntimeError as e:
-        # Errore specifico del POD resolver (POD non trovato, servizio non disponibile, etc.)
+        # Errore specifico del POD resolver (POD non trovato, servizio non
+        # disponibile, etc.)
         error_msg = str(e)
         if "Area Convenzionale non trovata" in error_msg:
             # API GSE non disponibile - permettere di procedere con POD valido
             logger.warning(
-                f"API GSE non disponibile per POD {pod_code}, ma codice valido - procedendo con dati limitati"
+                f"API GSE non disponibile per POD {pod_code}, ma codice valido - "
+                f"procedendo con dati limitati"
             )
 
             # Trova CER disponibili (senza filtri geografici)
@@ -422,7 +425,9 @@ def resolve_pod(request):
                     "available_cer": list(available_cer),
                     "can_create_new": True,
                     "suggested_cer_name": "CER Nuova",
-                    "warning": "Il servizio GSE per la risoluzione POD non è attualmente disponibile. Il codice POD è valido e puoi procedere con la configurazione.",
+                    "warning": "Il servizio GSE per la risoluzione POD non è "
+                    "attualmente disponibile. Il codice POD è valido e puoi "
+                    "procedere con la configurazione.",
                 }
             )
         else:
@@ -430,7 +435,8 @@ def resolve_pod(request):
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": "Servizio di risoluzione POD temporaneamente non disponibile. Riprova più tardi.",
+                    "message": "Servizio di risoluzione POD temporaneamente non "
+                    "disponibile. Riprova più tardi.",
                     "error_type": "service_unavailable",
                 },
                 status=503,
@@ -440,7 +446,8 @@ def resolve_pod(request):
         return JsonResponse(
             {
                 "status": "error",
-                "message": "Errore interno del server. Contatta il supporto se il problema persiste.",
+                "message": "Errore interno del server. Contatta il supporto se il "
+                "problema persiste.",
                 "error_type": "internal_error",
             },
             status=500,
@@ -494,7 +501,8 @@ def profile_completion(request):
         ):  # Solo legal_type + CSRF
             legal_type = request.POST.get("legal_type")
             if legal_type and user.legal_type != legal_type:
-                # Aggiorna senza validazione per evitare errori su campi non ancora compilati
+                # Aggiorna senza validazione per evitare errori su campi non ancora
+                # compilati
                 CustomUser.objects.filter(pk=user.pk).update(legal_type=legal_type)
                 user.refresh_from_db()
                 messages.info(
@@ -502,7 +510,9 @@ def profile_completion(request):
                     _("Tipo di soggetto aggiornato. Compila i campi appropriati."),
                 )
 
-        form = ProfileCompletionForm(request.POST, instance=member_profile, user=user)
+        form = ProfileCompletionForm(
+            request.POST, instance=member_profile, user=user
+        )
 
         if form.is_valid():
             # Salva il profilo membro
@@ -511,7 +521,8 @@ def profile_completion(request):
             # Aggiorna il tipo di soggetto dell'utente se modificato
             legal_type = form.cleaned_data.get("legal_type")
             if legal_type and user.legal_type != legal_type:
-                # Aggiorna senza validazione per evitare errori su campi non ancora compilati
+                # Aggiorna senza validazione per evitare errori su campi non ancora
+                # compilati
                 CustomUser.objects.filter(pk=user.pk).update(legal_type=legal_type)
                 user.refresh_from_db()
 
@@ -524,7 +535,8 @@ def profile_completion(request):
             messages.success(
                 request,
                 _(
-                    "Profilo anagrafico completato con successo! Ora puoi procedere con la configurazione della CER."
+                    "Profilo anagrafico completato con successo! Ora puoi "
+                    "procedere con la configurazione della CER."
                 ),
             )
 

@@ -1,14 +1,14 @@
 # core/views/economic.py
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg, Count, Q, Sum
+from django.core.exceptions import PermissionDenied
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView
 
 from ..models import (
     CERConfiguration,
@@ -17,7 +17,6 @@ from ..models import (
     GSEIncomeTracking,
 )
 from .base import CerBaseView
-from .mixins.auth import StaffRequiredMixin
 
 
 class EconomicDashboardView(CerBaseView):

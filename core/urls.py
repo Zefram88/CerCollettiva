@@ -1,7 +1,7 @@
-from django.contrib import admin
+# from django.contrib import admin
 from django.urls import path
 
-from .admin import admin_site
+# from .admin import admin_site
 from .views.api import (
     cer_power_api,
     get_plant_data,
@@ -16,7 +16,7 @@ from .views.cer import (
     MemberRegistryView,
     MembershipCardView,
 )
-from .views.dashboard import CerDashboardView, DashboardView, HomeView
+from .views.dashboard import DashboardView, HomeView
 from .views.document import (
     PlantDocumentDeleteView,
     PlantDocumentListView,
@@ -140,10 +140,16 @@ urlpatterns = [
     path("api/fees/set/<int:card_id>/", set_membership_fee, name="api_set_fee"),
     path("api/fees/paid/<int:card_id>/", mark_fee_paid, name="api_mark_fee_paid"),
     path("api/cer/<int:cer_pk>/bulk-fees/", bulk_set_fees, name="api_bulk_fees"),
-    # API URLs - Primary Substation Lookup (temporaneamente disabilitato - richiede GDAL/PostGIS)
-    # path('api/primary-substation/lookup-pod/', lookup_primary_substation_by_pod, name='api_lookup_pod'),
-    # path('api/primary-substation/lookup-address/', lookup_primary_substation_by_address, name='api_lookup_address'),
-    # path('api/primary-substation/bulk-lookup-pods/', bulk_lookup_pods, name='api_bulk_lookup_pods'),
-    # path('api/primary-substation/near-cer/<int:cer_id>/', get_primary_substations_near_cer, name='api_substations_near_cer'),
-    # path('api/validate-pod-for-cer/', validate_pod_for_cer, name='api_validate_pod_cer')
+    # API URLs - Primary Substation Lookup
+    # (temporaneamente disabilitato - richiede GDAL/PostGIS)
+    # path('api/primary-substation/lookup-pod/',
+    #      lookup_primary_substation_by_pod, name='api_lookup_pod'),
+    # path('api/primary-substation/lookup-address/',
+    #      lookup_primary_substation_by_address, name='api_lookup_address'),
+    # path('api/primary-substation/bulk-lookup-pods/',
+    #      bulk_lookup_pods, name='api_bulk_lookup_pods'),
+    # path('api/primary-substation/near-cer/<int:cer_id>/',
+    #      get_primary_substations_near_cer, name='api_substations_near_cer'),
+    # path('api/validate-pod-for-cer/',
+    #      validate_pod_for_cer, name='api_validate_pod_cer')
 ]

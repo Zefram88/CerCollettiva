@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
-        verbose = options["verbose"]
+        # verbose = options["verbose"]  # Unused variable
 
         if dry_run:
             self.stdout.write(

@@ -13,8 +13,8 @@ class MQTTBroker(models.Model):
     Utilizzato dal sistema per connettersi al broker che riceve i dati dai dispositivi.
     """
 
-    class Meta:
-        app_label = "energy"
+    # class Meta:
+    #     app_label = "energy"
 
     name = models.CharField("Nome configurazione", max_length=100)
     host = models.CharField("Host", max_length=255)
@@ -66,7 +66,10 @@ class MQTTBroker(models.Model):
         if self.use_tls and not self.verify_cert and not self.ca_cert:
             raise ValidationError(
                 {
-                    "ca_cert": "Il certificato CA è richiesto quando TLS è attivo ma la verifica del certificato è disabilitata"
+                    "ca_cert": (
+                        "Il certificato CA è richiesto quando TLS è attivo ma "
+                        "la verifica del certificato è disabilitata"
+                    )
                 }
             )
 
@@ -74,11 +77,12 @@ class MQTTBroker(models.Model):
 class MQTTConfiguration(models.Model):
     """
     Configurazione di una connessione MQTT per un dispositivo specifico.
-    Utilizzato per gestire le credenziali e le impostazioni di connessione per singoli dispositivi.
+    Utilizzato per gestire le credenziali e le impostazioni di connessione
+    per singoli dispositivi.
     """
 
-    class Meta:
-        app_label = "energy"
+    # class Meta:
+    #     app_label = "energy"
 
     device = models.OneToOneField(
         "energy.DeviceConfiguration",

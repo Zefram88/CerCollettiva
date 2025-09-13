@@ -6,7 +6,7 @@ from crispy_forms.layout import HTML, Column, Div, Field, Layout, Row, Submit
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.password_validation import validate_password
+# from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
@@ -19,7 +19,7 @@ from .validators import (
     POD_VALIDATOR,
     POWER_VALIDATOR,
     USERNAME_UNIQUE_VALIDATOR,
-    ConditionalRequiredValidator,
+    # ConditionalRequiredValidator,
     ValidationMixin,
 )
 
@@ -124,7 +124,8 @@ class InitialSuperUserForm(ValidationMixin, UserCreationForm):
                     <div class="card-body">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            Benvenuto! Per iniziare a usare CerCollettiva, crea il primo account amministratore.
+                            Benvenuto! Per iniziare a usare CerCollettiva,
+                            crea il primo account amministratore.
                         </div>
             """
             ),
@@ -140,7 +141,8 @@ class InitialSuperUserForm(ValidationMixin, UserCreationForm):
             HTML(
                 """
                         <hr class="my-4">
-                        <h5><i class="fas fa-solar-panel me-2"></i>Configurazione CER Iniziale</h5>
+                        <h5><i class="fas fa-solar-panel me-2"></i>
+                        Configurazione CER Iniziale</h5>
             """
             ),
             Field("create_demo_cer"),
@@ -169,12 +171,15 @@ class InitialSuperUserForm(ValidationMixin, UserCreationForm):
                 """
                     </div>
                 </div>
-                
+
                 <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const createCerCheckbox = document.getElementById('id_create_demo_cer');
+                document.addEventListener('DOMContentLoaded',
+                function() {
+                    const createCerCheckbox = document.getElementById(
+                        'id_create_demo_cer'
+                    );
                     const cerFields = document.getElementById('cer-fields');
-                    
+
                     function toggleCerFields() {
                         if (createCerCheckbox.checked) {
                             cerFields.style.display = 'block';
@@ -182,7 +187,7 @@ class InitialSuperUserForm(ValidationMixin, UserCreationForm):
                             cerFields.style.display = 'none';
                         }
                     }
-                    
+
                     createCerCheckbox.addEventListener('change', toggleCerFields);
                     toggleCerFields(); // Inizializza lo stato
                 });
@@ -323,7 +328,8 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
                 "data-pod-input": "",  # Per JavaScript lookup
             }
         ),
-        help_text="Codice del punto di prelievo (visibile in bolletta) - alternativo all'indirizzo",
+        help_text="Codice del punto di prelievo (visibile in bolletta) - "
+        "alternativo all'indirizzo",
     )
 
     address = forms.CharField(
@@ -441,22 +447,29 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
                 "style": "display: none;",
             }
         ),
-        help_text="Autorizzazione installazione impianto (PDF) - OBBLIGATORIO per produttori",
+        help_text="Autorizzazione installazione impianto (PDF) - "
+        "OBBLIGATORIO per produttori",
     )
 
     # Consensi GDPR
     privacy_consent = forms.BooleanField(
         label="Consenso Privacy",
         required=True,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-        help_text="Accetto l'informativa sulla privacy e autorizzo il trattamento dei dati personali",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input"}
+        ),
+        help_text="Accetto l'informativa sulla privacy e autorizzo "
+        "il trattamento dei dati personali",
     )
 
     data_processing_consent = forms.BooleanField(
         label="Trattamento Dati Energetici",
         required=True,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-        help_text="Autorizzo il trattamento dei dati di consumo/produzione per la gestione CER",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input"}
+        ),
+        help_text="Autorizzo il trattamento dei dati di consumo/produzione "
+        "per la gestione CER",
     )
 
     marketing_consent = forms.BooleanField(
@@ -484,12 +497,16 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
                     "id": "member_type_select",  # Per JavaScript
                 }
             ),
-            "role": forms.Select(attrs={"class": "form-control"}),
+            "role": forms.Select(
+                attrs={"class": "form-control"}
+            ),
             "panels_serial_list": forms.Textarea(
                 attrs={
                     "class": "form-control producer-field",
                     "rows": 3,
-                    "placeholder": "Inserire i numeri seriali dei pannelli, uno per riga",
+                    "placeholder": (
+                        "Inserire i numeri seriali dei pannelli, uno per riga"
+                    ),
                     "style": "display: none;",  # Nascosto inizialmente
                 }
             ),
@@ -524,11 +541,26 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
         }
         help_texts = {
             "member_type": "Seleziona il tipo di partecipazione nella CER",
-            "conformity_declaration": "Dichiarazione di conformità dell'impianto (PDF) - OBBLIGATORIO per produttori",
-            "gse_practice": "Documentazione GSE completa (PDF) - OBBLIGATORIO per produttori",
-            "panels_photo": "Foto dei pannelli installati - OBBLIGATORIA per produttori",
-            "inverter_photo": "Foto dell'inverter installato - OBBLIGATORIA per produttori",
-            "panels_serial_list": "Numeri seriali dei pannelli - OBBLIGATORIO per produttori",
+            "conformity_declaration": (
+                "Dichiarazione di conformità dell'impianto (PDF) - "
+                "OBBLIGATORIO per produttori"
+            ),
+            "gse_practice": (
+                "Documentazione GSE completa (PDF) - "
+                "OBBLIGATORIO per produttori"
+            ),
+            "panels_photo": (
+                "Foto dei pannelli installati - "
+                "OBBLIGATORIA per produttori"
+            ),
+            "inverter_photo": (
+                "Foto dell'inverter installato - "
+                "OBBLIGATORIA per produttori"
+            ),
+            "panels_serial_list": (
+                "Numeri seriali dei pannelli - "
+                "OBBLIGATORIO per produttori"
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -599,7 +631,8 @@ class CERMembershipForm(ValidationMixin, forms.ModelForm):
                 if not cleaned_data.get(field_name):
                     self.add_error(
                         field_name,
-                        f"{field_label} è obbligatorio per {self.get_member_type_label(member_type)}",
+                        f"{field_label} è obbligatorio per "
+                        f"{self.get_member_type_label(member_type)}",
                     )
 
             # Campi numerici obbligatori per produttori
@@ -767,13 +800,16 @@ class PlantForm(ValidationMixin, forms.ModelForm):
             ),
             "nominal_power": _("Potenza nominale dell'impianto in kW"),
             "expected_yearly_production": _("Stima della produzione annuale in kWh"),
-            "connection_voltage": _("Tensione di connessione alla rete (default 230V)"),
+            "connection_voltage": _(
+                "Tensione di connessione alla rete (default 230V)"
+            ),
         }
 
     def __init__(self, *args, from_gaudi=False, **kwargs):
         super().__init__(*args, **kwargs)
         if from_gaudi:
-            # Se il form viene usato per impianti da Gaudì, mostra solo il campo tipologia
+            # Se il form viene usato per impianti da Gaudì, mostra solo il
+            # campo tipologia
             for field in list(self.fields.keys()):
                 if field != "plant_type":
                     self.fields[field].widget = forms.HiddenInput()
@@ -809,7 +845,9 @@ class PlantForm(ValidationMixin, forms.ModelForm):
         cleaned_data = super().clean()
 
         # Validazione date correlate
-        expected_operation_date = cleaned_data.get("expected_operation_date")
+        expected_operation_date = cleaned_data.get(
+            "expected_operation_date"
+        )
         validation_date = cleaned_data.get("validation_date")
 
         if validation_date and expected_operation_date:
@@ -817,7 +855,8 @@ class PlantForm(ValidationMixin, forms.ModelForm):
                 self.add_error(
                     "expected_operation_date",
                     _(
-                        "La data prevista di esercizio non può essere anteriore alla data di validazione"
+                        "La data prevista di esercizio non può essere "
+                        "anteriore alla data di validazione"
                     ),
                 )
 

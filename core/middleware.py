@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
+# from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 
@@ -83,7 +83,7 @@ class SuperUserSetupMiddleware:
             setup_url = reverse("core:initial_setup")
             if request.path == setup_url:
                 return self.get_response(request)
-        except:
+        except Exception:
             # Se l'URL non esiste ancora, continua
             pass
 
@@ -100,7 +100,7 @@ class SuperUserSetupMiddleware:
                 try:
                     setup_url = reverse("core:initial_setup")
                     return HttpResponseRedirect(setup_url)
-                except:
+                except Exception:
                     # Se l'URL non è ancora disponibile, continua senza reindirizzare
                     pass
 
@@ -142,7 +142,7 @@ class FirstInstallationMiddleware:
                             "Prima installazione rilevata, reindirizzo al setup"
                         )
                         return HttpResponseRedirect(setup_url)
-                    except:
+                    except Exception:
                         # Se l'URL non è disponibile, continua
                         pass
 

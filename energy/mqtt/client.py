@@ -5,15 +5,17 @@ import threading
 import time
 from collections import deque
 from queue import Queue
-from typing import Optional
+# from typing import Optional
 
 import paho.mqtt.client as mqtt
 
-from django.conf import settings
+# from django.conf import settings
 from django.utils import timezone
 
-from ..models import MQTTAuditLog, MQTTBroker
-from .core import MQTTMessage, get_mqtt_service
+from ..models import MQTTBroker
+# from ..models import MQTTAuditLog
+from .core import get_mqtt_service
+# from .core import MQTTMessage
 from .manager import DeviceManager
 
 logger = logging.getLogger("energy.mqtt")
@@ -256,11 +258,11 @@ class EnergyMQTTClient:
 
                     health_monitor = get_health_monitor()
                     health_monitor.record_connection()
-                except:
+                except Exception:
                     pass
 
                 # print("\n=============== MQTT ==================")
-                print(f" | Connessione al broker stabilita!    |")
+                print(" | Connessione al broker stabilita!    |")
                 logger.info(f"Broker: {self._host}:{self._port}")
                 logger.info(f"Client ID: {client._client_id.decode()}")
 
@@ -281,7 +283,7 @@ class EnergyMQTTClient:
 
                 health_monitor = get_health_monitor()
                 health_monitor.record_disconnection()
-            except:
+            except Exception:
                 pass
 
             error_msgs = {
@@ -293,7 +295,7 @@ class EnergyMQTTClient:
             }
             error_msg = error_msgs.get(rc, f"Errore sconosciuto ({rc})")
             print("\n============== ERRORE ==================")
-            print(f" | Connessione MQTT fallita!            |")
+            print(" | Connessione MQTT fallita!            |")
             print(f" | Motivo: {error_msg}")
             print("========================================\n")
             logger.error(f"MQTT connection failed: {error_msg}")
@@ -373,7 +375,7 @@ class EnergyMQTTClient:
                     current_power = payload.get("total_act_power", 0)
                     status = "published" if success else "failed"
                     logger.info(f"  Potenza Totale [W]: {current_power:.1f} ({status})")
-                except:
+                except Exception:
                     pass
             elif msg.topic.endswith("/emdata:0"):
                 try:
@@ -382,7 +384,7 @@ class EnergyMQTTClient:
                     logger.info(
                         f"  Energia Attiva Totale [kWh]: {energy:.2f} ({status})"
                     )
-                except:
+                except Exception:
                     pass
 
             if not success:
@@ -396,7 +398,7 @@ class EnergyMQTTClient:
 
                 health_monitor = get_health_monitor()
                 health_monitor.record_error()
-            except:
+            except Exception:
                 pass
 
     def _subscribe_topics(self) -> None:
@@ -474,7 +476,8 @@ class EnergyMQTTClient:
             # Usa il metodo esistente per sottoscrivere ai nuovi topic
             self._subscribe_topics()
 
-            # logger.info(f"Subscriptions refreshed. Active topics: {len(self._subscribed_topics)}")
+            # logger.info(f"Subscriptions refreshed. Active topics: "
+            #             f"{len(self._subscribed_topics)}")
 
         except Exception as e:
             logger.error(f"Error refreshing subscriptions: {e}")
@@ -596,7 +599,9 @@ class EnergyMQTTClient:
                             and self._client.is_connected() != self._is_connected
                         ):
                             logger.warning(
-                                f"Stato connessione discrepante: client={self._client.is_connected()}, internal={self._is_connected}"
+                                f"Stato connessione discrepante: "
+                                f"client={self._client.is_connected()}, "
+                                f"internal={self._is_connected}"
                             )
                     time.sleep(5)
                 except Exception as e:
@@ -627,7 +632,7 @@ def init_mqtt_connection():
 
         # Cerca una configurazione broker attiva
         try:
-            from ..models import MQTTBroker
+            # from ..models import MQTTBroker  # Already imported at top
 
             mqtt_broker = MQTTBroker.objects.filter(is_active=True).first()
 

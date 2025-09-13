@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, List, Optional, Tuple, Type
 
-from ..models.device import DeviceConfiguration
+# from ..models.device import DeviceConfiguration
 from .base.device import BaseDevice
 from .vendors.shelly.em import ShellyEM
 from .vendors.shelly.em_3 import ShellyEM3
@@ -190,7 +190,7 @@ def register_devices():
         DeviceRegistry.register(ShellyPlusPlugS)  # Smart plug con misurazione
 
         # logger.info("Dispositivi registrati con successo")
-    except Exception as e:
+    except Exception:
         # logger.error(f"Errore durante la registrazione dei dispositivi: {e}")
         raise
 

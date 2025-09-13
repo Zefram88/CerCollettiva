@@ -40,7 +40,8 @@ class InitialSetupView(FormView):
 
         if has_superuser:
             logger.warning(
-                f"Tentativo di accesso al setup con superuser già esistente da IP {request.META.get('REMOTE_ADDR')}"
+                f"Tentativo di accesso al setup con superuser già esistente "
+                f"da IP {request.META.get('REMOTE_ADDR')}"
             )
             messages.info(request, "Il sistema è già configurato.")
             return redirect("core:dashboard")
@@ -75,7 +76,8 @@ class InitialSetupView(FormView):
             # Messaggio di successo
             messages.success(
                 self.request,
-                f"Benvenuto {user.first_name}! Il sistema è stato configurato con successo.",
+                f"Benvenuto {user.first_name}! Il sistema è stato configurato "
+                f"con successo.",
             )
 
             # Log dettagli CER se creata

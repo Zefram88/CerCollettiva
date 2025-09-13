@@ -4,7 +4,7 @@ import logging
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+# from django.db.models import Sum
 from django.http import JsonResponse
 from django.utils import timezone
 

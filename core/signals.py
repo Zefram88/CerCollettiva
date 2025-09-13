@@ -31,5 +31,6 @@ def track_gaudi_changes(sender, instance, **kwargs):
 
     if changes:
         logger.info(
-            f"Modifiche dati Gaudì per impianto {instance.pod_code}: {', '.join(changes)}"
+            f"Modifiche dati Gaudì per impianto {instance.pod_code}: "
+            f"{', '.join(changes)}"
         )

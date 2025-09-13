@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _  # noqa: F401
 
 
 class MemberProfile(models.Model):
@@ -150,17 +150,20 @@ class MemberProfile(models.Model):
             if not self.fiscal_code:
                 raise ValidationError(
                     {
-                        "fiscal_code": "Il codice fiscale è obbligatorio per le persone fisiche."
+                        "fiscal_code": "Il codice fiscale è obbligatorio per le "
+                        "persone fisiche."
                     }
                 )
             if len(self.fiscal_code) != 16:
                 raise ValidationError(
                     {
-                        "fiscal_code": "Il codice fiscale per persone fisiche deve essere di 16 caratteri."
+                        "fiscal_code": "Il codice fiscale per persone fisiche deve "
+                        "essere di 16 caratteri."
                     }
                 )
 
-        # Validazioni per aziende/associazioni (solo se il profilo è già stato inizializzato)
+        # Validazioni per aziende/associazioni (solo se il profilo è già stato
+        # inizializzato)
         elif self.user.legal_type in ["BUSINESS", "ASSOCIATION"] and self.pk:
             if not all([self.vat_number, self.legal_name, self.pec]):
                 missing_fields = []
@@ -172,14 +175,16 @@ class MemberProfile(models.Model):
                     missing_fields.append("PEC")
                 raise ValidationError(
                     {
-                        "vat_number": f'Campi obbligatori mancanti: {", ".join(missing_fields)}'
+                        "vat_number": f'Campi obbligatori mancanti: '
+                        f'{", ".join(missing_fields)}'
                     }
                 )
 
             if self.vat_number and len(self.vat_number) != 11:
                 raise ValidationError(
                     {
-                        "vat_number": "La Partita IVA deve essere di 11 caratteri numerici."
+                        "vat_number": "La Partita IVA deve essere di 11 caratteri "
+                        "numerici."
                     }
                 )
 
@@ -188,7 +193,8 @@ class MemberProfile(models.Model):
             if not self.legal_name:
                 raise ValidationError(
                     {
-                        "legal_name": "La denominazione è obbligatoria per gli enti pubblici."
+                        "legal_name": "La denominazione è obbligatoria per gli "
+                        "enti pubblici."
                     }
                 )
 
