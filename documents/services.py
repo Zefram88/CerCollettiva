@@ -1,10 +1,10 @@
 # documents/services.py
 import hashlib
 
-import pdfkit
-
 from django.core.files import File
 from django.template.loader import render_to_string
+
+import pdfkit
 
 from .models import Document
 

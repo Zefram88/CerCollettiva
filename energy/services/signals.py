@@ -9,15 +9,15 @@ from django.core.cache import cache
 from django.db.models.signals import post_delete, post_migrate, post_save
 from django.dispatch import receiver
 
-# from django.utils import timezone
-
-from energy.models import (
+from energy.models import (  # EnergyMeasurement,
     DeviceConfiguration,
     DeviceMeasurement,
-    # EnergyMeasurement,
     MQTTBroker,
 )
 from energy.mqtt.client import get_mqtt_client
+
+# from django.utils import timezone
+
 
 logger = logging.getLogger("energy.mqtt")
 

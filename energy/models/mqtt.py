@@ -1,10 +1,10 @@
 # energy/models/mqtt.py
-from encrypted_model_fields.fields import EncryptedCharField
-
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+
+from encrypted_model_fields.fields import EncryptedCharField
 
 
 class MQTTBroker(models.Model):

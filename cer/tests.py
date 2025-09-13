@@ -3,12 +3,14 @@
 # from unittest.mock import MagicMock, patch  # Unused
 
 from django.contrib.auth import get_user_model
+
 # from django.core.exceptions import ValidationError  # Unused
 # from django.db import IntegrityError  # Unused
 from django.test import Client, TransactionTestCase
 from django.urls import reverse
 
 from core.main_models import CERConfiguration
+
 # from core.main_models import CERMembership  # Unused
 # from core.main_models import Plant  # Unused
 from users.models import CustomUser

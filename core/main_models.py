@@ -6,16 +6,6 @@ import time
 import uuid
 from datetime import timedelta
 
-import paho.mqtt.client as mqtt
-
-# from geopy.exc import GeocoderServiceError, GeocoderTimedOut
-from geopy.geocoders import Nominatim
-
-# Import lazy per evitare dipendenze circolari
-# from energy.models import DeviceMeasurement
-# from energy.models import DeviceConfiguration
-# from paho.mqtt.client import CallbackAPIVersion
-
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -26,6 +16,18 @@ from django.db.models import Max, Sum
 # Monitoring models will be imported at the end of this file
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+import paho.mqtt.client as mqtt
+
+# from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+from geopy.geocoders import Nominatim
+
+# Import lazy per evitare dipendenze circolari
+# from energy.models import DeviceMeasurement
+# from energy.models import DeviceConfiguration
+# from paho.mqtt.client import CallbackAPIVersion
+
+
 
 logger = logging.getLogger(__name__)
 

@@ -2,12 +2,12 @@
 import logging
 from typing import Optional, Tuple
 
+from django.conf import settings
+from django.core.cache import cache
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
-from django.conf import settings
-from django.core.cache import cache
 
 logger = logging.getLogger("geocoding")
 

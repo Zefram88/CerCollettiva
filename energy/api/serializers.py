@@ -1,7 +1,7 @@
 # energy/api/serializers.py
-from rest_framework import serializers
-
 from django.core.exceptions import ValidationError
+
+from rest_framework import serializers
 
 # from ..devices.models import DeviceConfiguration
 from core.models import Plant  # Import diretto da core
@@ -19,12 +19,10 @@ from ..models import (
     EnergyAggregate,
     EnergyMeasurement,
 )
-from ..validators import (
+from ..validators import (  # EnergyAPIValidationMixin,; EnergyValidationMixin,
     API_REQUEST_VALIDATOR,
     DEVICE_VALIDATOR,
     MEASUREMENT_VALIDATOR,
-    # EnergyAPIValidationMixin,
-    # EnergyValidationMixin,
 )
 
 

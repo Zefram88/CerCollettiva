@@ -6,12 +6,10 @@ import time
 from collections import deque
 from queue import Queue
 
-# from typing import Optional
-
-import paho.mqtt.client as mqtt
-
 # from django.conf import settings
 from django.utils import timezone
+
+import paho.mqtt.client as mqtt
 
 from ..models import MQTTBroker
 
@@ -20,6 +18,13 @@ from .core import get_mqtt_service
 
 # from .core import MQTTMessage
 from .manager import DeviceManager
+
+# from typing import Optional
+
+
+
+
+
 
 logger = logging.getLogger("energy.mqtt")
 

@@ -1,8 +1,9 @@
 from django.db import models
 
+from .base import BaseTimestampModel
+
 # from django.utils import timezone
 
-from .base import BaseTimestampModel
 
 
 class TopicMetrics(BaseTimestampModel):

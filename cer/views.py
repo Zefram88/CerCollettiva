@@ -9,8 +9,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-# from django.views.decorators.http import require_http_methods  # Unused
-
 from core.main_models import CERConfiguration, CERMembership, Plant
 from users.models import CustomUser
 
@@ -23,6 +21,10 @@ from .forms import (
     ProfileCompletionForm,
 )
 from .models import MemberProfile
+
+# from django.views.decorators.http import require_http_methods  # Unused
+
+
 
 logger = logging.getLogger(__name__)
 

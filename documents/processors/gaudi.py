@@ -5,9 +5,9 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, Optional
 
-import PyPDF2
-
 from django.utils.translation import gettext as _
+
+import PyPDF2
 
 logger = logging.getLogger(__name__)
 

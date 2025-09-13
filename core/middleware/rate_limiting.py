@@ -5,12 +5,13 @@ Implements protection against DoS attacks and abuse
 
 import logging
 
-# import time
-
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.utils.deprecation import MiddlewareMixin
+
+# import time
+
 
 logger = logging.getLogger(__name__)
 

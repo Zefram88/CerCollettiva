@@ -1,9 +1,10 @@
 # energy/services/device_manager.py
 from typing import Any, Dict, Optional
 
+from ..models.device import Device
+
 # from django.core.cache import cache
 
-from ..models.device import Device
 
 # from ..models.device import DeviceType
 

@@ -4,12 +4,13 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-# from django.utils import timezone
-
 from ...devices.base.device import MeasurementData
 from ...mqtt.router import MessageContext
 from ...services.measurement_service import MeasurementService
 from .base import BaseHandler
+
+# from django.utils import timezone
+
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +155,6 @@ class MeasurementHandler(BaseHandler):
             from django.db import transaction
 
             # # from django.utils import timezone  # Already imported at top
-
             from ...models import DeviceMeasurement
 
             current_timestamp = event.timestamp

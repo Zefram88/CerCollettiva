@@ -9,12 +9,13 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
-# from django.views.generic import CreateView, FormView
-
 from ..forms import CERMembershipForm
 from ..models import CERConfiguration, CERMembership, Plant, PlantMeasurement
 from .base import BaseCERView
 from .mixins.gdpr import GDPRConsentRequiredMixin
+
+# from django.views.generic import CreateView, FormView
+
 
 logger = logging.getLogger(__name__)
 

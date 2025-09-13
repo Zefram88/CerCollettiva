@@ -14,18 +14,15 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 
-# from django.views.decorators.http import require_http_methods
-
 # Import monitoring models
-from core.main_models import (
+from core.main_models import (  # ABTestingParticipation,; AccessibilityAudit,; DeviceInfo,; UserFeedback,
     ABTestingEvent,
-    # ABTestingParticipation,
-    # AccessibilityAudit,
-    # DeviceInfo,
     PerformanceMetrics,
     SessionData,
-    # UserFeedback,
 )
+
+# from django.views.decorators.http import require_http_methods
+
 
 logger = logging.getLogger(__name__)
 

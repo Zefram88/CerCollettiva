@@ -5,10 +5,11 @@ import logging
 # from datetime import datetime
 from typing import Any, Optional
 
-# from typing import Dict
-
 from ....models import DeviceMeasurement
 from ...base.meter import BaseMeter
+
+# from typing import Dict
+
 
 # Configurazione del logger
 logger = logging.getLogger(__name__)

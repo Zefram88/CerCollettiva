@@ -7,13 +7,14 @@ from typing import List, Optional, Tuple
 from django.conf import settings
 from django.core.cache import cache
 
+# from ..models import EnergyInterval
+from .energy_calculator_aggregations import EnergyCalculatorAggregations
+
 # from django.db import transaction
 # from django.db.models import Sum
 # from django.db.models import F
 # from django.utils import timezone
 
-# from ..models import EnergyInterval
-from .energy_calculator_aggregations import EnergyCalculatorAggregations
 
 logger = logging.getLogger("energy.calculator.cache")
 

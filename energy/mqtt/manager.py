@@ -17,8 +17,6 @@ from django.core.cache import cache
 # from django.db.models import Q
 from django.utils import timezone
 
-# from core.main_models import Plant
-
 from ..devices.base.device import BaseDevice
 
 # from ..devices.base.device import MeasurementData
@@ -30,6 +28,11 @@ from .core import get_mqtt_service
 from .event_bus import Event, get_event_bus
 from .handlers.device import DeviceHandler
 from .handlers.measurement import MeasurementHandler
+
+# from core.main_models import Plant
+
+
+
 
 # from .router import get_mqtt_router
 

@@ -4,12 +4,14 @@ import logging
 # from datetime import datetime
 from typing import Any, List, Optional
 
-# from typing import Dict
-
 from django.utils import timezone
 
 from ...base.device import MeasurementData
 from .base import BaseShellyMeter
+
+# from typing import Dict
+
+
 
 # Configurazione del logger
 logger = logging.getLogger(__name__)

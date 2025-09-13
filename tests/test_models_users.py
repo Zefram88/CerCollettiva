@@ -170,10 +170,10 @@ class CustomUserModelTest(TransactionTestCase):
 
     def test_user_groups(self):
         """Test user group relationships"""
-        from django.contrib.auth.models import Group
-
         # Use unique identifier to avoid conflicts
         import time
+
+        from django.contrib.auth.models import Group
         unique_id = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
             username=f"testuser{unique_id}",

@@ -9,11 +9,12 @@ from django.core.cache import cache
 # from django.db import transaction
 from django.db.models import Sum
 
+from ..models import EnergyInterval
+from .energy_calculator_measurements import EnergyCalculatorMeasurements
+
 # from django.db.models import F
 # from django.utils import timezone
 
-from ..models import EnergyInterval
-from .energy_calculator_measurements import EnergyCalculatorMeasurements
 
 logger = logging.getLogger("energy.calculator")
 

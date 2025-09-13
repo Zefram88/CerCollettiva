@@ -2,15 +2,15 @@
 import logging
 from datetime import timedelta
 
+from django.db.models import Max, Sum
+from django.utils import timezone
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-
-from django.db.models import Max, Sum
-from django.utils import timezone
 
 from core.main_models import Plant
 from energy.models import DeviceConfiguration, DeviceMeasurement

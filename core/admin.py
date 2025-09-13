@@ -15,11 +15,6 @@ from django.contrib import admin
 from django.template.response import TemplateResponse
 from django.urls import path
 
-# from django.urls import reverse
-# from django.utils.decorators import method_decorator
-# from django.utils.html import format_html
-# from django.utils.translation import gettext_lazy as _
-
 from core.main_models import (
     Alert,
     CERConfiguration,
@@ -39,6 +34,14 @@ from energy.models import DeviceConfiguration, DeviceMeasurement, MQTTBroker
 from users.models import CustomUser
 
 from .views import CerDashboardView
+
+# from django.urls import reverse
+# from django.utils.decorators import method_decorator
+# from django.utils.html import format_html
+# from django.utils.translation import gettext_lazy as _
+
+
+
 
 # Register your models here.
 

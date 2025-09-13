@@ -1,8 +1,4 @@
 # core/forms.py
-from crispy_forms.bootstrap import FormActions
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, Column, Div, Field, Layout, Row, Submit
-
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
@@ -12,15 +8,18 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
+from crispy_forms.bootstrap import FormActions
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML, Column, Div, Field, Layout, Row, Submit
+
 from .models import CERConfiguration, CERMembership, Plant, PlantDocument
-from .validators import (
+from .validators import (  # ConditionalRequiredValidator,
     EMAIL_UNIQUE_VALIDATOR,
     IMAGE_VALIDATOR,
     PDF_VALIDATOR,
     POD_VALIDATOR,
     POWER_VALIDATOR,
     USERNAME_UNIQUE_VALIDATOR,
-    # ConditionalRequiredValidator,
     ValidationMixin,
 )
 

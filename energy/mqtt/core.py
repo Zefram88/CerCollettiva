@@ -10,16 +10,19 @@ from datetime import datetime
 # from datetime import timedelta
 from typing import Any, Dict, Optional
 
-# from typing import List
-
-import paho.mqtt.client as mqtt
-
 # from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
+import paho.mqtt.client as mqtt
+
 from ..devices.registry import DeviceRegistry
 from ..models import DeviceConfiguration
+
+# from typing import List
+
+
+
 
 # from ..models import DeviceMeasurement, MQTTAuditLog
 

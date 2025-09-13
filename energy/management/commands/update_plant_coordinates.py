@@ -2,10 +2,10 @@
 
 import time
 
+from django.core.management.base import BaseCommand
+
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
-
-from django.core.management.base import BaseCommand
 
 from core.main_models import Plant
 

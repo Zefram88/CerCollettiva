@@ -5,8 +5,6 @@ Health check and monitoring views for CerCollettiva
 import time
 from datetime import datetime, timedelta
 
-import psutil
-
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
@@ -15,6 +13,8 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import never_cache
+
+import psutil
 
 
 class HealthStatus:

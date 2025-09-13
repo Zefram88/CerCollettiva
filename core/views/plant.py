@@ -15,7 +15,6 @@ from energy.models import DeviceConfiguration
 
 from ..forms import PlantForm, PlantMQTTConfigForm
 from ..models import CERConfiguration, Plant
-
 from .base import BasePlantView
 
 logger = logging.getLogger(__name__)

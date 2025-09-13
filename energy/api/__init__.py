@@ -1,10 +1,9 @@
 from .mixins import BulkCreateMixin, CachedRetrieveMixin, DeviceOnlineCheckMixin
 from .pagination import CustomPageNumberPagination
 from .permissions import IsDeviceOwner, IsStaffOrReadOnly, ReadOnly
-from .serializers import (
+from .serializers import (  # EnergyAggregateRequestSerializer,
     DeviceConfigurationSerializer,
     DeviceMeasurementSerializer,
-    # EnergyAggregateRequestSerializer,
     EnergyAggregateSerializer,
     EnergyMeasurementSerializer,
     PlantSerializer,
