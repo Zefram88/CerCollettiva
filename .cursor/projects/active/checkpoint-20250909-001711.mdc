@@ -1,0 +1,33 @@
+# Checkpoint S001 - Inizio Story
+
+## Timestamp
+- **Data**: 2025-09-09 00:17:11
+- **Story**: S001-refactor-api-validation
+- **Slice**: 1/5 (Analisi Pattern Esistenti)
+
+## Stato Attuale
+- **EPIC**: EPIC-003-migration-energy-app (READY → IN_PROGRESS)
+- **Story**: S001-refactor-api-validation (READY → IN_PROGRESS)
+- **Slice**: Slice 1 - Analisi Pattern Esistenti (PENDING → IN_PROGRESS)
+
+## Obiettivo Slice 1
+Identificare pattern comuni di validazione in 3 file:
+1. `energy/api/serializers.py` - validazione device data
+2. `energy/views/api.py` - validazione measurement data  
+3. `energy/mqtt/handlers/device.py` - validazione payload MQTT
+
+## File Coinvolti
+- `energy/api/serializers.py` (45 LOC)
+- `energy/views/api.py` (30 LOC)
+- `energy/mqtt/handlers/device.py` (25 LOC)
+
+## Prossimi Passi
+1. Analizzare pattern di validazione esistenti
+2. Identificare duplicazioni
+3. Documentare pattern comuni
+4. Preparare design per validator unificato
+
+## Metriche Target
+- **Duplicazioni**: 3 → 0
+- **Coverage**: 0% → 85%
+- **LOC**: 90 → 60 (-30 LOC)

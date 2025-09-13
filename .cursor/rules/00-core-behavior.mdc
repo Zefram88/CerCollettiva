@@ -1,0 +1,70 @@
+---
+description: Comportamento di default, protocollo chat e formato standardizzato integrato
+alwaysApply: true
+---
+
+# CORE BEHAVIOR — comportamento, protocollo e formato integrato
+
+## Protocollo di chat (testo semplice)
+- Se il messaggio inizia con "OBIETTIVO:" → rispondi in formato **THINK** (nessuna modifica ai file)
+- Se il messaggio è "OK" → esegui il thin-slice e rispondi con **PATCH REPORT**
+- Se il messaggio inizia con "REVISE " → rifai **THINK** applicando il vincolo (es. "REVISE p95<=1200ms")
+- Se il messaggio è "SPLIT" → proponi 2–4 thin-slice sequenziali (formato THINK per ciascuno)
+- Se il messaggio è "STOP" → interrompi
+
+## Formato obbligatorio (testo semplice)
+Produci SEMPRE uno dei due formati, in testo semplice:
+
+### THINK (pensa, non modificare file)
+- Contesto (≤5 righe):
+- Assunzioni (max 5):
+- Rischi (max 5):
+- Thin-slice (1 passo, reversibile):
+  - Obiettivo:
+  - File coinvolti (≤3):
+  - Limiti: ≤3 file o ≤120 LOC
+  - Metriche numeriche: coverage≥80%, p95/budget se rilevante
+- Riuso proposto (3 candidati con @Code) + scelta:
+- Go/No-Go (criteri numerici):
+- Chiedimi (max 3 domande bloccanti):
+
+### PATCH REPORT (dopo OK)
+- Modifiche (file, sintesi diff):
+- Comandi eseguiti (con esito):
+- Test: unit/e2e = pass/fail, coverage = XX%
+- Evidenze: percorsi log/diff salvati
+- Riuso: candidati valutati e decisione (reuse/adapt/new) con 1 riga di motivo
+- Prossimo passo (piccolo e reversibile):
+
+## Metodologia di pensiero critico
+- **Output SOLO FORMATO THINK** (vedi sopra):
+- Max 3 domande, ordinate per impatto; se mancano risposte → assunzioni esplicite
+- Ogni thin-slice deve essere reversibile e misurabile
+- **Ricerca documentazione**: Sempre richiedere ricerca KB/internet/documentazione ufficiale quando necessario
+- **Fonti primarie**: Documentazione ufficiale tools in uso come fonte primaria
+
+## Analisi obbligatoria
+- PRIMA di qualsiasi azione: leggi errore COMPLETO
+- Identifica causa ROOT (non sintomi)
+- Se causa non chiara → chiedi chiarimenti
+- Se causa chiara → proponi fix DIRETTO
+- NON creare workaround o soluzioni parziali
+
+## Paletti fondamentali
+- Rispetta sempre 01-guards (≤3 file o ≤120 LOC, test, evidenze)
+- Applica 04-reuse: nella sezione "Riuso proposto" cita 3 candidati con @Code e motiva
+- Prima di ogni azione: brainstorming obbligatorio con analisi critica
+
+## Sistema step intelligente
+- **Analisi contestuale**: AI analizza situazione e crea senso
+- **Suggerimenti proattivi**: Step logici basati su contesto specifico
+- **Piena libertà creativa**: Nessuna sequenza rigida o prescrittiva
+- **Flessibilità totale**: Adattamento dinamico a situazioni diverse
+- **Intelligenza proattiva**: AI propone step appropriati per contesto
+
+## Integrazione con regole
+- **01-guards**: Limiti assoluti non negoziabili
+- **03-quality**: Standard qualità e testing
+- **04-reuse**: Priorità riuso codice esistente
+- **05-governance**: Per lavoro complesso usa EPIC/Story/Slice
+- **06-reasoning**: Per brainstorming strutturato usa HRM

@@ -1,0 +1,51 @@
+---
+description: Standard di qualità del codice, best practices Python e baseline di testing
+alwaysApply: true
+---
+
+# QUALITY — standard di qualità e testing
+
+## Standard di qualità del codice
+- **Chiarezza > furbizia**: Funzioni corte, nomi espliciti, zero duplicazioni evitabili
+- **Architettura**: Dipendenze verso l'interno (app->use_case->domain->ports). Adapters fuori dal core
+- **DRY**: Fattorizza duplicazioni >2 volte (o motiva nel commento "why")
+- **Errori gestiti**: Niente eccezioni silenziose o print; log strutturato e messaggi utili
+- **Passi piccoli e reversibili**: Coerente con 01-guards
+
+## Regole minime
+- Funzioni pubbliche: max ~40 LOC, 1 responsabilità chiara
+- Niente side-effect non dichiarati; I/O confinato negli adapters
+- Contratti espliciti: schema dati (Pydantic) per IO esterni (API/LLM/DB)
+- Naming: verbi per funzioni, sostantivi per classi, snake_case per Python
+- Commenti brevi "perché", non "cosa"; docstring dove serve (API pubbliche)
+- No TODO permanenti: se lasci TODO, apri task dedicata (id nel commento)
+
+## Best practices Python
+- **Type hints**: Obbligatori per funzioni pubbliche
+- **Logging**: JSON strutturato, no print
+- **Error handling**: Cattura specifica, mai swallow
+- **Import organization**: Standard PEP 8
+- **Code style**: Black formatter, isort per imports
+- **Documentation**: Docstring per API pubbliche
+
+## Baseline di testing
+- **Coverage ≥80%**: Obbligatorio
+- **NIENTE MOCK. ZERO TOLLERANZA. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK.**: Test reali con connessioni vere
+- Se test fallisce → fixa il sistema
+- Mock = fallimento del sistema
+- **Tipologie**: Unit, Contract, E2E/Smoke
+- **Ogni nuova funzione pubblica**: almeno 1 test unit + (se tocca IO) 1 contract
+- **Trasformazioni**: aggiungi 1 property-based semplice (range/enums/idempotenza)
+- **LLM**: output **solo JSON** validato (Pydantic) + 3 golden test
+- **Test riproducibili**: seed fisso se random
+
+## Copertura e tipologie
+- **Unit**: dominio/trasformazioni pure (veloci)
+- **Contract**: validazione IO esterni (API provider/LLM) contro schemi Pydantic
+- **E2E/Smoke**: 1 flusso minimo "happy path" per feature
+
+## Integrazione con regole
+- **01-guards**: Testing rispetta limiti coverage ≥80%
+- **00-core-behavior**: Standard qualità rispettano formato THINK/PATCH
+- **04-reuse**: Riuso codice rispetta standard qualità
+- **05-governance**: EPIC/Story includono test coverage

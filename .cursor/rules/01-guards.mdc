@@ -1,0 +1,61 @@
+---
+description: Guard-rails non negoziabili e gestione errori con fail-fast e rollback
+alwaysApply: true
+---
+
+# GUARDS — limiti assoluti e gestione errori
+
+## Limiti assoluti (non negoziabili)
+- Patch piccole: ≤ 3 file **o** ≤ 120 LOC per richiesta; se superi → **CHIEDI CONFERMA** e attendi risposta esplicita
+
+## Sistema di conferma per modifiche estese
+- SE modifiche >3 file: STOP e chiedi conferma esplicita
+- Template conferma: "⚠️ MODIFICA RICHIEDE X FILE. Motivo: [causa]. Confermi? (SI/NO)"
+- Attendi risposta esplicita prima di procedere
+- Se NO → Trova alternativa ≤3 file
+- Se SI → Procedi con documentazione completa
+- NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. NIENTE MOCK. (mock:forbidden). ZERO TOLLERANZA
+- Prima di dire "fatto": **diff per file**, **comandi + exit code**, **test con coverage ≥ 80%**, **log smoke**
+- Verifiche automatiche: `rules:check` (CI job) per validare:
+  - THINK/PATCH presenti
+  - ≤3 file e ≤120 LOC
+  - coverage ≥80%
+- Max 3 domande; poi **assunzioni esplicite** + passo **reversibile**
+- Nessuna azione irreversibile: niente cancellazioni distruttive, niente scrittura fuori repo, niente segreti in log (redazione obbligatoria)
+- Autonomia default **L1** (niente merge autonomo). Richiedi approvazione esplicita per refactor ampi o azioni esterne
+
+## Gestione errori obbligatoria
+- **Fail-fast**: al primo errore → esito INCOMPLETE
+- **Log diagnostico minimo**: timestamp, errore, file, riga
+- **Istruzioni rollback**: comandi per tornare indietro
+- **Retry policy**: max 3 tentativi con backoff
+- **Error recovery**: identificare causa root e fix specifico
+
+## Formato errore
+```
+❌ ERRORE: [timestamp] [file:riga] [tipo]
+📝 CAUSA: [descrizione specifica]
+🔄 ROLLBACK: [comandi per tornare indietro]
+🔁 RETRY: [prossimo tentativo]
+```
+
+## Esempi gestione errori
+- Database error → rollback migration
+- Template error → restore template
+- Import error → check dependencies
+- Test failure → check test data
+
+## Override controllato
+- **"Refactor Window"**: Max 1 slice per Story può superare 120 LOC con:
+  - Motivo tecnico documentato
+  - Analisi rischio specifica
+  - Piano rollback dettagliato
+  - Label PR `override/refactor-window`
+- **Scadenza**: Override valido max 7 giorni
+- **Approvazione**: Richiede approvazione esplicita Tech Lead
+
+## Integrazione con regole
+- **00-core-behavior**: Protocollo chat rispetta limiti assoluti
+- **03-quality**: Standard qualità rispettano guard-rails
+- **04-reuse**: Performance rispetta limiti assoluti
+- **05-governance**: EPIC/Story rispettano WIP limits

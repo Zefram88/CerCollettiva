@@ -1,0 +1,54 @@
+---
+description: Priorità al riuso del codice esistente, sicurezza, osservabilità e performance
+alwaysApply: false
+---
+
+# REUSE — riuso codice, sicurezza e performance
+
+## Priorità al riuso del codice esistente
+- **3 candidati**: Cerca sempre nella codebase
+- **@Code**: Cita file esistenti con @
+- **Motivazione**: Spiega reuse/adapt/new
+- Prima di proporre nuovo codice, cerca nella codebase e mostra 3 candidati con @Code
+- Nel **THINK** e nel **PATCH REPORT** spiega in 1 riga perché scegli reuse/adapt/new
+
+## Riuso forzato
+- PRIMA di scrivere qualsiasi riga: cerca codice esistente
+- Se esiste → adatta
+- Se non esiste → crea riutilizzabile
+- Duplicazione = fallimento
+
+## Sicurezza
+- **Segreti solo via env/secret manager**: Vietato loggarli
+- **Input validation**: Su tutti gli endpoint pubblici
+- **Error policy**: Messaggi dettagliati solo in dev; generici in prod
+- **Autenticazione**: JWT per API, OAuth2 per servizi esterni
+- **Autorizzazione**: RBAC con ruoli granulari
+
+## Osservabilità
+- **Log strutturato JSON**: Con correlation-id propagato
+- **Metriche RED minime**: request_rate, error_rate, duration_p95 per API/provider/LLM
+- **Health/ready endpoints**: Distinguono dipendenze critiche → /readyz
+- **Tracing**: Distributed tracing per richieste cross-service
+- **Alerting**: Soglie configurabili per metriche critiche
+
+## Performance (budget di base, adattabili per progetto)
+- **API p95 ≤ 200 ms**: Per endpoint interno
+- **Provider p95 ≤ 800 ms**: Per servizi esterni
+- **LLM p95 ≤ 1500 ms**: Per chiamate AI
+- **Memory**: No carichi "full dataset" se superano budget; preferisci streaming/chunk
+- **Cache**: Dove idempotente (chiave = input normalizzato); scadenza esplicita
+- **Database**: Query ottimizzate, indici appropriati, connection pooling
+
+## Proprietà & Performance
+- **API critiche**: Benchmark p95 obbligatorio nel PATCH REPORT per endpoint pubblici
+- **Proprietà invarianti**: Test di proprietà per trasformazioni pure (idempotenza, commutatività)
+- **Performance budget**: p95 ≤ 200ms API, ≤ 800ms Provider, ≤ 1500ms LLM
+- **Memory budget**: No carichi "full dataset" se superano budget, preferire streaming/chunk
+
+## Integrazione con regole
+- **00-core-behavior**: Riuso proposto nel formato THINK
+- **01-guards**: Performance rispetta limiti assoluti
+- **00-core-behavior**: Riuso documentato nel PATCH REPORT
+- **03-quality**: Riuso rispetta standard qualità
+- **05-governance**: EPIC/Story includono metriche performance

@@ -1,0 +1,90 @@
+---
+description: HYBRID REASONING MODE (HRM) — dal brainstorming all'esecuzione con flusso IDEATE→CONVERGE→FREEZE→EXECUTE
+alwaysApply: false
+---
+
+# REASONING — modalità ibrida per lavoro complesso
+
+## Scopo
+Modalità ibrida che gestisce il flusso completo da brainstorming a esecuzione: IDEATE→CONVERGE→FREEZE→EXECUTE. HRM funge da ponte tra conversazione libera e artefatti strutturati, garantendo tracciabilità e governance del processo decisionale.
+
+## Fasi & Timebox
+- **IDEATE (8–10 minuti)**: Brainstorming libero con tag strutturati [FACT][REQ][RISK][HYP][OPEN] max 10 righe
+- **CONVERGE (5–7 minuti)**: Sintesi in EPIC Draft + Story Map con dipendenze e capacità
+- **FREEZE (2–3 minuti)**: Creazione file EPIC definitivo in `.cursor/projects/` con riferimento Ideation Log
+- **EXECUTE (variabile)**: Esecuzione Story→Slice seguendo 05-governance
+
+## Metriche & Soglie
+- **ClarityScore ≥ 3**: Chiarezza obiettivi e scope (1=confuso, 5=cristallino)
+- **FeasibilityScore ≥ 3**: Fattibilità tecnica e temporale (1=impossibile, 5=triviale)
+- **SpecCompleteness ≥ 90%**: Completezza specifiche tecniche (percentuale requisiti coperti)
+- **DoR EPIC = true**: Tutte le condizioni Definition of Ready soddisfatte
+
+## Output attesi
+- **Ideation Log**: Documento testuale con timestamp, tag strutturati, decisioni prese
+- **EPIC Draft**: Bozza EPIC con Story Map e metriche preliminari
+- **Riferimento Ideation Log**: Hash/ID del log incorporato nell'EPIC finale
+
+## Anti-deriva
+- **Timebox rigoroso**: Ogni fase ha limite temporale, superato → REVISE mirato
+- **[OPEN] > 3 dopo CONVERGE**: Se questioni aperte > 3 → REVISE mirato su punti critici
+- **Override "OVERRIDE:"**: Comando speciale con scadenza ≤ 7 giorni per casi eccezionali
+- **Gate di qualità**: Ogni fase deve soddisfare metriche minime per procedere
+
+## Protocollo (comandi)
+- **IDEATE**: Avvia brainstorming con tag strutturati, timebox 8-10 min
+- **CONVERGE**: Sintetizza in EPIC Draft + Story Map, timebox 5-7 min
+- **FREEZE**: Crea file EPIC definitivo, timebox 2-3 min
+- **PLAN**: Genera Story Map dettagliata da EPIC (05-governance)
+- **STORY/SPLIT/OK/REVISE**: Esegue slicing seguendo 05-governance
+- **ACCEPT**: Valida Gate EPIC e chiude ciclo (05-governance)
+
+## Esempi pratici
+### IDEATE output:
+```
+[FACT] <Fatto 1>: <Descrizione>
+[REQ] <Requisito 1>: <Descrizione>
+[RISK] <Rischio 1>: <Descrizione>
+[HYP] <Ipotesi 1>: <Descrizione>
+[OPEN] <Domanda aperta 1>?
+```
+
+### CONVERGE output:
+```
+EPIC Draft: <Titolo Progetto>
+Story Map:
+- S001: <Obiettivo Story 1> (<n> file, <n> LOC)
+- S002: <Obiettivo Story 2> (<n> file, <n> LOC)
+- S003: <Obiettivo Story 3> (<n> file, <n> LOC)
+- S004: <Obiettivo Story 4> (<n> file, <n> LOC)
+```
+
+### FREEZE output:
+```
+File: .cursor/projects/EPIC-<id>-<titolo>.mdc
+Riferimento: [EPIC-<id>] Ideation Log hash: <hash>
+```
+
+## Gestione errori
+- **IDEATE timeout**: Se > 10 min → CONVERGE forzato con [OPEN] tag
+- **CONVERGE incompleto**: Se metriche < soglie → REVISE mirato
+- **FREEZE fallito**: Se file EPIC non creato → rollback a CONVERGE
+- **EXECUTE bloccato**: Se Story non eseguibile → SPLIT automatico
+
+## Tracciabilità
+- **Ideation Log**: Timestamp, partecipanti, decisioni, rationale
+- **EPIC Hash**: Hash del file EPIC per versioning
+- **Story Trace**: Collegamento Story → Slice → PATCH REPORT
+
+## Comandi di emergenza
+- **OVERRIDE**: Bypassa limiti temporali con scadenza 7 giorni
+- **ROLLBACK**: Torna alla fase precedente mantenendo log
+- **EMERGENCY**: Interrompe HRM e passa a modalità diretta
+- **RESET**: Cancella sessione HRM e riparte da IDEATE
+
+## Integrazione con le regole esistenti
+- **01-guards**: HRM produce artefatti che rispettano limiti ≤3 file, ≤120 LOC, test ≥80%
+- **00-core-behavior**: Formato testuale obbligatorio, no JSON in tutti gli output, metodologia THINK integrata in fase CONVERGE
+- **03-quality**: Standard qualità rispettati in tutti gli artefatti HRM
+- **04-reuse**: Riuso prioritario del codice esistente in fase EXECUTE
+- **05-governance**: HRM genera EPIC che rispetta governance e struttura

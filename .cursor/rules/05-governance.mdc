@@ -1,0 +1,339 @@
+---
+description: Governance del lavoro complesso, slicing playbook e verifiche automatiche CI
+alwaysApply: false
+---
+
+# GOVERNANCE — EPIC planning, slicing e CI verification
+
+## EPIC PLANNING — governance del lavoro grande
+
+### Contesto
+Gli EPIC rappresentano unità di lavoro significative che richiedono coordinamento multi-slice, gestione dipendenze e governance strutturata. Ogni EPIC deve essere scomposto in Story mappate con capacità e metriche definite, seguendo la sequenza logica di implementazione.
+
+### Obiettivi & Metriche
+- **Performance**: p95 ≤ target specificato per endpoint/operazione (default: API 200ms, Provider 800ms, LLM 1500ms)
+- **Error Budget**: ≤ 5% error rate per operazioni critiche, ≤ 1% per operazioni core
+- **Coverage**: Unit test ≥ 80%, E2E test ≥ 70% per flussi critici
+- **SLA/SLO**: Disponibilità ≥ 99.5% per servizi core, tempo di risposta p95 ≤ target
+- **Osservabilità**: Metriche RED (Request rate, Error rate, Duration) per ogni componente
+
+### WIP & Governance
+- **Max 1 EPIC attivo**: Solo un EPIC può essere in stato "IN_PROGRESS" contemporaneamente
+- **Max 2 Story attive**: Massimo 2 Story per EPIC possono essere in stato "IN_PROGRESS"
+- **Precedenza regole**: 01-guards > 05-governance > 00-core-behavior > 03-quality
+
+### Definition of Ready (EPIC)
+Tutte le condizioni devono essere vere:
+- **[OPEN] ≤ 3**: Massimo 3 questioni aperte dopo fase CONVERGE di HRM
+- **Metriche definite**: Tutte le metriche di performance, coverage e SLA specificate
+- **Story Map con cap**: Story Map completa con capacità file/LOC per ogni Story
+- **Gate EPIC dichiarato**: Criteri di accettazione EPIC definiti e misurabili
+
+### Definition of Done (EPIC)
+- **Gate soddisfatto**: Tutti i criteri del Gate EPIC verificati e documentati
+- **PR collegati**: Tutti i Pull Request collegati all'EPIC con riferimenti cross-link
+- **Report finale**: Documento di 1 pagina con risultati vs target, lezioni apprese, metriche finali
+
+## SLICING PLAYBOOK — EPIC → Story → Slice
+
+### Principi
+- **Story = 1–3 Slice**: Ogni Story deve essere scomposta in 1-3 Slice logiche e atomiche
+- **Ogni Slice**: ≤3 file modificati, ≤120 LOC (test esclusi), test coverage ≥80%
+- **Reuse-first**: Ogni Slice deve identificare 3 candidati @Code per riuso/adattamento
+- **Atomicità**: Ogni Slice deve essere completabile indipendentemente
+- **Reversibilità**: Ogni Slice deve avere piano di rollback definito
+
+### Template Story
+```
+# STORY: S<id> <titolo>
+## Obiettivo
+Descrizione chiara dell'obiettivo della Story in ≤3 righe.
+
+## Ricerca Documentazione
+- [ ] Documentazione ufficiale: [fonte] consultata
+- [ ] KB/Internet: [fonte] ricercata
+- [ ] Best practices: [fonte] analizzate
+- [ ] Esempi reali: [fonte] studiati
+
+## DoR Story (Definition of Ready)
+- [ ] Dipendenze Story precedenti soddisfatte
+- [ ] Slice 1-3 definite con scope e limiti
+- [ ] Metriche minime specificate per ogni Slice
+- [ ] Piano di rollback per ogni Slice
+- [ ] Documentazione ufficiale consultata
+
+## Slice 1-3
+### Slice 1: <nome>
+- **File coinvolti**: ≤3 file
+- **LOC limite**: ≤120 LOC (test esclusi)
+- **Test coverage**: ≥80%
+- **Candidati riuso**: 3 @Code identificati
+- **Documentazione**: [fonte] consultata
+
+## DoD Story (Definition of Done)
+- [ ] Tutti i Slice completati con PATCH REPORT
+- [ ] Test coverage ≥80% per ogni Slice
+- [ ] Metriche performance rispettate
+- [ ] Documentazione aggiornata
+- [ ] PR collegati con riferimenti cross-link
+- [ ] Documentazione ufficiale consultata e applicata
+```
+
+### Slice — Regole
+- **THINK conciso**: Applica 00-core-behavior in formato compatto
+- **Go/No-Go numerici**: Criteri misurabili per accettazione (p95, coverage, error rate)
+- **OK → PATCH REPORT**: Comando OK esegue thin-slice e genera PATCH REPORT completo
+- **SPLIT se cap superati**: Se Slice supera 3 file o 120 LOC → SPLIT automatico
+- **Rollback indicato**: Ogni PATCH REPORT deve includere comandi di rollback
+- **Ricerca documentazione**: Sempre consultare documentazione ufficiale tools in uso
+
+## CI VERIFICATION — verifiche automatiche
+
+### CI Job: rules:check
+Verifiche obbligatorie:
+1. JSON deprecato assente (grep -r "JSON" .cursor/rules/)
+2. THINK/PATCH presenti (grep -r "THINK\|PATCH" .cursor/rules/)
+3. ≤3 file e ≤120 LOC (controllo dimensioni patch)
+4. coverage ≥80% (pytest --cov)
+
+### Script di verifica
+```bash
+#!/bin/bash
+echo "🔍 Verifica regole..."
+
+# 1. Controllo JSON deprecato
+if grep -r "JSON" .cursor/rules/; then
+  echo "❌ JSON deprecato trovato"
+  exit 1
+fi
+
+# 2. Controllo THINK/PATCH
+if ! grep -r "THINK\|PATCH" .cursor/rules/; then
+  echo "❌ THINK/PATCH mancanti"
+  exit 1
+fi
+
+# 3. Controllo dimensioni
+# (implementare controllo file/LOC)
+
+# 4. Controllo coverage
+pytest --cov --cov-fail-under=80
+
+echo "✅ Tutte le verifiche passate"
+```
+
+## Comandi
+- **EPIC**: Crea nuovo EPIC con template completo in `.cursor/projects/`, valida DoR
+- **PLAN**: Genera Story Map e sequenza basata su dipendenze e capacità
+- **STORY**: Crea nuovo Story con template completo, valida DoR
+- **SPLIT**: Divide Slice che supera limiti in 2-3 Slice più piccole
+- **ACCEPT**: Valida Gate EPIC, genera report finale, chiude EPIC
+- **INIT**: Crea intera struttura EPIC + Stories da prompt completo (10-15 min)
+- **MIGRATE**: Standardizza progetto esistente al set di regole (15-20 min)
+
+## Separazione File
+- **Regole**: File in `.cursor/rules/` (sistema operativo)
+- **Progetti**: File EPIC/Story in `.cursor/projects/` (lavoro specifico)
+- **Nessuna contaminazione**: Le regole non devono contenere file di progetto
+
+## Struttura Progetti
+```
+.cursor/projects/
+├── EPIC-<id>-<titolo>.mdc          # EPIC principale
+├── EPIC-<id>-<titolo>/
+│   ├── S001-<titolo-story>.mdc     # Story 1
+│   ├── S002-<titolo-story>.mdc     # Story 2
+│   ├── S003-<titolo-story>.mdc     # Story 3
+│   └── logs/
+│       ├── ideation-<hash>.log     # Log fase IDEATE
+│       ├── converge-<hash>.log     # Log fase CONVERGE
+│       └── freeze-<hash>.log       # Log fase FREEZE
+└── active/                         # Lavoro in corso
+    ├── current-epic -> ../EPIC-<id>-<titolo>.mdc
+    ├── current-story -> ../EPIC-<id>-<titolo>/S<id>-<titolo>.mdc
+    └── checkpoint-<timestamp>.mdc  # Checkpoint per ripristino
+```
+
+## Ripristino Lavoro
+### Comandi di ripristino
+- **RESUME**: Riprende dall'ultimo checkpoint salvato
+- **CHECKPOINT**: Crea snapshot dello stato corrente
+- **STATUS**: Mostra stato EPIC/Story attivi e checkpoint disponibili
+
+### Checkpoint automatici
+- **Dopo ogni Slice completato**: Checkpoint automatico con timestamp
+- **Prima di ogni Story**: Checkpoint pre-Story con dipendenze verificate
+- **Dopo ogni fase HRM**: Checkpoint post-IDEATE/CONVERGE/FREEZE
+
+### Ripristino da punto specifico
+```bash
+# Ripristina da checkpoint specifico
+RESUME checkpoint-20241201-143022.mdc
+
+# Ripristina ultimo checkpoint
+RESUME
+
+# Mostra checkpoint disponibili
+STATUS
+```
+
+## COMANDI AVANZATI — Creazione Struttura Completa
+
+### INIT — Creazione da Prompt
+**Sintassi**: `INIT <descrizione-progetto>`
+
+**Processo automatico**:
+1. **Analisi prompt** (2-3 min): Estrae requisiti, vincoli, dipendenze
+2. **Generazione EPIC** (3-4 min): Crea EPIC con DoR completo
+3. **Story Mapping** (4-5 min): Scompone in 3-5 Story logiche
+4. **Creazione struttura** (2-3 min): File EPIC + Stories + cartelle
+5. **Validazione DoR** (1-2 min): Verifica tutti i requisiti
+
+**Template prompt richiesto**:
+```
+INIT <titolo-progetto>
+
+CONTESTO:
+- <descrizione del problema/obiettivo>
+- <vincoli tecnici/architetturali>
+- <dipendenze esterne>
+
+REQUISITI:
+- <requisito funzionale 1>
+- <requisito funzionale 2>
+- <requisito non funzionale 1>
+
+METRICHE:
+- <performance target>
+- <coverage target>
+- <SLA/SLO target>
+
+GATE EPIC:
+- <criterio accettazione 1>
+- <criterio accettazione 2>
+```
+
+**Output INIT**:
+```
+✅ EPIC-<id>-<titolo>.mdc creato
+✅ Cartella EPIC-<id>-<titolo>/ creata
+✅ S001-<story1>.mdc creata
+✅ S002-<story2>.mdc creata
+✅ S003-<story3>.mdc creata
+✅ logs/ cartella creata
+✅ active/ links creati
+✅ DoR validato: <n> requisiti soddisfatti
+```
+
+### MIGRATE — Standardizzazione Progetto Esistente
+**Sintassi**: `MIGRATE <path-progetto>`
+
+**Processo automatico**:
+1. **Analisi codebase** (5-7 min): Scansione file, dipendenze, architettura
+2. **Identificazione componenti** (3-4 min): Moduli, API, database, frontend
+3. **Mappatura a Stories** (4-5 min): Raggruppa funzionalità in Story logiche
+4. **Creazione EPIC** (2-3 min): EPIC che descrive lo stato attuale
+5. **Piano migrazione** (3-4 min): Roadmap per standardizzazione
+
+**Output MIGRATE**:
+```
+✅ Analisi codebase completata: <n> file, <n> LOC
+✅ Componenti identificati: <lista>
+✅ EPIC-<id>-migration-<progetto>.mdc creato
+✅ S001-<refactor1>.mdc creata
+✅ S002-<refactor2>.mdc creata
+✅ S003-<refactor3>.mdc creata
+✅ Piano migrazione: <roadmap>
+```
+
+**Criteri MIGRATE**:
+- **Identifica duplicazioni**: Codice duplicato → Story di refactoring
+- **Rileva violazioni**: Violazioni regole → Story di compliance
+- **Mappa dipendenze**: Dipendenze circolari → Story di architettura
+- **Valuta test**: Coverage < 80% → Story di testing
+- **Analizza performance**: Bottleneck → Story di ottimizzazione
+
+### Comandi di Progressione
+
+#### COMPLETE — Completamento Story/EPIC
+**Sintassi**: `COMPLETE [STORY|EPIC]`
+
+**Processo automatico**:
+1. **Validazione DoD**: Verifica criteri di completamento
+2. **Aggiornamento stato**: Story/EPIC → COMPLETED
+3. **Checkpoint automatico**: Salvataggio stato finale
+4. **Progressione automatica**: Passa alla Story/EPIC successiva
+5. **Aggiornamento active/**: Links simbolici aggiornati
+
+**Output COMPLETE STORY**:
+```
+✅ S001-<story-name>.mdc → COMPLETED
+✅ DoD validato: <n>/<n> criteri soddisfatti
+✅ Checkpoint salvato: checkpoint-<timestamp>.mdc
+✅ Progressione: S002-<next-story>.mdc → ACTIVE
+✅ active/current-story.mdc aggiornato
+```
+
+**Output COMPLETE EPIC**:
+```
+✅ EPIC-<id>-<titolo>.mdc → COMPLETED
+✅ Tutte le Story completate: <n>/<n>
+✅ EPIC Gate validato: <n>/<n> criteri soddisfatti
+✅ Checkpoint finale salvato: epic-complete-<timestamp>.mdc
+✅ Prossimo EPIC: EPIC-<next-id>-<titolo>.mdc → ACTIVE
+```
+
+#### NEXT — Passaggio Manuale
+**Sintassi**: `NEXT [STORY|EPIC]`
+
+**Processo manuale**:
+1. **Stato attuale**: Mostra Story/EPIC corrente
+2. **Stato successivo**: Mostra Story/EPIC successiva
+3. **Conferma**: Richiede conferma per il passaggio
+4. **Aggiornamento**: Links simbolici aggiornati
+
+**Output NEXT STORY**:
+```
+📊 STATO ATTUALE
+Story attiva: S001-<story-name> (IN_PROGRESS)
+Slice completati: <n>/<n>
+Prossima Story: S002-<next-story> (READY)
+
+Confermi passaggio a S002? (y/n)
+```
+
+#### STATUS — Stato Dettagliato
+**Sintassi**: `STATUS [DETAILED]`
+
+**Output STATUS**:
+```
+📊 STATO LAVORO ATTUALE
+EPIC attivo: EPIC-<id>-<titolo>
+Story attiva: S001-<story-name>
+Slice attivo: Slice <n>/<n>
+
+Progresso EPIC: <n>% (<n>/<n> Story completate)
+Progresso Story: <n>% (<n>/<n> Slice completati)
+
+Prossimi passi:
+1. Completare Slice <n>: <descrizione-slice>
+2. COMPLETE STORY → S002-<next-story>
+3. Continuare con S002 Slice 1: <descrizione-slice>
+
+Checkpoint disponibili:
+- checkpoint-<timestamp>.mdc (ultimo)
+- checkpoint-<timestamp>.mdc
+```
+
+## Sistema suggerimenti proattivi
+- **Analisi contestuale**: AI analizza stato attuale e propone step logici
+- **Suggerimenti intelligenti**: Step appropriati basati su situazione specifica
+- **Flessibilità creativa**: Nessuna sequenza rigida, adattamento dinamico
+- **Intelligenza proattiva**: AI anticipa bisogni e propone soluzioni
+- **Creatività prioritaria**: Problem-solving innovativo e flessibile
+
+## Integrazione con regole
+- **01-guards**: Rispetta limiti ≤3 file, ≤120 LOC per slice, test coverage ≥80%
+- **03-quality**: Standard qualità rispettati in EPIC/Story/Slice
+- **00-core-behavior**: Metodologia THINK applicata a livello EPIC/Slice
+- **04-reuse**: Riuso prioritario del codice esistente

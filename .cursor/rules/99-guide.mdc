@@ -1,0 +1,389 @@
+---
+description: Guida completa al sistema di regole Cursor ristrutturato
+alwaysApply: false
+---
+
+# GUIDA COMPLETA AL SISTEMA REGOLE CURSOR
+
+## PANORAMICA
+Le 7 regole principali formano un sistema integrato per garantire qualità, sicurezza e verificabilità di ogni interazione con l'AI. Il sistema è strutturato in 2 layer: fondamentali (00, 01, 03) e avanzate (04, 05, 06), più documentazione (99).
+
+## LE 7 REGOLE PRINCIPALI
+
+### LAYER 1: FONDAMENTALI (Sempre attive)
+
+#### 00. CORE BEHAVIOR (00-core-behavior.mdc)
+**RUOLO**: Comportamento di default e protocollo chat
+- Protocollo chat: OBIETTIVO, OK, REVISE, SPLIT, STOP
+- Metodologia THINK integrata con formato PATCH REPORT
+- Sistema step intelligente con analisi contestuale e suggerimenti proattivi
+- Ricerca documentazione obbligatoria per tools in uso (KB/internet/documentazione ufficiale)
+- Piena libertà creativa e flessibilità totale
+
+#### 01. GUARDS (01-guards.mdc)
+**RUOLO**: Limiti assoluti e gestione errori
+- Patch piccole: ≤3 file o ≤120 LOC
+- NIENTE MOCK: Zero tolleranza per test falsi
+- Gestione errori con fail-fast e rollback
+- Autonomia L1: Richiede approvazione per azioni esterne
+- Override controllato: "Refactor Window" con approvazione esplicita Tech Lead
+- Verifiche automatiche: `rules:check` (CI job)
+
+#### 03. QUALITY (03-quality.mdc)
+**RUOLO**: Standard qualità e testing
+- Best practices Python con type hints
+- Coverage ≥80% obbligatorio
+- NIENTE MOCK: Test reali con connessioni vere
+- Tipologie: Unit, Contract, E2E/Smoke
+- LLM: output solo JSON validato (Pydantic) + 3 golden test
+- Property-based testing per trasformazioni pure
+
+### LAYER 2: AVANZATE (Attivate quando necessario)
+
+#### 04. REUSE (04-reuse.mdc)
+**RUOLO**: Riuso codice, sicurezza e performance
+- 3 candidati @Code per riuso prioritario
+- Sicurezza: Segreti via env, input validation, JWT/OAuth2, RBAC
+- Osservabilità: Log JSON, metriche RED, health endpoints, tracing
+- Performance: p95 ≤ 200ms API, ≤ 800ms Provider, ≤ 1500ms LLM
+- API critiche: Benchmark p95 obbligatorio nel PATCH REPORT
+- Proprietà invarianti: Test di proprietà per trasformazioni pure
+
+#### 05. GOVERNANCE (05-governance.mdc)
+**RUOLO**: Governance lavoro complesso
+- EPIC planning con Story Map e dipendenze
+- Slicing playbook: Story → Slice atomiche
+- CI verification con rules:check
+- WIP limits: Max 1 EPIC attivo, max 2 Story attive
+- Comandi progressione: COMPLETE, NEXT, STATUS
+- Template Story completo con "Ricerca Documentazione"
+- Comandi avanzati: INIT, MIGRATE per creazione struttura completa
+- Sistema suggerimenti proattivi con analisi contestuale
+
+#### 06. REASONING (06-reasoning.mdc)
+**RUOLO**: Modalità ibrida per lavoro complesso
+- Flusso: IDEATE→CONVERGE→FREEZE→EXECUTE
+- Timebox: 8-10 min IDEATE, 5-7 min CONVERGE, 2-3 min FREEZE
+- Metriche: ClarityScore ≥3, FeasibilityScore ≥3, SpecCompleteness ≥90%
+- Anti-deriva: [OPEN] ≤3, override con scadenza 7 giorni
+- Comandi di emergenza: OVERRIDE, ROLLBACK, EMERGENCY, RESET
+- Tracciabilità: Ideation Log, EPIC Hash, Story Trace
+
+#### 99. GUIDE (99-guide.mdc)
+**RUOLO**: Documentazione sistema (questo file)
+- Guida completa con esempi pratici
+- Riferimento rapido comandi
+- Gerarchia di precedenza
+- Intersezioni tra regole
+
+## PROTOCOLLO DI COMUNICAZIONE
+
+### COMANDI BREVI (Layer 1)
+- **"OBIETTIVO:"** → Risposta in formato THINK
+- **"OK"** → Esecuzione e PATCH REPORT
+- **"REVISE [vincolo]"** → Rianalisi con vincolo
+- **"SPLIT"** → Proposta di thin-slice multipli
+- **"STOP"** → Interruzione
+
+### COMANDI AVANZATI (Layer 2)
+- **"IDEATE"** → Avvia brainstorming strutturato (8-10 min)
+- **"CONVERGE"** → Sintetizza in EPIC Draft + Story Map (5-7 min)
+- **"FREEZE"** → Crea file EPIC definitivo in `.cursor/projects/` (2-3 min)
+- **"PLAN"** → Genera Story Map dettagliata da EPIC
+- **"STORY"** → Crea nuovo Story con template
+- **"ACCEPT"** → Valida Gate EPIC e chiude ciclo
+- **"COMPLETE"** → Completa Story/EPIC e passa al successivo (automatico)
+- **"NEXT"** → Passa manualmente al prossimo Story/EPIC
+- **"STATUS"** → Mostra stato EPIC/Story attivi e checkpoint (30 sec)
+- **"INIT"** → Crea intera struttura EPIC + Stories da prompt (10-15 min)prima di passare oltre, anagrafica dovrebbe IDEATE essere condizionata dal tipo di entità che si sta registrando, se persona, società, ente... che ne dici?
+- **"MIGRATE"** → Standardizza progetto esistente al set di regole (15-20 min)
+
+### COMANDI DI EMERGENZA (HRM)
+- **"OVERRIDE"** → Bypassa limiti temporali con scadenza 7 giorni
+- **"ROLLBACK"** → Torna alla fase precedente mantenendo log
+- **"EMERGENCY"** → Interrompe HRM e passa a modalità diretta
+- **"RESET"** → Cancella sessione HRM e riparte da IDEATE
+
+## FLUSSO OPERATIVO
+
+### FLUSSO SEMPLICE (Lavoro standard)
+1. **THINK** (analisi critica)
+2. **Cerca 3 candidati** (@Code)
+3. **Thin-slice** (1 passo reversibile)
+4. **Esecuzione** (se OK)
+5. **PATCH REPORT** (verifiche complete)
+
+### FLUSSO AVANZATO (Lavoro complesso)
+1. **IDEATE** (brainstorming strutturato con tag [FACT][REQ][RISK][HYP][OPEN])
+2. **CONVERGE** (sintesi in EPIC Draft + Story Map)
+3. **FREEZE** (creazione file EPIC definitivo in `.cursor/projects/`)
+4. **PLAN** (generazione Story Map dettagliata)
+5. **STORY** (creazione Story con template)
+6. **Slice** (esecuzione slice atomiche)
+7. **ACCEPT** (validazione Gate EPIC)
+
+## GERARCHIA DI PRECEDENZA
+
+```
+01-guards (SICUREZZA) > 05-governance (GOVERNANCE) > 00-core-behavior (METODO) > 03-quality (QUALITÀ)
+```
+
+**MOTIVAZIONE:**
+1. **01-guards**: Limiti assoluti non negoziabili
+2. **05-governance**: Governance del lavoro complesso
+3. **00-core-behavior**: Metodologia di pensiero
+4. **03-quality**: Standard di qualità e testing
+
+## INTERSEZIONI CRITICHE
+
+### **01-guards ↔ 05-governance**
+- **Limiti assoluti**: ≤3 file, ≤120 LOC per slice
+- **NIENTE MOCK**: Test reali obbligatori
+- **Override controllato**: "Refactor Window" con approvazione esplicita
+
+### **00-core-behavior ↔ 06-reasoning**
+- **Formato THINK**: Integrato in fase CONVERGE di HRM
+- **PATCH REPORT**: Richiesto per ogni slice
+- **Sistema step intelligente**: Analisi contestuale e suggerimenti proattivi
+- **Metodologia THINK**: Integrata in HRM
+- **Thin-slice**: Implementato per ogni slice
+- **Max 3 domande**: [OPEN] ≤3 dopo CONVERGE
+
+## ESEMPI PRATICI
+
+### ESEMPIO 1: RICHIESTA SEMPLICE
+```
+Utente: OBIETTIVO: Aggiungere validazione email nel form di registrazione
+
+AI: # THINK (pensa, non modificare file)
+- Contesto: Aggiungere validazione email nel form di registrazione per migliorare la qualità dei dati
+- Assunzioni: Form esistente, campo email presente, validazione lato client
+- Rischi: Rottura UX esistente, conflitti con validazione server
+- Thin-slice (1 passo, reversibile):
+  - Obiettivo: Aggiungere validazione email lato client
+  - File coinvolti (≤3): forms.py, template.html, static/js/validation.js
+  - Limiti: ≤3 file o ≤120 LOC
+  - Metriche numeriche: coverage≥80%, test validazione
+- Riuso proposto (3 candidati con @Code) + scelta:
+  1. @forms.py - Estendere form esistente
+  2. @static/js/validation.js - Aggiungere validazione client
+  3. @templates/registration.html - Modificare template
+  - Scelta: Estendere form esistente (reuse)
+- Go/No-Go (criteri numerici): Form funzionante, test passano, coverage ≥80%
+- Chiedimi (max 3 domande bloccanti):
+  1. Preferisci validazione lato client o server?
+  2. Vuoi messaggi di errore personalizzati?
+  3. Deve essere compatibile con browser vecchi?
+
+Utente: OK
+
+AI: # PATCH REPORT (dopo OK)
+- Modifiche (file, sintesi diff):
+  - forms.py: Aggiunta validazione email con regex
+  - static/js/validation.js: Aggiunta validazione client-side
+  - templates/registration.html: Aggiunto feedback visivo
+- Comandi eseguiti (con esito):
+  - python manage.py test forms.tests.EmailValidationTest (exit code: 0)
+  - pytest --cov forms.py (coverage: 85%)
+- Test: unit/e2e = pass/pass, coverage = 85%
+- Evidenze: percorsi log/diff salvati
+  - logs/email_validation_test.log
+  - diffs/forms_email_validation.diff
+- Riuso: candidati valutati e decisione (reuse/adapt/new) con 1 riga di motivo
+  - Reuse: Esteso form esistente per mantenere coerenza
+- Prossimo passo (piccolo e reversibile):
+  - Testare validazione in browser diversi
+```
+
+### ESEMPIO 2: LAVORO COMPLESSO
+```
+Utente: IDEATE
+
+AI: [FACT] Sistema attuale: Django + PostgreSQL + MQTT
+[REQ] Nuova API REST per dispositivi IoT
+[RISK] Rate limiting provider MQTT
+[HYP] Implementazione con Django REST Framework
+[OPEN] Autenticazione OAuth2 vs JWT?
+
+Utente: CONVERGE
+
+AI: EPIC Draft: IoT Device Management API
+Story Map:
+- S001: Setup Django REST Framework (2 file, 100 LOC)
+- S002: Device models e serializers (3 file, 120 LOC)
+- S003: API endpoints CRUD (3 file, 110 LOC)
+- S004: Autenticazione JWT (2 file, 80 LOC)
+
+Utente: FREEZE
+
+AI: File: .cursor/projects/EPIC-<id>-<titolo>.mdc
+Riferimento: [EPIC-<id>] Ideation Log hash: <hash>
+```
+
+### Esempio INIT
+```
+Utente: INIT <Titolo Progetto>
+
+CONTESTO:
+- <Descrizione sistema>
+- <Integrazione database>
+- <API/Frontend stack>
+- <Conformità normative>
+
+REQUISITI:
+- <Requisito funzionale 1>
+- <Requisito funzionale 2>
+- <Requisito funzionale 3>
+- <Requisito funzionale 4>
+
+METRICHE:
+- Performance: <metriche performance>
+- Coverage: <metriche test>
+- SLA: <metriche disponibilità>
+
+GATE EPIC:
+- <Criterio accettazione 1>
+- <Criterio accettazione 2>
+- <Criterio accettazione 3>
+
+AI: ✅ EPIC-<id>-<titolo>.mdc creato
+✅ Cartella EPIC-<id>-<titolo>/ creata
+✅ S001-<story1>.mdc creata
+✅ S002-<story2>.mdc creata
+✅ S003-<story3>.mdc creata
+✅ S004-<story4>.mdc creata
+✅ DoR validato: <n> requisiti soddisfatti
+```
+
+### Esempio MIGRATE
+```
+Utente: MIGRATE <path-progetto>/
+
+AI: ✅ Analisi codebase completata: <n> file, <n> LOC
+✅ Componenti identificati: <lista componenti>
+✅ EPIC-<id>-migration-<progetto>.mdc creato
+✅ S001-<refactor1>.mdc creata
+✅ S002-<refactor2>.mdc creata
+✅ S003-<refactor3>.mdc creata
+✅ S004-<refactor4>.mdc creata
+✅ Piano migrazione: <n> Story, <n> Slice, <n> settimane
+
+Problemi identificati:
+❌ Coverage test: <n>% (target: ≥80%)
+❌ Duplicazioni: <n> pattern di <tipo>
+❌ Performance: <n> <problema performance>
+```
+
+### Esempio RESUME/STATUS
+```
+Utente: STATUS
+
+AI: 📊 STATO LAVORO ATTUALE
+EPIC attivo: EPIC-<id>-<titolo>
+Story attiva: S001-<story-name>
+Checkpoint disponibili:
+- checkpoint-<timestamp>.mdc (ultimo)
+- checkpoint-<timestamp>.mdc
+- checkpoint-<timestamp>.mdc
+
+Utente: RESUME
+
+AI: ✅ Ripristino da checkpoint-<timestamp>.mdc
+✅ EPIC-<id>-<titolo> ripristinato
+✅ S001-<story-name> ripristinata
+✅ Stato: Pronto per continuare Slice <n>
+```
+
+### Esempio COMPLETE/NEXT
+```
+Utente: COMPLETE STORY
+
+AI: ✅ S001-<story-name>.mdc → COMPLETED
+✅ DoD validato: <n>/<n> criteri soddisfatti
+✅ Checkpoint salvato: checkpoint-<timestamp>.mdc
+✅ Progressione: S002-<next-story>.mdc → ACTIVE
+✅ active/current-story.mdc aggiornato
+
+Utente: NEXT STORY
+
+AI: 📊 STATO ATTUALE
+Story attiva: S002-<story-name> (IN_PROGRESS)
+Slice completati: <n>/<n>
+Prossima Story: S003-<next-story> (READY)
+
+Confermi passaggio a S003? (y/n)
+```
+
+## VERIFICHE AUTOMATICHE
+
+### CI JOB: rules:check
+- JSON deprecato assente
+- THINK/PATCH presenti
+- ≤3 file e ≤120 LOC
+- coverage ≥80%
+
+### GESTIONE ERRORI
+- **Fail-fast**: Primo errore → INCOMPLETE
+- **Rollback**: Comandi per tornare indietro
+- **Retry**: Max 3 tentativi con backoff
+
+## GARANZIE
+
+- **Niente azioni irreversibili**
+- **Test reali (no mock)**
+- **Verifiche complete prima di "fatto"**
+- **Riuso prioritario del codice esistente**
+- **Gestione errori con rollback**
+- **Governance strutturata per lavoro complesso**
+- **Modalità ibrida per brainstorming→esecuzione**
+
+## RIFERIMENTO RAPIDO
+
+| Comando | Azione | Formato Risposta |
+|---------|--------|------------------|
+| OBIETTIVO: | Analisi | THINK |
+| OK | Esecuzione | PATCH REPORT |
+| REVISE [vincolo] | Rianalisi | THINK |
+| SPLIT | Divisione | THINK |
+| STOP | Interruzione | - |
+| IDEATE | Brainstorming | Ideation Log |
+| CONVERGE | Sintesi | EPIC Draft |
+| FREEZE | Creazione | EPIC File in `.cursor/projects/` |
+| PLAN | Story Map | Story Map |
+| STORY | Template | Story Template |
+| ACCEPT | Validazione | Gate Report |
+
+### COMANDI RIPRISTINO
+
+| Comando | Azione | Formato Risposta |
+|---------|--------|------------------|
+| RESUME | Ripristino | Checkpoint Restore |
+| CHECKPOINT | Snapshot | Checkpoint Created |
+| STATUS | Stato | Active Work Status |
+
+### COMANDI PROGRESSIONE
+
+| Comando | Azione | Formato Risposta |
+|---------|--------|------------------|
+| COMPLETE STORY | Completamento Story | Story → COMPLETED, auto-next |
+| COMPLETE EPIC | Completamento EPIC | EPIC → COMPLETED, auto-next |
+| NEXT STORY | Passaggio manuale Story | Conferma → Story successiva |
+| NEXT EPIC | Passaggio manuale EPIC | Conferma → EPIC successiva |
+
+### COMANDI CREAZIONE
+
+| Comando | Azione | Formato Risposta |
+|---------|--------|------------------|
+| INIT | Creazione | Struttura EPIC + Stories |
+| MIGRATE | Standardizzazione | Piano Migrazione |
+
+### COMANDI DI EMERGENZA
+
+| Comando | Azione | Formato Risposta |
+|---------|--------|------------------|
+| OVERRIDE | Bypassa limiti | Override con scadenza 7 giorni |
+| ROLLBACK | Torna indietro | Rollback a fase precedente |
+| EMERGENCY | Interrompe HRM | Passa a modalità diretta |
+| RESET | Cancella sessione | Riparte da IDEATE |
+
+**Le 7 regole formano un sistema integrato che garantisce qualità, sicurezza e verificabilità di ogni interazione, con governance avanzata per lavoro complesso.**

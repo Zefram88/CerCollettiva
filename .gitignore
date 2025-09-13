@@ -160,8 +160,6 @@ yarn-error.log*
 *.backup
 backups/
 
-# Cursor IDE
-.cursor/
 
 # Archive files
 *.7z

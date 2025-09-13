@@ -1,0 +1,59 @@
+---
+description: Controllo automatico, validazione e penalità per violazioni delle regole
+alwaysApply: true
+---
+
+# ENFORCEMENT — controllo e penalità
+
+## Checkpoint automatico
+- PRIMA di ogni modifica: conta file da modificare
+- SE >3 → STOP e chiedi conferma
+- SE ≤3 → procedi
+
+## Validazione obbligatoria
+- DOPO ogni modifica: test coverage ≥80%
+- Tutti i test passano
+- Sistema funziona end-to-end
+- Se fallisce → rollback automatico
+
+## Penalità per violazioni
+- Violazione regola → STOP immediato
+- Rollback modifiche
+- Riparti da analisi
+- Zero tolleranza per bypass
+
+## Template di conferma
+```
+⚠️ MODIFICA RICHIEDE X FILE
+Motivo: [causa specifica]
+File coinvolti: [lista]
+Rischio: [basso/medio/alto]
+Confermi? (SI/NO)
+```
+
+## Checklist obbligatoria
+PRIMA di ogni azione:
+□ Errore letto completamente?
+□ Causa root identificata?
+□ Codice esistente cercato?
+□ Fix diretto proposto?
+□ Test reali pianificati?
+
+## Protocollo di stop
+SE violi regola:
+1. STOP immediato
+2. "❌ VIOLAZIONE REGOLA: [regola violata]"
+3. Rollback modifiche
+4. Riparti da analisi
+
+## Regole di emergenza
+- Se bloccato → Chiedi aiuto
+- Se errore → Rollback e riprova
+- Se confuso → Rileggi le regole
+- Se tentato di bypassare → STOP
+
+## Integrazione con regole
+- **01-guards**: Controllo automatico file count
+- **00-core-behavior**: Validazione analisi obbligatoria
+- **03-quality**: Verifica test reali
+- **04-reuse**: Controllo riuso forzato
