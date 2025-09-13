@@ -113,7 +113,7 @@ class OnboardingViewsTest(TransactionTestCase):
         profile.province = "RM"
         profile.save()
 
-        self.client.login(username="testuser", password="testpass123")
+        self.client.login(username=self.user.username, password="testpass123")
         response = self.client.get(reverse("cer:onboarding_wizard"))
         self.assertEqual(response.status_code, 302)  # Redirect al primo step
 
@@ -133,10 +133,10 @@ class OnboardingViewsTest(TransactionTestCase):
         profile.province = "RM"
         profile.save()
 
-        self.client.login(username="testuser", password="testpass123")
+        self.client.login(username=self.user.username, password="testpass123")
 
         data = {
-            "legal_type": "PERSON",
+            "legal_type": "PRIVATE",
             "profit_type": "NON_PROFIT",
             "fiscal_code": "RSSMRA80A01H501U",
             "first_name": "Mario",
@@ -160,4 +160,4 @@ class OnboardingViewsTest(TransactionTestCase):
         profile = self.user.member_profile
         profile.refresh_from_db()  # Ricarica dal database
         self.assertIn("step_1", profile.onboarding_data)
-        self.assertEqual(profile.onboarding_data["step_1"]["legal_type"], "PERSON")
+        self.assertEqual(profile.onboarding_data["step_1"]["legal_type"], "PRIVATE")
