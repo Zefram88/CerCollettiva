@@ -5,9 +5,9 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Max, Sum
+from django.db.models import Count
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.generic import TemplateView  # Import TemplateView
 
@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 @login_required
 def total_power_data(request):
     """
-    Recupera e formatta i dati di potenza per il grafico, con supporto per vari intervalli temporali
-    e aggregazione dei dati.
+    Recupera e formatta i dati di potenza per il grafico, con supporto per
+    vari intervalli temporali e aggregazione dei dati.
     """
     try:
         now = timezone.localtime()
@@ -169,10 +169,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             logger.info(f"\nPlant: {plant.name} (ID: {plant.id})")
             logger.info(f"Timestamp threshold: {time_threshold}")
             plant_devices = plant.devices.all()
-            logger.info(f"\nDispositivi configurati per impianto:")
+            logger.info("\nDispositivi configurati per impianto:")
 
             for device in plant_devices:
-                logger.info(f"\nDevice Config:")
+                logger.info("\nDevice Config:")
                 logger.info(f"- Device ID: {device.device_id}")
                 logger.info(f"- Topic template: {device.mqtt_topic_template}")
                 logger.info(f"- Is active: {device.is_active}")
@@ -181,14 +181,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 last_measurement = measurement_map.get(device.id)
 
                 if last_measurement:
-                    logger.info(f"  Ultima misurazione:")
+                    logger.info("  Ultima misurazione:")
                     logger.info(f"  - Timestamp: {last_measurement.timestamp}")
                     logger.info(f"  - Power: {last_measurement.power}W")
                     total_power += last_measurement.power
                 else:
                     logger.info("  Nessuna misurazione recente trovata")
 
-        logger.info(f"\nRiepilogo potenza:")
+        logger.info("\nRiepilogo potenza:")
         logger.info(
             f"Potenza totale impianto: {total_power}W ({total_power/1000:.2f}kW)"
         )
@@ -212,7 +212,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
             total_active = len(active_devices)
 
-            logger.info(f"\nStatistiche dispositivi:")
+            logger.info("\nStatistiche dispositivi:")
             logger.info(f"- Totali: {len(all_plant_devices)}")
             logger.info(f"- Attivi: {total_active}")
             logger.info(f"- Online: {online_count}")

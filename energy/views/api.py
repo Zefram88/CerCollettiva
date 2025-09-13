@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from django.db.models import Avg, Count, Max, Min
+from django.db.models import Max, Sum
 from django.utils import timezone
 
 from core.main_models import Plant
@@ -18,12 +18,10 @@ from energy.models import DeviceConfiguration, DeviceMeasurement
 from ..api.filters import get_filters
 from ..api.mixins import BulkCreateMixin, CachedRetrieveMixin, DeviceOnlineCheckMixin
 from ..api.pagination import CustomPageNumberPagination
-from ..api.permissions import IsDeviceOwner, IsStaffOrReadOnly, ReadOnly
+from ..api.permissions import IsDeviceOwner, IsStaffOrReadOnly
 from ..api.serializers import (
     DeviceConfigurationSerializer,
     DeviceMeasurementSerializer,
-    EnergyAggregateSerializer,
-    EnergyMeasurementSerializer,
     PlantSerializer,
 )
 
@@ -57,7 +55,8 @@ class DeviceConfigurationViewSet(viewsets.ModelViewSet):
             )
 
             logger.info(
-                f"Latest measurement for device {device.id} found: {measurement.timestamp}"
+                f"Latest measurement for device {device.id} found: "
+                f"{measurement.timestamp}"
             )
             return Response(DeviceMeasurementSerializer(measurement).data)
 
@@ -136,7 +135,8 @@ class DeviceMeasurementViewSet(
 class PlantViewSet(viewsets.ModelViewSet):
     """
     ViewSet per la gestione degli impianti energetici.
-    Fornisce operazioni CRUD standard più endpoint personalizzati per statistiche e analytics.
+    Fornisce operazioni CRUD standard più endpoint personalizzati per
+    statistiche e analytics.
     """
 
     serializer_class = PlantSerializer

@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Sum
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DetailView, ListView
@@ -267,7 +267,8 @@ class PlantDetailView(LoginRequiredMixin, DetailView):
 
             if device_measurement:
                 logger.info(
-                    f"Dispositivo {device.device_id}: {device_measurement['latest_power']}W"
+                    f"Dispositivo {device.device_id}: "
+                    f"{device_measurement['latest_power']}W"
                 )
 
                 device_data.update(
@@ -333,7 +334,8 @@ def plant_delete(request, pk):
 
         except Plant.DoesNotExist:
             logger.warning(
-                f"Tentativo di eliminare un impianto inesistente (ID: {pk}) da parte dell'utente {request.user}"
+                f"Tentativo di eliminare un impianto inesistente (ID: {pk}) "
+                f"da parte dell'utente {request.user}"
             )
             return JsonResponse(
                 {"success": False, "error": "Impianto non trovato"}, status=404

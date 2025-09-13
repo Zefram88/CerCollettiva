@@ -1,4 +1,5 @@
 # energy/views/__init__.py
+# flake8: noqa
 from .api import DeviceConfigurationViewSet, DeviceMeasurementViewSet, PlantViewSet
 from .dashboard_views import DashboardView, total_power_data
 from .debug_views import debug_device_status, debug_mqtt_config

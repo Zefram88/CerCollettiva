@@ -2,18 +2,23 @@
 # Questi sono esempi di comandi Django personalizzati
 
 import logging
+import os
+from decimal import Decimal
 
-# energy/management/commands/example_energy_calculation.py
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from energy.models import DeviceMeasurement
+from core.main_models import CERConfiguration, Plant
+from documents.processors.gaudi import GAUDIProcessor
 from energy.services.energy_calculator_cache import EnergyCalculatorCache
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
+class EnergyCalculationCommand(BaseCommand):
     help = "Esempio di comando per calcoli energetici"
 
     def add_arguments(self, parser):
@@ -65,19 +70,10 @@ class Command(BaseCommand):
             logger.error(f"Errore comando energy calculation: {str(e)}")
 
 
-from decimal import Decimal
-
-from django.contrib.auth import get_user_model
-
 # core/management/commands/example_cer_setup.py
-from django.core.management.base import BaseCommand
-
-from core.main_models import CERConfiguration, Plant
-
-User = get_user_model()
 
 
-class Command(BaseCommand):
+class CERSetupCommand(BaseCommand):
     help = "Esempio di setup CER di test"
 
     def add_arguments(self, parser):
@@ -165,16 +161,10 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Errore nel setup: {str(e)}"))
 
 
-import os
-
 # documents/management/commands/example_document_processing.py
-from django.core.management.base import BaseCommand
-
-from documents.models import Document
-from documents.processors.gaudi import GAUDIProcessor
 
 
-class Command(BaseCommand):
+class DocumentProcessingCommand(BaseCommand):
     help = "Esempio di elaborazione documenti GAUDI"
 
     def add_arguments(self, parser):
@@ -194,12 +184,12 @@ class Command(BaseCommand):
         self.stdout.write(f"Elaborazione documento: {file_path}")
 
         try:
-            # Crea documento
-            document = Document.objects.create(
-                name=os.path.basename(file_path),
-                file_path=file_path,
-                document_type="GAUDI",
-            )
+            # Crea documento (per ora solo in memoria)
+            # document = Document.objects.create(
+            #     name=os.path.basename(file_path),
+            #     file_path=file_path,
+            #     document_type="GAUDI",
+            # )
 
             # Elabora con GAUDI processor
             processor = GAUDIProcessor(file_path)

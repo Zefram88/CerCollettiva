@@ -2,7 +2,6 @@
 Health check and monitoring views for CerCollettiva
 """
 
-import json
 import time
 from datetime import datetime, timedelta
 
@@ -54,7 +53,7 @@ class HealthCheckView(View):
             boot_time = datetime.fromtimestamp(psutil.boot_time())
             uptime = datetime.now() - boot_time
             return str(uptime).split(".")[0]  # Remove microseconds
-        except:
+        except Exception:
             return "unknown"
 
 
@@ -154,7 +153,10 @@ class MQTTHealthView(View):
                         )
                         if time_since_connection > timedelta(minutes=5):
                             status = HealthStatus.DEGRADED
-                            error_message = f"No recent connection (last: {active_broker.last_connected.isoformat()})"
+                            error_message = (
+                                f"No recent connection (last: "
+                                f"{active_broker.last_connected.isoformat()})"
+                            )
                     else:
                         status = HealthStatus.DEGRADED
                         error_message = "Never connected to broker"
@@ -380,7 +382,7 @@ class StatusView(View):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 return {"status": HealthStatus.HEALTHY}
-        except:
+        except Exception:
             return {"status": HealthStatus.UNHEALTHY}
 
     def _check_mqtt(self):
@@ -391,7 +393,7 @@ class StatusView(View):
             if MQTTBroker.objects.filter(is_active=True).exists():
                 return {"status": HealthStatus.HEALTHY}
             return {"status": HealthStatus.DEGRADED}
-        except:
+        except Exception:
             return {"status": HealthStatus.UNHEALTHY}
 
     def _check_cache(self):
@@ -401,7 +403,7 @@ class StatusView(View):
             if cache.get("health_check") == "ok":
                 return {"status": HealthStatus.HEALTHY}
             return {"status": HealthStatus.DEGRADED}
-        except:
+        except Exception:
             return {"status": HealthStatus.UNHEALTHY}
 
     def _check_system(self):
@@ -415,7 +417,7 @@ class StatusView(View):
             elif cpu > 80 or mem > 80:
                 return {"status": HealthStatus.DEGRADED}
             return {"status": HealthStatus.HEALTHY}
-        except:
+        except Exception:
             return {"status": HealthStatus.UNHEALTHY}
 
 
@@ -431,16 +433,16 @@ class MetricsView(View):
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage("/")
 
-        metrics.append(f"# HELP system_cpu_usage_percent CPU usage percentage")
-        metrics.append(f"# TYPE system_cpu_usage_percent gauge")
+        metrics.append("# HELP system_cpu_usage_percent CPU usage percentage")
+        metrics.append("# TYPE system_cpu_usage_percent gauge")
         metrics.append(f"system_cpu_usage_percent {cpu_percent}")
 
-        metrics.append(f"# HELP system_memory_usage_percent Memory usage percentage")
-        metrics.append(f"# TYPE system_memory_usage_percent gauge")
+        metrics.append("# HELP system_memory_usage_percent Memory usage percentage")
+        metrics.append("# TYPE system_memory_usage_percent gauge")
         metrics.append(f"system_memory_usage_percent {memory.percent}")
 
-        metrics.append(f"# HELP system_disk_usage_percent Disk usage percentage")
-        metrics.append(f"# TYPE system_disk_usage_percent gauge")
+        metrics.append("# HELP system_disk_usage_percent Disk usage percentage")
+        metrics.append("# TYPE system_disk_usage_percent gauge")
         metrics.append(f"system_disk_usage_percent {disk.percent}")
 
         # Application metrics
@@ -452,19 +454,19 @@ class MetricsView(View):
             cer_count = CERConfiguration.objects.filter(is_active=True).count()
             device_count = DeviceConfiguration.objects.filter(is_active=True).count()
 
-            metrics.append(f"# HELP app_active_plants_total Number of active plants")
-            metrics.append(f"# TYPE app_active_plants_total gauge")
+            metrics.append("# HELP app_active_plants_total Number of active plants")
+            metrics.append("# TYPE app_active_plants_total gauge")
             metrics.append(f"app_active_plants_total {plant_count}")
 
-            metrics.append(f"# HELP app_active_cers_total Number of active CERs")
-            metrics.append(f"# TYPE app_active_cers_total gauge")
+            metrics.append("# HELP app_active_cers_total Number of active CERs")
+            metrics.append("# TYPE app_active_cers_total gauge")
             metrics.append(f"app_active_cers_total {cer_count}")
 
-            metrics.append(f"# HELP app_active_devices_total Number of active devices")
-            metrics.append(f"# TYPE app_active_devices_total gauge")
+            metrics.append("# HELP app_active_devices_total Number of active devices")
+            metrics.append("# TYPE app_active_devices_total gauge")
             metrics.append(f"app_active_devices_total {device_count}")
 
-        except Exception as e:
+        except Exception:
             # Log error but don't fail the metrics endpoint
             pass
 

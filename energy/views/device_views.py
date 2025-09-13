@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
@@ -226,14 +226,18 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
 
             if not device:
                 raise ValueError(
-                    f"Combinazione vendor/model non valida: {form.instance.vendor}/{form.instance.model}"
+                    f"Combinazione vendor/model non valida: "
+                    f"{form.instance.vendor}/{form.instance.model}"
                 )
 
             form.instance.device_type = device.get_device_type()
 
             # Genera il topic MQTT se non specificato
             if not form.cleaned_data.get("mqtt_topic_template"):
-                mqtt_topic = f"{form.instance.vendor}/{plant.pod_code}/{form.instance.device_id}/status"
+                mqtt_topic = (
+                    f"{form.instance.vendor}/{plant.pod_code}/"
+                    f"{form.instance.device_id}/status"
+                )
                 form.instance.mqtt_topic_template = mqtt_topic
                 logger.info(f"Generato MQTT topic: {mqtt_topic}")
 
@@ -510,19 +514,22 @@ def device_delete(request, pk):
                         # Se non ci sono più dispositivi attivi, usa il topic wildcard
                         default_topic = "cercollettiva/+/+/value"
                         logger.info(
-                            f"Nessun dispositivo attivo, sottoscrizione a: {default_topic}"
+                            f"Nessun dispositivo attivo, sottoscrizione a: "
+                            f"{default_topic}"
                         )
                         client.subscribe(default_topic)
             except Exception as mqtt_error:
                 logger.error(
-                    f"Errore nell'aggiornamento delle sottoscrizioni MQTT: {str(mqtt_error)}"
+                    f"Errore nell'aggiornamento delle sottoscrizioni MQTT: "
+                    f"{str(mqtt_error)}"
                 )
 
             return JsonResponse({"success": True})
 
         except DeviceConfiguration.DoesNotExist:
             logger.warning(
-                f"Tentativo di eliminare un dispositivo inesistente (ID: {pk}) da parte dell'utente {request.user}"
+                f"Tentativo di eliminare un dispositivo inesistente (ID: {pk}) "
+                f"da parte dell'utente {request.user}"
             )
             return JsonResponse(
                 {"success": False, "error": "Dispositivo non trovato"}, status=404
