@@ -1,0 +1,33 @@
+[flake8]
+max-line-length = 120
+extend-ignore = 
+    E203,  # whitespace before ':'
+    E501,  # line too long
+    W503,  # line break before binary operator
+    E402,  # module level import not at top of file
+    F401,  # imported but unused
+    F841,  # local variable assigned but never used
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    .env,
+    migrations,
+    settings,
+    manage.py,
+    tests,
+    test_*,
+    *_test.py,
+    node_modules,
+    .pytest_cache,
+    .coverage,
+    htmlcov,
+    dist,
+    build,
+    *.egg-info
+per-file-ignores =
+    __init__.py:F401
+    manage.py:E402
+    settings/*.py:E402
+    migrations/*.py:E501

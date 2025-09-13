@@ -1,0 +1,16 @@
+# Safety configuration
+# Ignore specific vulnerabilities that are false positives or not critical
+ignore = [
+    "12345",  # Example: ignore specific CVE if it's a false positive
+]
+
+# Only check for high and critical severity issues
+severity = ["high", "critical"]
+
+# Skip packages that are known to have false positives
+skip = [
+    "django",
+    "psycopg2",
+    "redis",
+    "cryptography",
+]

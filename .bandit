@@ -1,0 +1,18 @@
+[bandit]
+exclude_dirs = [
+    "tests",
+    "test_*",
+    "*/tests/*",
+    "*/test_*/*",
+    "migrations",
+    "venv",
+    ".venv",
+    "node_modules",
+    "settings",
+]
+skips = [
+    "B101",  # assert_used
+    "B601",  # shell_injection_subprocess
+    "B603",  # subprocess_without_shell_equals_true
+    "B607",  # start_process_with_partial_path
+]
