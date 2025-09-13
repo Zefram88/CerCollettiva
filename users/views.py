@@ -132,10 +132,7 @@ def register(request):
 @login_required
 def profile_complete(request):
     """Redirect al completamento profilo anagrafico nell'app cer"""
-    if (
-        request.user.onboarding_status
-        != CustomUser.OnboardingStatus.REGISTRATO
-    ):
+    if request.user.onboarding_status != CustomUser.OnboardingStatus.REGISTRATO:
         return redirect("core:dashboard")
 
     return redirect("cer:profile_completion")
@@ -155,9 +152,7 @@ def login_view(request):
                 user.last_login = timezone.now()
                 user.save(skip_validation=True)
                 login(request, user)
-                return redirect(
-                    "core:home"
-                )  # o qualsiasi altra pagina dopo il login
+                return redirect("core:home")  # o qualsiasi altra pagina dopo il login
         else:
             # Non aggiungere messaggi qui, lascia che sia il form a gestire gli errori
             # Rimuovi qualsiasi chiamata a messages.error o messages.add_message
@@ -234,15 +229,11 @@ class ProfileView(LoginRequiredMixin, View):
         context.update(
             {
                 "privacy_status": {
-                    "accepted": getattr(
-                        request.user, "privacy_accepted", False
-                    ),
+                    "accepted": getattr(request.user, "privacy_accepted", False),
                     "acceptance_date": getattr(
                         request.user, "privacy_acceptance_date", None
                     ),
-                    "last_update": getattr(
-                        request.user, "last_privacy_update", None
-                    ),
+                    "last_update": getattr(request.user, "last_privacy_update", None),
                 }
             }
         )
@@ -262,8 +253,8 @@ class ProfileView(LoginRequiredMixin, View):
 
             # Documenti aziendali
             if hasattr(request.user, "documents"):
-                context["business_documents"] = (
-                    request.user.documents.all().order_by("-upload_date")
+                context["business_documents"] = request.user.documents.all().order_by(
+                    "-upload_date"
                 )
 
         # Attività recenti
@@ -280,9 +271,7 @@ class ProfileView(LoginRequiredMixin, View):
         business_form = None
 
         if request.user.legal_type == "BUSINESS":
-            business_form = BusinessProfileForm(
-                request.POST, instance=request.user
-            )
+            business_form = BusinessProfileForm(request.POST, instance=request.user)
             if user_form.is_valid() and business_form.is_valid():
                 # Additional validation using centralized validators
                 try:
@@ -324,9 +313,7 @@ class ProfileView(LoginRequiredMixin, View):
                 "acceptance_date": getattr(
                     request.user, "privacy_acceptance_date", None
                 ),
-                "last_update": getattr(
-                    request.user, "last_privacy_update", None
-                ),
+                "last_update": getattr(request.user, "last_privacy_update", None),
             },
         }
 
@@ -390,17 +377,13 @@ class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["show_sensitive"] = self.request.GET.get(
-            "show_sensitive", False
-        )
+        context["show_sensitive"] = self.request.GET.get("show_sensitive", False)
         context["search"] = self.request.GET.get("search", "")
         context["legal_type_labels"] = dict(CustomUser.LEGAL_TYPES)
         return context
 
 
-class AdminUserProfileView(
-    LoginRequiredMixin, UserPassesTestMixin, UpdateView
-):
+class AdminUserProfileView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = CustomUser
     template_name = "users/admin_profile.html"
     form_class = UserProfileForm
@@ -412,9 +395,7 @@ class AdminUserProfileView(
         return reverse_lazy("users:management")
 
     def form_valid(self, form):
-        messages.success(
-            self.request, "Profilo utente aggiornato con successo"
-        )
+        messages.success(self.request, "Profilo utente aggiornato con successo")
         return super().form_valid(form)
 
 

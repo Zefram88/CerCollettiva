@@ -108,9 +108,7 @@ class CustomUser(AbstractUser):
         null=True,
         verbose_name="Numero Registrazione",
     )
-    statute_date = models.DateField(
-        blank=True, null=True, verbose_name="Data Statuto"
-    )
+    statute_date = models.DateField(blank=True, null=True, verbose_name="Data Statuto")
 
     # Campi per enti religiosi
     religious_entity_code = models.CharField(
@@ -223,10 +221,7 @@ class CustomUser(AbstractUser):
     @property
     def is_onboarding_complete(self):
         """Verifica se l'onboarding è completato"""
-        return (
-            self.onboarding_status
-            == self.OnboardingStatus.ONBOARDING_COMPLETATO
-        )
+        return self.onboarding_status == self.OnboardingStatus.ONBOARDING_COMPLETATO
 
     @property
     def needs_profile_completion(self):
@@ -236,9 +231,7 @@ class CustomUser(AbstractUser):
     @property
     def needs_cer_setup(self):
         """Verifica se l'utente deve configurare la partecipazione CER"""
-        return (
-            self.onboarding_status == self.OnboardingStatus.ANAGRAFICA_COMPLETA
-        )
+        return self.onboarding_status == self.OnboardingStatus.ANAGRAFICA_COMPLETA
 
     @property
     def requires_vat(self):

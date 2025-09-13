@@ -93,9 +93,7 @@ class MinimalRegistrationForm(UserCreationForm):
         label=_("Trattamento Dati"),
         required=True,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-        help_text=_(
-            "Confermo di aver letto l'accordo sul trattamento dei dati"
-        ),
+        help_text=_("Confermo di aver letto l'accordo sul trattamento dei dati"),
     )
 
     # Campi nascosti per tracciamento timestamp
@@ -227,9 +225,7 @@ class MinimalRegistrationForm(UserCreationForm):
         privacy_policy_read = self.cleaned_data.get("privacy_policy_read")
         if not privacy_policy_read:
             raise forms.ValidationError(
-                _(
-                    "Devi confermare di aver letto la privacy policy per registrarti."
-                )
+                _("Devi confermare di aver letto la privacy policy per registrarti.")
             )
         return privacy_policy_read
 
@@ -238,9 +234,7 @@ class MinimalRegistrationForm(UserCreationForm):
         data_processing_read = self.cleaned_data.get("data_processing_read")
         if not data_processing_read:
             raise forms.ValidationError(
-                _(
-                    "Devi confermare di aver letto l'accordo sul trattamento dei dati."
-                )
+                _("Devi confermare di aver letto l'accordo sul trattamento dei dati.")
             )
         return data_processing_read
 
@@ -301,9 +295,7 @@ class UserRegistrationForm(UserCreationForm):
         label=_("Codice Fiscale"),
         max_length=16,
         required=True,
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "autocomplete": "off"}
-        ),
+        widget=forms.TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
     )
 
     phone = forms.CharField(
@@ -342,9 +334,7 @@ class UserRegistrationForm(UserCreationForm):
         label=_("Partita IVA"),
         max_length=11,
         required=False,
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "autocomplete": "off"}
-        ),
+        widget=forms.TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
     )
 
     pec = forms.EmailField(
@@ -444,9 +434,7 @@ class UserRegistrationForm(UserCreationForm):
         self.fields["password1"].help_text = _(
             "La password deve contenere almeno 8 caratteri"
         )
-        self.fields["fiscal_code"].help_text = _(
-            "Codice fiscale (16 caratteri)"
-        )
+        self.fields["fiscal_code"].help_text = _("Codice fiscale (16 caratteri)")
 
         # Aggiornamento campi richiesti se c'è legal_type nei dati
         if self.data.get("legal_type"):
@@ -480,9 +468,7 @@ class UserRegistrationForm(UserCreationForm):
                 )
             if not fiscal_code.isdigit():
                 raise forms.ValidationError(
-                    _(
-                        "Il codice fiscale per aziende deve contenere solo numeri"
-                    )
+                    _("Il codice fiscale per aziende deve contenere solo numeri")
                 )
 
         return fiscal_code
@@ -495,9 +481,7 @@ class UserRegistrationForm(UserCreationForm):
             raise forms.ValidationError(_("La Partita IVA è obbligatoria"))
 
         if vat_number and len(vat_number) != 11:
-            raise forms.ValidationError(
-                _("La Partita IVA deve essere di 11 cifre")
-            )
+            raise forms.ValidationError(_("La Partita IVA deve essere di 11 cifre"))
 
         return vat_number
 
@@ -527,15 +511,11 @@ class UserRegistrationForm(UserCreationForm):
                 )
         elif legal_type in ["BUSINESS", "ASSOCIATION"]:
             if not cleaned_data.get("vat_number"):
-                self.add_error(
-                    "vat_number", _("La Partita IVA è obbligatoria")
-                )
+                self.add_error("vat_number", _("La Partita IVA è obbligatoria"))
             if not cleaned_data.get("pec"):
                 self.add_error("pec", _("La PEC è obbligatoria"))
             if not cleaned_data.get("legal_name"):
-                self.add_error(
-                    "legal_name", _("La denominazione è obbligatoria")
-                )
+                self.add_error("legal_name", _("La denominazione è obbligatoria"))
         # Se non è privato ma manca profit_type, solleva errore
         elif not cleaned_data.get("profit_type"):
             raise ValidationError(
@@ -659,18 +639,14 @@ class BusinessProfileForm(forms.ModelForm):
         self.fields["fiscal_code"].required = True
 
         # Aggiungi help text
-        self.fields["vat_number"].help_text = (
-            "Inserisci la partita IVA (11 caratteri)"
-        )
+        self.fields["vat_number"].help_text = "Inserisci la partita IVA (11 caratteri)"
         self.fields["pec"].help_text = "Inserisci l'indirizzo PEC aziendale"
 
     def clean_vat_number(self):
         """Validazione partita IVA"""
         vat_number = self.cleaned_data.get("vat_number")
         if vat_number and len(vat_number) != 11:
-            raise forms.ValidationError(
-                _("La partita IVA deve essere di 11 caratteri")
-            )
+            raise forms.ValidationError(_("La partita IVA deve essere di 11 caratteri"))
         return vat_number
 
     def privacy_policy(request):

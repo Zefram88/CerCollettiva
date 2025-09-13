@@ -31,9 +31,7 @@ urlpatterns = [
         views.DeleteAccountView.as_view(),
         name="delete_account",
     ),
-    path(
-        "detail/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"
-    ),
+    path("detail/<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
     # Password Reset URLs
     path(
         "password_reset/",
