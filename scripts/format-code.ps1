@@ -5,7 +5,7 @@ Write-Host "🎨 Formattazione codice con Black..." -ForegroundColor Cyan
 
 # Controlla se Black è installato
 try {
-    black --version | Out-Null
+    python -m black --version | Out-Null
     Write-Host "✅ Black trovato" -ForegroundColor Green
 } catch {
     Write-Host "❌ Black non trovato. Installazione..." -ForegroundColor Red
@@ -14,7 +14,7 @@ try {
 
 # Formatta tutti i file Python escludendo le directory specificate
 Write-Host "📝 Formattazione file Python..." -ForegroundColor Yellow
-black . --exclude "venv|node_modules|tests|cercollettiva/settings"
+python -m black . --exclude "venv|node_modules|tests|cercollettiva/settings"
 
 # Controlla se ci sono modifiche
 $changes = git diff --name-only
