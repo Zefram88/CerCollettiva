@@ -2,6 +2,7 @@
 Test suite for Core app models
 """
 
+import time
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -232,6 +233,7 @@ class CERMembershipModelTest(TransactionTestCase):
 
     def setUp(self):
         """Set up test data"""
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.admin = User.objects.create_superuser(
             email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
@@ -343,6 +345,7 @@ class AlertModelTest(TransactionTestCase):
 
     def setUp(self):
         """Set up test data"""
+        unique_id = str(int(time.time() * 1000))[-6:]
         self.admin = User.objects.create_superuser(
             email=f"admin{unique_id}@example.com",
             password="AdminPass123!",
