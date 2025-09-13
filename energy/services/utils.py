@@ -9,7 +9,6 @@ from ..models import DeviceMeasurement, EnergyAggregate, EnergyMeasurement
 # from django.utils import timezone
 
 
-
 def calculate_period_aggregates(
     device_id: str, start_date: datetime, end_date: datetime, period: str = "1H"
 ) -> List[EnergyAggregate]:

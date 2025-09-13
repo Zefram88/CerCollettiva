@@ -28,7 +28,6 @@ from geopy.geocoders import Nominatim
 # from paho.mqtt.client import CallbackAPIVersion
 
 
-
 logger = logging.getLogger(__name__)
 
 

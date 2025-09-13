@@ -32,8 +32,6 @@ from .handlers.measurement import MeasurementHandler
 # from core.main_models import Plant
 
 
-
-
 # from .router import get_mqtt_router
 
 logger = logging.getLogger("energy.mqtt")

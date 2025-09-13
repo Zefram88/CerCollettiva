@@ -25,7 +25,6 @@ from .models import MemberProfile
 # from django.views.decorators.http import require_http_methods  # Unused
 
 
-
 logger = logging.getLogger(__name__)
 
 

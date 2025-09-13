@@ -1,0 +1,150 @@
+--- /home/runner/work/CerCollettiva/CerCollettiva/core/admin.py	2025-09-13 21:17:45.654681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/core/admin.py	2025-09-13 21:17:51.023962+00:00
+@@ -39,12 +39,10 @@
+ # from django.utils.decorators import method_decorator
+ # from django.utils.html import format_html
+ # from django.utils.translation import gettext_lazy as _
+ 
+ 
+-
+-
+ # Register your models here.
+ 
+ 
+ class CERAdminSite(admin.AdminSite):
+     site_header = "CerCollettiva Admin"
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/core/admin.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/cer/views.py	2025-09-13 21:17:45.653681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/cer/views.py	2025-09-13 21:17:51.173633+00:00
+@@ -21,11 +21,10 @@
+     ProfileCompletionForm,
+ )
+ from .models import MemberProfile
+ 
+ # from django.views.decorators.http import require_http_methods  # Unused
+-
+ 
+ 
+ logger = logging.getLogger(__name__)
+ 
+ 
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/cer/views.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/documents/tests.py	2025-09-13 21:17:45.663681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/documents/tests.py	2025-09-13 21:17:51.793330+00:00
+@@ -1,2 +1 @@
+-
+ # Create your tests here.
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/documents/tests.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/energy/devices/vendors/shelly/pro_3em.py	2025-09-13 21:17:45.665681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/energy/devices/vendors/shelly/pro_3em.py	2025-09-13 21:17:52.114377+00:00
+@@ -8,11 +8,10 @@
+ 
+ from ...base.device import MeasurementData
+ from .base import BaseShellyMeter
+ 
+ # from typing import Dict
+-
+ 
+ 
+ # Configurazione del logger
+ logger = logging.getLogger(__name__)
+ 
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/energy/devices/vendors/shelly/pro_3em.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/energy/models/metrics.py	2025-09-13 21:17:45.666681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/energy/models/metrics.py	2025-09-13 21:17:52.181713+00:00
+@@ -1,11 +1,10 @@
+ from django.db import models
+ 
+ from .base import BaseTimestampModel
+ 
+ # from django.utils import timezone
+-
+ 
+ 
+ class TopicMetrics(BaseTimestampModel):
+     """Metriche per topic MQTT"""
+ 
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/energy/models/metrics.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/core/main_models.py	2025-09-13 21:17:45.654681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/core/main_models.py	2025-09-13 21:17:52.248415+00:00
+@@ -24,11 +24,10 @@
+ 
+ # Import lazy per evitare dipendenze circolari
+ # from energy.models import DeviceMeasurement
+ # from energy.models import DeviceConfiguration
+ # from paho.mqtt.client import CallbackAPIVersion
+-
+ 
+ 
+ logger = logging.getLogger(__name__)
+ 
+ 
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/core/main_models.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/core.py	2025-09-13 21:17:45.666681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/core.py	2025-09-13 21:17:52.484804+00:00
+@@ -18,12 +18,10 @@
+ 
+ from ..devices.registry import DeviceRegistry
+ from ..models import DeviceConfiguration
+ 
+ # from typing import List
+-
+-
+ 
+ 
+ # from ..models import DeviceMeasurement, MQTTAuditLog
+ 
+ # from ..models.device import DeviceConfiguration, DeviceMeasurementDetail
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/core.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/client.py	2025-09-13 21:17:45.666681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/client.py	2025-09-13 21:17:52.636791+00:00
+@@ -18,14 +18,10 @@
+ 
+ # from .core import MQTTMessage
+ from .manager import DeviceManager
+ 
+ # from typing import Optional
+-
+-
+-
+-
+ 
+ 
+ logger = logging.getLogger("energy.mqtt")
+ 
+ 
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/client.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/manager.py	2025-09-13 21:17:45.667681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/manager.py	2025-09-13 21:17:52.675083+00:00
+@@ -28,12 +28,10 @@
+ from .event_bus import Event, get_event_bus
+ from .handlers.device import DeviceHandler
+ from .handlers.measurement import MeasurementHandler
+ 
+ # from core.main_models import Plant
+-
+-
+ 
+ 
+ # from .router import get_mqtt_router
+ 
+ logger = logging.getLogger("energy.mqtt")
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/energy/mqtt/manager.py
+--- /home/runner/work/CerCollettiva/CerCollettiva/energy/services/utils.py	2025-09-13 21:17:45.668681+00:00
++++ /home/runner/work/CerCollettiva/CerCollettiva/energy/services/utils.py	2025-09-13 21:17:52.760362+00:00
+@@ -5,11 +5,10 @@
+ from django.db.models import Avg, Max, Min, Q, Sum
+ 
+ from ..models import DeviceMeasurement, EnergyAggregate, EnergyMeasurement
+ 
+ # from django.utils import timezone
+-
+ 
+ 
+ def calculate_period_aggregates(
+     device_id: str, start_date: datetime, end_date: datetime, period: str = "1H"
+ ) -> List[EnergyAggregate]:
+would reformat /home/runner/work/CerCollettiva/CerCollettiva/energy/services/utils.py
+
+Oh no! 💥 💔 💥
+10 files would be reformatted, 182 files would be left unchanged.
