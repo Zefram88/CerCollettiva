@@ -35,7 +35,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Copia script di entrypoint e wait-for-db
-COPY scripts/docker-entrypoint.sh /usr/local/bin/
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY scripts/wait-for-db.py /app/scripts/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
