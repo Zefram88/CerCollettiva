@@ -11,8 +11,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
         # Se username non è specificato, usa email come username
-        if 'username' not in extra_fields:
-            extra_fields['username'] = email
+        if "username" not in extra_fields:
+            extra_fields["username"] = email
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -44,7 +44,7 @@ class CustomUser(AbstractUser):
         unique=True,
         help_text=_("Required. Enter a valid email address."),
     )
-    
+
     # DEPRECATO: username mantenuto solo per compatibilità, sempre == email
     # Non modificare direttamente, viene impostato automaticamente
 
@@ -271,7 +271,7 @@ class CustomUser(AbstractUser):
         # DEPRECAZIONE: Assicura che username sia sempre == email
         if self.email:
             self.username = self.email
-            
+
         # Non validare durante il login o aggiornamenti automatici
         skip_validation = kwargs.pop("skip_validation", False)
         if not skip_validation:
