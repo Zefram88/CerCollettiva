@@ -360,7 +360,9 @@ class UserRegistrationForm(UserCreationForm):
         help_text=_("Acconsento al trattamento dei dati personali"),
     )
 
-    # privacy_accepted = forms.BooleanField(required=True, label="Accetto la privacy policy")
+    # privacy_accepted = forms.BooleanField(
+    #     required=True, label="Accetto la privacy policy"
+    # )
 
     first_name = forms.CharField(
         label=_("Nome"),
@@ -454,16 +456,19 @@ class UserRegistrationForm(UserCreationForm):
             if len(fiscal_code) != 16:
                 raise forms.ValidationError(
                     _(
-                        "Il codice fiscale per persone fisiche deve essere di 16 caratteri"
+                        "Il codice fiscale per persone fisiche deve essere "
+                        "di 16 caratteri"
                     )
                 )
-            # Qui potresti aggiungere ulteriori validazioni per il formato del codice fiscale
+            # Qui potresti aggiungere ulteriori validazioni per il formato
+            # del codice fiscale
         elif legal_type in ["BUSINESS", "ASSOCIATION", "PUBLIC"]:
             # Per aziende e altri soggetti: 11 caratteri numerici
             if len(fiscal_code) != 11:
                 raise forms.ValidationError(
                     _(
-                        "Il codice fiscale per aziende deve essere di 11 caratteri numerici"
+                        "Il codice fiscale per aziende deve essere "
+                        "di 11 caratteri numerici"
                     )
                 )
             if not fiscal_code.isdigit():
@@ -515,12 +520,15 @@ class UserRegistrationForm(UserCreationForm):
             if not cleaned_data.get("pec"):
                 self.add_error("pec", _("La PEC è obbligatoria"))
             if not cleaned_data.get("legal_name"):
-                self.add_error("legal_name", _("La denominazione è obbligatoria"))
+                self.add_error(
+                    "legal_name", _("La denominazione è obbligatoria")
+                )
         # Se non è privato ma manca profit_type, solleva errore
         elif not cleaned_data.get("profit_type"):
             raise ValidationError(
                 {
-                    "profit_type": "Questo campo è obbligatorio per i soggetti non privati."
+                    "profit_type": "Questo campo è obbligatorio per i soggetti "
+                    "non privati."
                 }
             )
 
@@ -567,10 +575,12 @@ class UserUpdateForm(forms.ModelForm):
 def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
 
-    # Rendi il campo profit_type non richiesto perché verrà gestito automaticamente
+    # Rendi il campo profit_type non richiesto perché verrà gestito
+    # automaticamente
     self.fields["profit_type"].required = False
 
-    # Se c'è già un legal_type impostato, gestisci profit_type e help text di conseguenza
+    # Se c'è già un legal_type impostato, gestisci profit_type e help text
+    # di conseguenza
     if self.data.get("legal_type") == "PRIVATE":
         self.fields["profit_type"].disabled = True
         self.fields["profit_type"].initial = "NON_PROFIT"
