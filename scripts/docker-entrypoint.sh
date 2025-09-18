@@ -43,6 +43,37 @@ trap 'error "Setup failed at line $LINENO"' ERR
 # DJANGO_SETTINGS_MODULE è impostato dal docker-compose (prod/dev)
 log "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
 
+# Attesa secrets (se montato)
+if [ -d "/secrets" ]; then
+    i=0; while [ ! -f "/secrets/redis_password" ] || [ ! -f "/secrets/app.env" ]; do
+        if [ $i -ge 30 ]; then warning "Timeout attesa /secrets"; break; fi
+        log "Attesa /secrets..."; sleep 1; i=$((i+1));
+    done
+    # Importa app.env se presente (non sovrascrive variabili già esportate)
+    if [ -f "/secrets/app.env" ]; then
+        set -a; . /secrets/app.env; set +a
+        success "app.env importato da /secrets"
+    fi
+    # REDIS_PASSWORD da secrets se non già impostato
+    if [ -z "$REDIS_PASSWORD" ] && [ -f "/secrets/redis_password" ]; then
+        REDIS_PASSWORD=$(cat /secrets/redis_password)
+        export REDIS_PASSWORD
+        success "REDIS_PASSWORD importata da /secrets"
+    fi
+fi
+
+# Costruisci REDIS_URL coerente dall'ambiente e allinealo a /app/.env
+REDIS_HOST=${REDIS_HOST:-redis}
+REDIS_PORT=${REDIS_PORT:-6379}
+REDIS_DB=${REDIS_DB:-1}
+if [ -n "$REDIS_PASSWORD" ]; then
+    REDIS_URL="redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/$REDIS_DB"
+else
+    REDIS_URL="redis://$REDIS_HOST:$REDIS_PORT/$REDIS_DB"
+fi
+export REDIS_URL
+log "REDIS_URL (sintetizzato)=$REDIS_URL"
+
 # Verifica se è il primo avvio
 if [ ! -f "/app/.setup_complete" ]; then
     log "Primo avvio rilevato - avvio setup automatico..."
