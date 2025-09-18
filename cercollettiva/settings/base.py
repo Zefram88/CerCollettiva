@@ -66,13 +66,14 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",  # Per gestione multilingua
-    "core.middleware.rate_limiting.RateLimitMiddleware",  # Rate limiting
-    "core.middleware.security_headers.SecurityHeadersMiddleware",  # Security headers
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Sicurezza e throttling dopo che request.user è disponibile
+    "core.middleware.rate_limiting.RateLimitMiddleware",  # Rate limiting
+    "core.middleware.security_headers.SecurityHeadersMiddleware",  # Security headers
 ]
 
 ROOT_URLCONF = "cercollettiva.urls"
@@ -183,14 +184,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 os.makedirs(os.path.join(MEDIA_ROOT, "documents", "gaudi"), exist_ok=True)
 
 # Sicurezza - Configurazione SSL per ambiente
+# Nota: in produzione i valori sono forzati in production.py
 if DEBUG:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
-else:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
 
 # Rest Framework
 REST_FRAMEWORK = {

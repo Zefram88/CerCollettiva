@@ -630,7 +630,7 @@ User=$SYSTEM_USER
 Group=www-data
 WorkingDirectory=$PROJECT_PATH
 Environment="PATH=$VENV_PATH/bin"
-Environment="DJANGO_SETTINGS_MODULE=cercollettiva.settings.local"
+Environment="DJANGO_SETTINGS_MODULE=cercollettiva.settings.production"
 ExecStart=$VENV_PATH/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 cercollettiva.wsgi:application
 Restart=on-failure
 RestartSec=5s
@@ -647,7 +647,7 @@ EOL
 #!/bin/bash
 cd $PROJECT_PATH
 source $VENV_PATH/bin/activate
-export DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
+export DJANGO_SETTINGS_MODULE=cercollettiva.settings.production
 $VENV_PATH/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 cercollettiva.wsgi:application
 EOL
 
@@ -675,7 +675,7 @@ echo \"Servizi avviati!\"" > "$APP_ROOT/start_services.sh"
 command=$VENV_PATH/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 cercollettiva.wsgi:application
 directory=$PROJECT_PATH
 user=$SYSTEM_USER
-environment=DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
+environment=DJANGO_SETTINGS_MODULE=cercollettiva.settings.production
 autostart=true
 autorestart=true
 startretries=3
@@ -732,7 +732,7 @@ setup_supervisor() {
 command=$VENV_PATH/bin/python $PROJECT_PATH/manage.py mqtt_client
 directory=$PROJECT_PATH
 user=$SYSTEM_USER
-environment=DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
+environment=DJANGO_SETTINGS_MODULE=cercollettiva.settings.production
 autostart=true
 autorestart=true
 startretries=3

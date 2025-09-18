@@ -1,6 +1,7 @@
 # cercollettiva/urls.py
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
 
 # from django.contrib import admin
 from django.shortcuts import redirect
@@ -9,6 +10,8 @@ from django.urls import include, path
 from core.admin import admin_site
 
 urlpatterns = [
+    # Favicon - prevent 500 errors
+    path("favicon.ico", lambda request: HttpResponse(status=204)),  # No Content
     # Core URLs
     path("", include("core.urls")),
     # Admin URLs

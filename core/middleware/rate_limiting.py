@@ -37,22 +37,29 @@ class RateLimitMiddleware(MiddlewareMixin):
         )
 
     def __call__(self, request):
-        # Determinare il tipo di endpoint
-        endpoint_type = self._get_endpoint_type(request)
+        try:
+            # Determinare il tipo di endpoint
+            endpoint_type = self._get_endpoint_type(request)
 
-        # Ottenere identificatore utente/IP
-        identifier = self._get_identifier(request)
+            # Ottenere identificatore utente/IP
+            identifier = self._get_identifier(request)
 
-        # Verificare rate limit
-        if self._is_rate_limited(identifier, endpoint_type):
+            # Verificare rate limit
+            if self._is_rate_limited(identifier, endpoint_type):
+                logger.warning(
+                    f"Rate limit exceeded for {identifier} on {endpoint_type} "
+                    f"endpoint: {request.path}"
+                )
+                return self._rate_limit_response(request)
+
+            # Incrementare contatore
+            self._increment_counter(identifier, endpoint_type)
+        except Exception as e:
+            # In caso di problemi con la cache/Redis, non bloccare la richiesta
             logger.warning(
-                f"Rate limit exceeded for {identifier} on {endpoint_type} "
-                f"endpoint: {request.path}"
+                "RateLimitMiddleware disabled for this request due to error: %s",
+                e,
             )
-            return self._rate_limit_response(request)
-
-        # Incrementare contatore
-        self._increment_counter(identifier, endpoint_type)
 
         return self.get_response(request)
 
@@ -89,17 +96,23 @@ class RateLimitMiddleware(MiddlewareMixin):
         """Verifica se l'identificatore ha superato il rate limit"""
         limit_config = self.rate_limits.get(endpoint_type, self.rate_limits["default"])
         key = f"rate_limit:{endpoint_type}:{identifier}"
-
-        current_count = cache.get(key, 0)
+        try:
+            current_count = cache.get(key, 0)
+        except Exception as e:
+            logger.warning("Rate limit check skipped due to cache error: %s", e)
+            return False
         return current_count >= limit_config["requests"]
 
     def _increment_counter(self, identifier, endpoint_type):
         """Incrementa il contatore per l'identificatore"""
         limit_config = self.rate_limits.get(endpoint_type, self.rate_limits["default"])
         key = f"rate_limit:{endpoint_type}:{identifier}"
-
-        current_count = cache.get(key, 0)
-        cache.set(key, current_count + 1, limit_config["window"])
+        try:
+            current_count = cache.get(key, 0)
+            cache.set(key, current_count + 1, limit_config["window"])
+        except Exception as e:
+            logger.warning("Rate limit counter increment skipped due to cache error: %s", e)
+            return
 
         # Log per monitoring
         if current_count + 1 > limit_config["requests"] * 0.8:  # 80% del limite

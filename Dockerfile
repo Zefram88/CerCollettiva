@@ -9,16 +9,13 @@ LABEL version="1.0.0"
 # Variabili d'ambiente
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Installa dipendenze di sistema
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     curl \
-    wget \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Crea utente non-root
@@ -29,15 +26,20 @@ WORKDIR /app
 
 # Copia requirements e installa dipendenze Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Abilita cache pip con BuildKit per velocizzare build successivi
+# syntax: docker/dockerfile:1.4
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
 
 # Copia codice sorgente
+# Copia solo il minimo indispensabile per invalidare cache sui cambi codice
 COPY . .
 
 # Copia script di entrypoint e wait-for-db
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY scripts/wait-for-db.py /app/scripts/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY scripts/nginx-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
 
 # Crea directory necessarie
 RUN mkdir -p /app/logs /app/media /app/staticfiles && \
@@ -56,5 +58,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Entrypoint per setup automatico
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-# Comando di default - usa runserver_plus in sviluppo, gunicorn in produzione
-CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then python manage.py runserver_plus 0.0.0.0:8000; else gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 cercollettiva.wsgi:application; fi"]
+# Comando di default - flessibile in base a DJANGO_SETTINGS_MODULE
+CMD ["sh", "-c", "if echo $DJANGO_SETTINGS_MODULE | grep -q 'local'; then python manage.py runserver_plus 0.0.0.0:8000; else gunicorn --bind 0.0.0.0:8000 --workers 1 --timeout 30 --log-level debug --access-logfile - --error-logfile - cercollettiva.wsgi:application; fi"]

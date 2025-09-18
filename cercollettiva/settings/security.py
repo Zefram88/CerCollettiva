@@ -1,7 +1,10 @@
 """
 Security settings for CerCollettiva
 Implementa security headers moderni per proteggere da vulnerabilità web comuni
+Condizionati via variabili d'ambiente per domini/proxy.
 """
+
+import os
 
 # Security Headers Base
 SECURE_BROWSER_XSS_FILTER = True
@@ -14,7 +17,8 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # SSL/TLS Configuration
-SECURE_SSL_REDIRECT = True
+# SECURE_SSL_REDIRECT = True  # Disabilitato per evitare loop con proxy Docker
+SECURE_SSL_REDIRECT = False  # Nginx gestisce HTTPS, Django serve HTTP
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_REDIRECT_EXEMPT = []
 
@@ -28,19 +32,42 @@ SESSION_COOKIE_AGE = 3600  # 1 hour
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_TRUSTED_ORIGINS = [
-    "https://cercollettiva.com",
-    "https://www.cercollettiva.com",
-    "https://api.cercollettiva.com",
-]
+# Domini configurabili via ambiente (produzione) con fallback locale
+_DOMAIN = os.getenv("DOMAIN", "")
+_WWW_DOMAIN = os.getenv("WWW_DOMAIN", "")
+_API_DOMAIN = os.getenv("API_DOMAIN", "")
+
+def _ensure_https(domain: str) -> str:
+    if not domain:
+        return ""
+    return domain if domain.startswith("http://") or domain.startswith("https://") else f"https://{domain}"
+
+_trusted = {"https://localhost", "https://127.0.0.1"}
+for _d in (_DOMAIN, _WWW_DOMAIN, _API_DOMAIN):
+    _u = _ensure_https(_d)
+    if _u:
+        _trusted.add(_u)
+
+CSRF_TRUSTED_ORIGINS = sorted(_trusted)
 
 # Content Security Policy
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com")
-CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+# Consenti CSS esterni usati (Bootstrap e Font Awesome)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+    "https://cdn.jsdelivr.net",
+    "https://cdnjs.cloudflare.com",
+)
+# Consenti font da Google e CDNJS (Font Awesome)
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com")
 CSP_IMG_SRC = ("'self'", "data:", "https:")
-CSP_CONNECT_SRC = ("'self'", "https://api.cercollettiva.com")
+_connect_src = ["'self'"]
+if _API_DOMAIN:
+    _connect_src.append(_ensure_https(_API_DOMAIN))
+CSP_CONNECT_SRC = tuple(_connect_src)
 CSP_FRAME_ANCESTORS = ("'none'",)
 CSP_BASE_URI = ("'self'",)
 CSP_OBJECT_SRC = ("'none'",)

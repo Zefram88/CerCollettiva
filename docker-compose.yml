@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Database PostgreSQL
   db:
@@ -36,7 +34,7 @@ services:
       - cercollettiva_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_pass}", "--raw", "incr", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -69,9 +67,11 @@ services:
       dockerfile: Dockerfile
     container_name: cercollettiva_web
     environment:
-      - DEBUG=${DEBUG:-True}
+      # Configurazione flessibile - controllata da variabili d'ambiente
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-cercollettiva.settings.production}
+      - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY}
-      - DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - DB_NAME=cercollettiva
       - DB_USER=cercollettiva_user
       - DB_PASSWORD=${DB_PASSWORD:-cercollettiva_pass}
@@ -83,7 +83,8 @@ services:
       - MQTT_USER=${MQTT_USER:-mqtt_user}
       - MQTT_PASS=${MQTT_PASS:-mqtt_pass}
     volumes:
-      - .:/app  # Mount source code for auto-reload
+      # Condizionale: bind mount codice SOLO in modalità dev per auto-reload
+      # In produzione: codice è dentro l'immagine (più sicuro e performante)
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
       - ./logs:/app/logs
@@ -109,7 +110,9 @@ services:
 
   # Nginx Reverse Proxy
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     container_name: cercollettiva_nginx
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
@@ -121,14 +124,18 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - NGINX_ENV=${NGINX_ENV:-dev}
+      # Configurazione flessibile - controllata da variabili d'ambiente
+      - NGINX_ENV=${NGINX_ENV:-prod}
+      - DOMAIN=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     networks:
       - cercollettiva_network
     depends_on:
       - web
     restart: unless-stopped
+    entrypoint: ["/bin/sh", "/usr/local/bin/nginx-entrypoint.sh"]
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health/"]
+      test: ["CMD", "curl", "-f", "http://localhost/health/"]
       interval: 30s
       timeout: 10s
       retries: 3

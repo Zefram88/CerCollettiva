@@ -9,6 +9,10 @@ from .base import *
 # Disabilita il debug
 DEBUG = False
 
+# Impedisci abilità accidentale di DEBUG via variabile d'ambiente
+if os.getenv("DEBUG", "").lower() == "true":
+    raise ValueError("DEBUG deve essere False in produzione")
+
 # Chiave segreta da variabile d'ambiente
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
@@ -18,8 +22,20 @@ if not SECRET_KEY:
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 if not ALLOWED_HOSTS:
     raise ValueError("ALLOWED_HOSTS non impostato nelle variabili d'ambiente")
+if "*" in [h.strip() for h in ALLOWED_HOSTS if h is not None]:
+    raise ValueError("ALLOWED_HOSTS non può contenere '*' in produzione")
 
 # Database PostgreSQL produzione
+# 
+# SSL DATABASE vs SSL UI (HTTPS) - CONFIGURAZIONI INDIPENDENTI:
+# - SSL Database: comunicazione app ↔ database (questa configurazione)
+# - SSL UI: comunicazione browser ↔ server (configurata in Nginx, sempre attiva)
+#
+# SSL Database è SEMPRE DISABILITATO perché:
+# - Database Docker interno: traffico non esce dalla rete Docker
+# - SSL non aggiunge sicurezza per comunicazione interna container
+# - Per database esterni: usare configurazione dedicata (es. AWS RDS)
+#
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -30,7 +46,9 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", "5432"),
         "CONN_MAX_AGE": 600,
         "OPTIONS": {
-            "sslmode": "require",  # Forza SSL
+            # SSL Database: sempre disabilitato per Docker interno
+            # NOTA: SSL UI (HTTPS) rimane attivo e indipendente da questa configurazione
+            "sslmode": "disable",  # Docker interno sempre sicuro
             "connect_timeout": 10,
             "keepalives": 1,
             "keepalives_idle": 30,
@@ -46,21 +64,11 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": os.getenv("REDIS_URL"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PARSER_CLASS": "redis.connection.HiredisParser",
-            "CONNECTION_POOL_CLASS": "redis.BlockingConnectionPool",
-            "CONNECTION_POOL_CLASS_KWARGS": {
-                "max_connections": 50,
-                "timeout": 20,
-            },
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-            "IGNORE_EXCEPTIONS": True,
-        },
     }
 }
 
 # Cache del template in produzione
+TEMPLATES[0]["APP_DIRS"] = False  # Disabilita APP_DIRS quando loaders è definito
 TEMPLATES[0]["OPTIONS"]["loaders"] = [
     (
         "django.template.loaders.cached.Loader",
@@ -91,10 +99,11 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
-SERVER_EMAIL = os.getenv("SERVER_EMAIL")
+SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Sicurezza
-SECURE_SSL_REDIRECT = True
+# SECURE_SSL_REDIRECT = True  # Temporaneamente disabilitato per debug
+SECURE_SSL_REDIRECT = False
 SECURE_HSTS_SECONDS = 31536000  # 1 anno
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
@@ -105,6 +114,17 @@ SESSION_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+
+# Disabilita debug toolbar o configurazioni dev se accidentalmente presenti
+if 'debug_toolbar' in INSTALLED_APPS:
+    INSTALLED_APPS.remove('debug_toolbar')
+if 'debug_toolbar.middleware.DebugToolbarMiddleware' in MIDDLEWARE:
+    MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
+
+# Middleware di setup per produzione - dopo AuthenticationMiddleware
+MIDDLEWARE += [
+    "core.middleware.FirstInstallationMiddleware",
+]
 
 # Configurazione session
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"

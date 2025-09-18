@@ -304,44 +304,21 @@ sudo systemctl start cercollettiva-celery cercollettiva-celery-beat
 
 ## Docker Deployment
 
-### Docker Compose Produzione
-```yaml
-# docker-compose.prod.yml
-version: '3.8'
+### Modalità con RUN_MODE (consigliata)
+```bash
+# Sviluppo (HTTP)
+RUN_MODE=dev docker compose up -d
 
-services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
-    environment:
-      - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY}
-    volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    depends_on:
-      - db
-      - redis
-    restart: unless-stopped
+# Produzione locale HTTPS (self-signed/mkcert)
+RUN_MODE=prod-local-https SECRET_KEY=... ALLOWED_HOSTS=localhost,127.0.0.1 docker compose up -d
 
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - static_volume:/var/www/static
-      - media_volume:/var/www/media
-      - ./config/nginx/nginx.prod.conf:/etc/nginx/nginx.conf
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - web
-    restart: unless-stopped
-
-volumes:
-  static_volume:
-  media_volume:
+# Produzione con Let's Encrypt (dominio pubblico richiesto)
+RUN_MODE=prod DOMAIN=example.com LETSENCRYPT_EMAIL=you@example.com SECRET_KEY=... ALLOWED_HOSTS=example.com docker compose up -d
 ```
+
+Note:
+- In produzione reale, al primo avvio nginx effettua bootstrap HTTP, ottiene i certificati via webroot e poi passa automaticamente a TLS.
+- I certificati vengono salvati in `config/ssl` (montato in `/etc/nginx/ssl`).
 
 ### Dockerfile Produzione
 ```dockerfile
@@ -581,7 +558,10 @@ tail -f /var/log/nginx/error.log
 
 ### Health Checks
 ```bash
-# Application health
+# Nginx health (dev: HTTP, prod: HTTPS)
+curl -k -f https://localhost/health/ || curl -f http://localhost/health/
+
+# Application health (web)
 curl -f http://localhost:8000/monitoring/health/
 
 # Database health
