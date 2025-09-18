@@ -31,7 +31,9 @@ class RateLimitMiddleware(MiddlewareMixin):
             {
                 "default": {"requests": 100, "window": 3600},  # 100 req/hour
                 "api": {"requests": 200, "window": 3600},  # 200 req/hour
-                "login": {"requests": 5, "window": 900},  # 5 req/15min
+                # Login: best practice → soglia meno aggressiva e finestra breve
+                # Il conteggio effettivo avviene SOLO sui fallimenti (vedi process_response)
+                "login": {"requests": 10, "window": 600},  # 10 tentativi/10min per IP+username
                 "upload": {"requests": 10, "window": 3600},  # 10 req/hour
             },
         )
@@ -44,16 +46,32 @@ class RateLimitMiddleware(MiddlewareMixin):
             # Ottenere identificatore utente/IP
             identifier = self._get_identifier(request)
 
-            # Verificare rate limit
-            if self._is_rate_limited(identifier, endpoint_type):
+            # Per login GET non si applica rate limiting (noisy e non sensibile)
+            if endpoint_type == "login" and request.method != "POST":
+                return self.get_response(request)
+
+            # Verificare rate limit (anticipato per tutti tranne login POST)
+            is_login_post = endpoint_type == "login" and request.method == "POST"
+            effective_identifier = (
+                self._get_login_identifier(request) if is_login_post else identifier
+            )
+
+            if self._is_rate_limited(effective_identifier, endpoint_type):
                 logger.warning(
-                    f"Rate limit exceeded for {identifier} on {endpoint_type} "
+                    f"Rate limit exceeded for {effective_identifier} on {endpoint_type} "
                     f"endpoint: {request.path}"
                 )
-                return self._rate_limit_response(request)
+                return self._rate_limit_response(request, endpoint_type)
 
-            # Incrementare contatore
-            self._increment_counter(identifier, endpoint_type)
+            # Incremento immediato per tutto tranne login POST.
+            # Per login POST incrementiamo SOLO se fallisce (in process_response)
+            if not is_login_post:
+                self._increment_counter(identifier, endpoint_type)
+            else:
+                # Marca per gestione in process_response
+                request._rate_limit_login_track = True
+                request._rate_limit_login_identifier = effective_identifier
+                request._rate_limit_login_endpoint = endpoint_type
         except Exception as e:
             # In caso di problemi con la cache/Redis, non bloccare la richiesta
             logger.warning(
@@ -78,10 +96,19 @@ class RateLimitMiddleware(MiddlewareMixin):
 
     def _get_identifier(self, request):
         """Ottiene l'identificatore per il rate limiting"""
-        if request.user.is_authenticated:
+        user = getattr(request, "user", None)
+        if user and getattr(user, "is_authenticated", False):
             return f"user:{request.user.id}"
         else:
             return f"ip:{self._get_client_ip(request)}"
+
+    def _get_login_identifier(self, request):
+        """Identificatore specifico per login: IP + username/email (se fornito)."""
+        client_ip = self._get_client_ip(request)
+        username = (request.POST.get("username") or request.POST.get("email") or "").strip().lower()
+        if username:
+            return f"login:{client_ip}:{username}"
+        return f"login:{client_ip}"
 
     def _get_client_ip(self, request):
         """Ottiene l'IP del client considerando proxy e load balancer"""
@@ -121,18 +148,47 @@ class RateLimitMiddleware(MiddlewareMixin):
                 f"({current_count + 1}/{limit_config['requests']}) for {endpoint_type}"
             )
 
-    def _rate_limit_response(self, request):
+    def _rate_limit_response(self, request, endpoint_type):
         """Restituisce una risposta di rate limit appropriata"""
+        # Comunica Retry-After basato sulla finestra
+        limit_config = self.rate_limits.get(endpoint_type, self.rate_limits["default"])
+        retry_after = limit_config.get("window", 60)
         if request.path.startswith("/api/"):
-            return JsonResponse(
+            resp = JsonResponse(
                 {
                     "error": "Rate limit exceeded",
                     "message": "Too many requests. Please try again later.",
-                    "retry_after": 3600,  # 1 hour
+                    "retry_after": retry_after,
                 },
                 status=429,
             )
+            resp["Retry-After"] = str(retry_after)
+            return resp
         else:
-            return HttpResponse(
+            resp = HttpResponse(
                 "Rate limit exceeded. Please try again later.", status=429
             )
+            resp["Retry-After"] = str(retry_after)
+            return resp
+
+    # Gestione post-risposta per login: incrementa solo su fallimento, reset su successo
+    def process_response(self, request, response):
+        try:
+            if getattr(request, "_rate_limit_login_track", False):
+                identifier = getattr(request, "_rate_limit_login_identifier", None)
+                endpoint_type = getattr(request, "_rate_limit_login_endpoint", "login")
+                if identifier:
+                    # Heuristica: login fallito → risposta 200 (pagina login ripresentata)
+                    # login riuscito → tipicamente 302 redirect
+                    if response.status_code == 200:
+                        self._increment_counter(identifier, endpoint_type)
+                    elif response.status_code in (301, 302, 303, 307, 308):
+                        # Reset contatore al successo per perdonare errori sporadici
+                        key = f"rate_limit:{endpoint_type}:{identifier}"
+                        try:
+                            cache.delete(key)
+                        except Exception:
+                            pass
+        except Exception as e:
+            logger.warning("Rate limit post-response hook error: %s", e)
+        return response
