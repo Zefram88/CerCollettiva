@@ -233,14 +233,16 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    
-    <!-- Custom JavaScript -->
+
+    <!-- Custom JavaScript (abilitato solo per utenti autenticati per evitare loop di redirect/login) -->
+    {% if user.is_authenticated %}
     <script src="{% static 'js/performance-monitor.js' %}"></script>
     <script src="{% static 'js/device-detector.js' %}"></script>
     <script src="{% static 'js/accessibility-audit.js' %}"></script>
     <script src="{% static 'js/user-feedback.js' %}"></script>
     <script src="{% static 'js/ab-testing.js' %}"></script>
     <script src="{% static 'js/analytics-dashboard.js' %}"></script>
+    {% endif %}
     <script>
         // Theme Management
         const themeManager = {

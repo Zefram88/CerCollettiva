@@ -40,6 +40,9 @@ echo -e "${NC}"
 # Funzione per gestire errori
 trap 'error "Setup failed at line $LINENO"' ERR
 
+# DJANGO_SETTINGS_MODULE è impostato dal docker-compose (prod/dev)
+log "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
+
 # Verifica se è il primo avvio
 if [ ! -f "/app/.setup_complete" ]; then
     log "Primo avvio rilevato - avvio setup automatico..."
@@ -92,10 +95,10 @@ if [ ! -f "/app/.setup_complete" ]; then
     success "Setup automatico completato con successo!"
     
     echo -e "${GREEN}"
-    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "╔═════════════════════════════════════════════════════════════╗"
     echo "║                    Setup Completato!                        ║"
     echo "║              CerCollettiva pronto per l'uso                 ║"
-    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo "╚═════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
     echo ""
     echo -e "${BLUE}Accesso all'applicazione:${NC}"
@@ -109,6 +112,18 @@ if [ ! -f "/app/.setup_complete" ]; then
     
 else
     log "Setup già completato - avvio applicazione..."
+fi
+
+# (Opzionale) Genera migrazioni in DEV quando esplicitamente richiesto
+if [ "${AUTO_MAKEMIGRATIONS:-false}" = "true" ]; then
+    log "Generazione migrazioni (AUTO_MAKEMIGRATIONS=true) ..."
+    python manage.py makemigrations || warning "makemigrations ha restituito un codice di errore"
+fi
+
+# Applica sempre le migrazioni all'avvio (idempotente/sicuro in prod)
+if [ "${AUTO_MIGRATE:-true}" = "true" ]; then
+    log "Applicazione migrazioni database (AUTO_MIGRATE=true) ..."
+    python manage.py migrate --noinput
 fi
 
 # Avvia applicazione
