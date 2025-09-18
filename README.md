@@ -75,13 +75,23 @@ Accedi a:
 
 ### 🐳 Docker (Raccomandato)
 
-```bash
-# Sviluppo
-docker-compose up -d
-
-# Produzione  
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
+# Produzione (default)
+docker compose up -d
+
+# Sviluppo (overlay dev: bind mount, DEBUG, HTTP)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# Rebuild rapido web (dev)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml build web
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d web
+
+# Switch prod ↔ dev
+docker compose down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+Note PowerShell: usa il separatore `;` al posto di `&&`.
 
 ### 🖥️ Installazione Nativa
 
@@ -186,6 +196,16 @@ Dopo l'installazione, sono disponibili diversi script di utilità:
 - `./shell.sh` - Apri shell Django interattiva
 - `scripts/logs.sh` - Visualizza i log
 - `scripts/restart.sh` - Riavvia i servizi (produzione)
+
+## Setup iniziale (wizard)
+
+- Se non esistono superuser attivi, la pagina `https://localhost/setup` mostra il wizard per creare il primo superuser.
+- Per ripetere il setup da zero:
+  - Rimuovi superuser dal DB oppure resetta lo stack:
+    - `docker compose down -v`
+    - `docker system prune -af`
+    - `docker compose build --no-cache && docker compose up -d`
+  - Il marker `.setup_complete` è persistito via volume e non impedisce il wizard; determina solo il comportamento dell'entrypoint.
 
 ## Contributi
 
