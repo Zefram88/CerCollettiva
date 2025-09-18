@@ -1,0 +1,10 @@
+FROM nginx:alpine
+
+RUN apk add --no-cache certbot curl bash openssl
+
+COPY scripts/nginx-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
+RUN chmod +x /usr/local/bin/nginx-entrypoint.sh
+
+CMD ["/bin/sh", "/usr/local/bin/nginx-entrypoint.sh"]
+
+

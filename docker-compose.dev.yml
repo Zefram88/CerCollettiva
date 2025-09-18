@@ -1,0 +1,27 @@
+# Docker Compose Override per MODALITÀ SVILUPPO
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# 
+# DIFFERENZE MODALITÀ SVILUPPO:
+# - Bind mount del codice per auto-reload
+# - DEBUG=True di default
+# - RUN_MODE=dev
+# - Performance ridotta ma sviluppo più veloce
+
+services:
+  web:
+    # Override CMD per sviluppo - runserver_plus con auto-reload
+    command: ["python", "manage.py", "runserver_plus", "0.0.0.0:8000"]
+    volumes:
+      # BIND MOUNT CODICE: abilita auto-reload in sviluppo
+      # ATTENZIONE: NON usare in produzione (sicurezza + performance)
+      - .:/app
+    environment:
+      # Modalità SVILUPPO - settings.local, debug attivo
+      - DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+
+  nginx:
+    environment:
+      # Modalità SVILUPPO - HTTP senza SSL
+      - NGINX_ENV=dev
