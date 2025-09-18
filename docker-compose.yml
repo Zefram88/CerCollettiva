@@ -4,7 +4,25 @@ services:
     image: python:3.11-alpine
     container_name: cercollettiva_secrets_init
     command: >
-      sh -c "python - <<'PY'\nimport os, base64, secrets\nSECRETS_DIR = '/secrets'\nos.makedirs(SECRETS_DIR, exist_ok=True)\n# Redis password\nrp = os.path.join(SECRETS_DIR, 'redis_password')\nif not os.path.exists(rp):\n    pw = base64.urlsafe_b64encode(secrets.token_bytes(24)).decode().rstrip('=')\n    with open(rp, 'w') as f: f.write(pw)\n# App env (SECRET_KEY, FIELD_ENCRYPTION_KEY)\nae = os.path.join(SECRETS_DIR, 'app.env')\nif not os.path.exists(ae):\n    sk = base64.urlsafe_b64encode(secrets.token_bytes(50)).decode().rstrip('=')\n    fk = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip('=')\n    with open(ae, 'w') as f: f.write(f'SECRET_KEY={sk}\nFIELD_ENCRYPTION_KEY={fk}\n')\nprint('secrets ready')\nPY"
+      python -c "import os,base64,secrets; d='/secrets'; os.makedirs(d, exist_ok=True); rp=f'{d}/redis_password';\
+      \nimport os as _os;\
+      \nimport pathlib;\
+      \nfrom os.path import exists as ex;\
+      \nimport sys;\
+      \nimport io;\
+      \nimport builtins;\
+      \n\
+      \nimport os,base64,secrets;\
+      \n# redis password\
+      \nif not ex(rp):\
+      \n    open(rp,'w').write(base64.urlsafe_b64encode(secrets.token_bytes(24)).decode().rstrip('='));\
+      \nae=f'{d}/app.env';\
+      \n# app env\
+      \nif not ex(ae):\
+      \n    sk=base64.urlsafe_b64encode(secrets.token_bytes(50)).decode().rstrip('=');\
+      \n    fk=base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip('=');\
+      \n    open(ae,'w').write('SECRET_KEY='+sk+'\nFIELD_ENCRYPTION_KEY='+fk+'\n');\
+      \nprint('secrets ready')"
     volumes:
       - secrets_data:/secrets
     networks:
@@ -111,7 +129,7 @@ services:
       - cercollettiva_network
     depends_on:
       secrets-init:
-        condition: service_started
+        condition: service_completed_successfully
       db:
         condition: service_healthy
       redis:
