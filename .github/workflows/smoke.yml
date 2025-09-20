@@ -21,7 +21,7 @@ jobs:
           docker compose version
 
       - name: Build images
-        run: docker compose build
+        run: docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml build
 
       - name: Prepare self-signed certs (prod-local-https)
         if: matrix.mode == 'prod-local-https'
@@ -40,10 +40,10 @@ jobs:
           NGINX_ENV: dev
         run: |
           set -e
-          docker compose up -d || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d || {
             echo "compose up failed - dumping diagnostics";
-            docker compose ps || true;
-            docker compose logs db redis mqtt web nginx || true;
+            docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
+            docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web nginx || true;
             exit 1;
           }
 
@@ -56,10 +56,10 @@ jobs:
           NGINX_ENV: prod
         run: |
           set -e
-          docker compose up -d || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d || {
             echo "compose up failed - dumping diagnostics";
-            docker compose ps || true;
-            docker compose logs db redis mqtt web nginx || true;
+            docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
+            docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web nginx || true;
             exit 1;
           }
 
@@ -71,10 +71,10 @@ jobs:
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: |
           set -e
-          docker compose up -d db redis mqtt web || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web || {
             echo "compose up failed - dumping diagnostics";
-            docker compose ps || true;
-            docker compose logs db redis mqtt web || true;
+            docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
+            docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web || true;
             exit 1;
           }
 
