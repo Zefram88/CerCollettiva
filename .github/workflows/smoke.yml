@@ -41,36 +41,12 @@ jobs:
           REDIS_PASSWORD: redis_pass
         run: |
           set -e
-          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web nginx || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d --wait --wait-timeout 180 db redis mqtt web nginx || {
             echo "compose up failed - dumping diagnostics";
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web nginx || true;
             exit 1;
           }
-
-      - name: Wait for containers health (dev)
-        if: matrix.mode == 'dev'
-        env:
-          MODE: dev
-        run: |
-          set -e
-          FILES="-f docker-compose.yml -f .github/ci/docker-compose.ci.yml"
-          SERVICES="db redis mqtt web nginx"
-          for i in $(seq 1 90); do
-            all_ok=1
-            for s in $SERVICES; do
-              cid=$(docker compose $FILES ps -q $s)
-              if [ -z "$cid" ]; then all_ok=0; break; fi
-              st=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid")
-              if [ "$st" != "healthy" ] && [ "$st" != "running" ]; then all_ok=0; fi
-            done
-            if [ $all_ok -eq 1 ]; then exit 0; fi
-            sleep 2
-          done
-          echo "Timeout waiting for containers health";
-          docker compose $FILES ps || true;
-          docker compose $FILES logs db redis mqtt web nginx || true;
-          exit 1
 
       - name: Bring up stack (prod-local-https)
         if: matrix.mode == 'prod-local-https'
@@ -82,36 +58,12 @@ jobs:
           REDIS_PASSWORD: redis_pass
         run: |
           set -e
-          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web nginx || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d --wait --wait-timeout 180 db redis mqtt web nginx || {
             echo "compose up failed - dumping diagnostics";
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web nginx || true;
             exit 1;
           }
-
-      - name: Wait for containers health (prod-local-https)
-        if: matrix.mode == 'prod-local-https'
-        env:
-          MODE: prod-local-https
-        run: |
-          set -e
-          FILES="-f docker-compose.yml -f .github/ci/docker-compose.ci.yml"
-          SERVICES="db redis mqtt web nginx"
-          for i in $(seq 1 90); do
-            all_ok=1
-            for s in $SERVICES; do
-              cid=$(docker compose $FILES ps -q $s)
-              if [ -z "$cid" ]; then all_ok=0; break; fi
-              st=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid")
-              if [ "$st" != "healthy" ] && [ "$st" != "running" ]; then all_ok=0; fi
-            done
-            if [ $all_ok -eq 1 ]; then exit 0; fi
-            sleep 2
-          done
-          echo "Timeout waiting for containers health";
-          docker compose $FILES ps || true;
-          docker compose $FILES logs db redis mqtt web nginx || true;
-          exit 1
 
       - name: Bring up stack (prod-webonly)
         if: matrix.mode == 'prod-webonly'
@@ -122,36 +74,12 @@ jobs:
           REDIS_PASSWORD: redis_pass
         run: |
           set -e
-          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d --wait --wait-timeout 180 db redis mqtt web || {
             echo "compose up failed - dumping diagnostics";
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web || true;
             exit 1;
           }
-
-      - name: Wait for containers health (prod-webonly)
-        if: matrix.mode == 'prod-webonly'
-        env:
-          MODE: prod-webonly
-        run: |
-          set -e
-          FILES="-f docker-compose.yml -f .github/ci/docker-compose.ci.yml"
-          SERVICES="db redis mqtt web"
-          for i in $(seq 1 90); do
-            all_ok=1
-            for s in $SERVICES; do
-              cid=$(docker compose $FILES ps -q $s)
-              if [ -z "$cid" ]; then all_ok=0; break; fi
-              st=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid")
-              if [ "$st" != "healthy" ] && [ "$st" != "running" ]; then all_ok=0; fi
-            done
-            if [ $all_ok -eq 1 ]; then exit 0; fi
-            sleep 2
-          done
-          echo "Timeout waiting for containers health";
-          docker compose $FILES ps || true;
-          docker compose $FILES logs db redis mqtt web || true;
-          exit 1
 
       - name: Wait for health (dev via HTTP)
         if: matrix.mode == 'dev'
