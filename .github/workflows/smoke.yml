@@ -37,7 +37,15 @@ jobs:
           RUN_MODE: dev
           SECRET_KEY: ci-secret
           ALLOWED_HOSTS: localhost,127.0.0.1
-        run: docker compose up -d
+          NGINX_ENV: dev
+        run: |
+          set -e
+          docker compose up -d || {
+            echo "compose up failed - dumping diagnostics";
+            docker compose ps || true;
+            docker compose logs db redis mqtt web nginx || true;
+            exit 1;
+          }
 
       - name: Bring up stack (prod-local-https)
         if: matrix.mode == 'prod-local-https'
@@ -45,7 +53,15 @@ jobs:
           RUN_MODE: prod-local-https
           SECRET_KEY: ci-secret
           ALLOWED_HOSTS: localhost,127.0.0.1
-        run: docker compose up -d
+          NGINX_ENV: prod
+        run: |
+          set -e
+          docker compose up -d || {
+            echo "compose up failed - dumping diagnostics";
+            docker compose ps || true;
+            docker compose logs db redis mqtt web nginx || true;
+            exit 1;
+          }
 
       - name: Bring up stack (prod-webonly)
         if: matrix.mode == 'prod-webonly'
@@ -53,7 +69,14 @@ jobs:
           RUN_MODE: prod
           SECRET_KEY: ci-secret
           ALLOWED_HOSTS: localhost,127.0.0.1
-        run: docker compose up -d db redis mqtt web
+        run: |
+          set -e
+          docker compose up -d db redis mqtt web || {
+            echo "compose up failed - dumping diagnostics";
+            docker compose ps || true;
+            docker compose logs db redis mqtt web || true;
+            exit 1;
+          }
 
       - name: Wait for health (dev via HTTP)
         if: matrix.mode == 'dev'
