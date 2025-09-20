@@ -35,6 +35,8 @@ jobs:
         if: matrix.mode == 'dev'
         env:
           RUN_MODE: dev
+          SECRET_KEY: ci-secret
+          ALLOWED_HOSTS: localhost,127.0.0.1
         run: docker compose up -d
 
       - name: Bring up stack (prod-local-https)
@@ -56,29 +58,104 @@ jobs:
       - name: Wait for health (dev via HTTP)
         if: matrix.mode == 'dev'
         run: |
-          for i in {1..30}; do
+          for i in {1..60}; do
             if curl -fsS http://localhost/health/ >/dev/null; then exit 0; fi
             sleep 2
           done
           echo "Health check failed"; docker compose ps; docker compose logs nginx web || true; exit 1
 
+      - name: Probe endpoints (dev)
+        if: matrix.mode == 'dev'
+        run: |
+          set -e
+          BASE_URL="http://localhost"
+          # Aggregated status (accept 200/207)
+          STATUS_CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/status/?detailed=true")
+          if [[ "$STATUS_CODE" != "200" && "$STATUS_CODE" != "207" ]]; then
+            echo "Status check failed: $STATUS_CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
+          fi
+          # Service health (accept 200/207)
+          for SVC in database cache mqtt; do
+            CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/health/$SVC/")
+            if [[ "$CODE" != "200" && "$CODE" != "207" ]]; then
+              echo "Health $SVC failed: $CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
+            fi
+          done
+          # Metrics contains a known system metric
+          curl -fsS "$BASE_URL/monitoring/metrics/" | grep -q "system_cpu_usage_percent" || { echo "Metrics probe failed"; docker compose ps; docker compose logs nginx web || true; exit 1; }
+          # Static asset served (admin CSS)
+          STATIC_CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE_URL/static/admin/css/base.css")
+          if [[ "$STATIC_CODE" != "200" ]]; then
+            echo "Static probe failed: $STATIC_CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
+          fi
+
       - name: Wait for health (prod-local-https via HTTPS)
         if: matrix.mode == 'prod-local-https'
         run: |
-          for i in {1..45}; do
+          for i in {1..60}; do
             if curl -kfsS https://localhost/health/ >/dev/null; then exit 0; fi
             sleep 2
           done
           echo "Health check failed"; docker compose ps; docker compose logs nginx web || true; exit 1
 
+      - name: Probe endpoints (prod-local-https)
+        if: matrix.mode == 'prod-local-https'
+        run: |
+          set -e
+          BASE_URL="https://localhost"
+          # Aggregated status (accept 200/207)
+          STATUS_CODE=$(curl -kfsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/status/?detailed=true")
+          if [[ "$STATUS_CODE" != "200" && "$STATUS_CODE" != "207" ]]; then
+            echo "Status check failed: $STATUS_CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
+          fi
+          # Service health (accept 200/207)
+          for SVC in database cache mqtt; do
+            CODE=$(curl -kfsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/health/$SVC/")
+            if [[ "$CODE" != "200" && "$CODE" != "207" ]]; then
+              echo "Health $SVC failed: $CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
+            fi
+          done
+          # Metrics contains a known system metric
+          curl -kfsS "$BASE_URL/monitoring/metrics/" | grep -q "system_cpu_usage_percent" || { echo "Metrics probe failed"; docker compose ps; docker compose logs nginx web || true; exit 1; }
+          # Static asset served (admin CSS)
+          STATIC_CODE=$(curl -kfsS -o /dev/null -w "%{http_code}" "$BASE_URL/static/admin/css/base.css")
+          if [[ "$STATIC_CODE" != "200" ]]; then
+            echo "Static probe failed: $STATIC_CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
+          fi
+
       - name: Wait for health (prod-webonly web:8000)
         if: matrix.mode == 'prod-webonly'
         run: |
-          for i in {1..45}; do
+          for i in {1..60}; do
             if curl -fsS http://localhost:8000/monitoring/health/ >/dev/null; then exit 0; fi
             sleep 2
           done
           echo "Health check failed"; docker compose ps; docker compose logs web || true; exit 1
+
+      - name: Probe endpoints (prod-webonly)
+        if: matrix.mode == 'prod-webonly'
+        run: |
+          set -e
+          BASE_URL="http://localhost:8000"
+          # Aggregated status (accept 200/207)
+          STATUS_CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/status/?detailed=true")
+          if [[ "$STATUS_CODE" != "200" && "$STATUS_CODE" != "207" ]]; then
+            echo "Status check failed: $STATUS_CODE"; docker compose ps; docker compose logs web || true; exit 1
+          fi
+          # Service health (accept 200/207)
+          for SVC in database cache mqtt; do
+            CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/health/$SVC/")
+            if [[ "$CODE" != "200" && "$CODE" != "207" ]]; then
+              echo "Health $SVC failed: $CODE"; docker compose ps; docker compose logs web || true; exit 1
+            fi
+          done
+          # Metrics contains a known system metric
+          curl -fsS "$BASE_URL/monitoring/metrics/" | grep -q "system_cpu_usage_percent" || { echo "Metrics probe failed"; docker compose ps; docker compose logs web || true; exit 1; }
+          # Static asset served (admin CSS)
+          STATIC_CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE_URL/static/admin/css/base.css")
+          if [[ "$STATIC_CODE" != "200" ]]; then
+            echo "Static probe failed: $STATIC_CODE"; docker compose ps; docker compose logs web || true; exit 1
+          fi
 
       - name: Teardown
         if: always()
