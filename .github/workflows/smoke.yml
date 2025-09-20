@@ -41,7 +41,7 @@ jobs:
           REDIS_PASSWORD: redis_pass
         run: |
           set -e
-          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d --wait --wait-timeout 180 db redis mqtt web nginx || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web nginx || {
             echo "compose up failed - dumping diagnostics";
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web nginx || true;
@@ -58,7 +58,7 @@ jobs:
           REDIS_PASSWORD: redis_pass
         run: |
           set -e
-          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d --wait --wait-timeout 180 db redis mqtt web nginx || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web nginx || {
             echo "compose up failed - dumping diagnostics";
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web nginx || true;
@@ -74,7 +74,7 @@ jobs:
           REDIS_PASSWORD: redis_pass
         run: |
           set -e
-          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d --wait --wait-timeout 180 db redis mqtt web || {
+          docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web || {
             echo "compose up failed - dumping diagnostics";
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps || true;
             docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs db redis mqtt web || true;
@@ -84,11 +84,13 @@ jobs:
       - name: Wait for health (dev via HTTP)
         if: matrix.mode == 'dev'
         run: |
-          for i in {1..60}; do
-            if curl -fsS http://localhost/health/ >/dev/null; then exit 0; fi
+          for i in {1..90}; do
+            if docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps nginx | grep -q 'Up'; then
+              if curl -fsS http://localhost/health/ >/dev/null; then exit 0; fi
+            fi
             sleep 2
           done
-          echo "Health check failed"; docker compose ps; docker compose logs nginx web || true; exit 1
+          echo "Health check failed"; docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps; docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs nginx web || true; exit 1
 
       - name: Probe endpoints (dev)
         if: matrix.mode == 'dev'
@@ -118,11 +120,13 @@ jobs:
       - name: Wait for health (prod-local-https via HTTPS)
         if: matrix.mode == 'prod-local-https'
         run: |
-          for i in {1..60}; do
-            if curl -kfsS https://localhost/health/ >/dev/null; then exit 0; fi
+          for i in {1..90}; do
+            if docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps nginx | grep -q 'Up'; then
+              if curl -kfsS https://localhost/health/ >/dev/null; then exit 0; fi
+            fi
             sleep 2
           done
-          echo "Health check failed"; docker compose ps; docker compose logs nginx web || true; exit 1
+          echo "Health check failed"; docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps; docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs nginx web || true; exit 1
 
       - name: Probe endpoints (prod-local-https)
         if: matrix.mode == 'prod-local-https'
@@ -152,11 +156,11 @@ jobs:
       - name: Wait for health (prod-webonly web:8000)
         if: matrix.mode == 'prod-webonly'
         run: |
-          for i in {1..60}; do
+          for i in {1..90}; do
             if curl -fsS http://localhost:8000/monitoring/health/ >/dev/null; then exit 0; fi
             sleep 2
           done
-          echo "Health check failed"; docker compose ps; docker compose logs web || true; exit 1
+          echo "Health check failed"; docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml ps; docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml logs web || true; exit 1
 
       - name: Probe endpoints (prod-webonly)
         if: matrix.mode == 'prod-webonly'
