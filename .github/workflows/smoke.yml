@@ -38,6 +38,7 @@ jobs:
           SECRET_KEY: ci-secret
           ALLOWED_HOSTS: localhost,127.0.0.1
           NGINX_ENV: dev
+          REDIS_PASSWORD: redis_pass
         run: |
           set -e
           docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d || {
@@ -54,6 +55,7 @@ jobs:
           SECRET_KEY: ci-secret
           ALLOWED_HOSTS: localhost,127.0.0.1
           NGINX_ENV: prod
+          REDIS_PASSWORD: redis_pass
         run: |
           set -e
           docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d || {
@@ -69,6 +71,7 @@ jobs:
           RUN_MODE: prod
           SECRET_KEY: ci-secret
           ALLOWED_HOSTS: localhost,127.0.0.1
+          REDIS_PASSWORD: redis_pass
         run: |
           set -e
           docker compose -f docker-compose.yml -f .github/ci/docker-compose.ci.yml up -d db redis mqtt web || {
