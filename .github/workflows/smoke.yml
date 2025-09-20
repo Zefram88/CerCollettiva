@@ -125,23 +125,23 @@ jobs:
         if: matrix.mode == 'prod-local-https'
         run: |
           set -e
-          BASE_URL="https://localhost"
+          # Run probes from inside the nginx container to satisfy allow/deny rules
           # Aggregated status (accept 200/207)
-          STATUS_CODE=$(curl -kfsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/status/?detailed=true")
+          STATUS_CODE=$(docker compose exec -T nginx sh -lc "curl -kfsS -o /dev/null -w '%{http_code}' https://localhost/monitoring/status/?detailed=true")
           if [[ "$STATUS_CODE" != "200" && "$STATUS_CODE" != "207" ]]; then
             echo "Status check failed: $STATUS_CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
           fi
           # Service health (accept 200/207)
           for SVC in database cache mqtt; do
-            CODE=$(curl -kfsS -o /dev/null -w "%{http_code}" "$BASE_URL/monitoring/health/$SVC/")
+            CODE=$(docker compose exec -T nginx sh -lc "curl -kfsS -o /dev/null -w '%{http_code}' https://localhost/monitoring/health/$SVC/")
             if [[ "$CODE" != "200" && "$CODE" != "207" ]]; then
               echo "Health $SVC failed: $CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
             fi
           done
           # Metrics contains a known system metric
-          curl -kfsS "$BASE_URL/monitoring/metrics/" | grep -q "system_cpu_usage_percent" || { echo "Metrics probe failed"; docker compose ps; docker compose logs nginx web || true; exit 1; }
+          docker compose exec -T nginx sh -lc "curl -kfsS https://localhost/monitoring/metrics/" | grep -q "system_cpu_usage_percent" || { echo "Metrics probe failed"; docker compose ps; docker compose logs nginx web || true; exit 1; }
           # Static asset served (admin CSS)
-          STATIC_CODE=$(curl -kfsS -o /dev/null -w "%{http_code}" "$BASE_URL/static/admin/css/base.css")
+          STATIC_CODE=$(docker compose exec -T nginx sh -lc "curl -kfsS -o /dev/null -w '%{http_code}' https://localhost/static/admin/css/base.css")
           if [[ "$STATIC_CODE" != "200" ]]; then
             echo "Static probe failed: $STATIC_CODE"; docker compose ps; docker compose logs nginx web || true; exit 1
           fi
