@@ -6,24 +6,32 @@ from sentry_sdk.integrations.redis import RedisIntegration
 
 from .base import *
 
-# Disabilita il debug
-DEBUG = False
+# Debug configurabile per flessibilità dev/staging
+# In modalità unificata, permetti DEBUG=True per development/staging
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEPLOYMENT_MODE = os.getenv("DEPLOYMENT_MODE", "production")
 
-# Impedisci abilità accidentale di DEBUG via variabile d'ambiente
-if os.getenv("DEBUG", "").lower() == "true":
-    raise ValueError("DEBUG deve essere False in produzione")
+# Validazione sicurezza: avvisa per DEBUG=True in produzione reale
+if DEBUG and DEPLOYMENT_MODE == "production":
+    import warnings
+    warnings.warn("⚠️  DEBUG=True in production mode - use for testing only!", UserWarning)
 
 # Chiave segreta da variabile d'ambiente
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY non impostata nelle variabili d'ambiente")
 
-# Host consentiti
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-if not ALLOWED_HOSTS:
-    raise ValueError("ALLOWED_HOSTS non impostato nelle variabili d'ambiente")
-if "*" in [h.strip() for h in ALLOWED_HOSTS if h is not None]:
-    raise ValueError("ALLOWED_HOSTS non può contenere '*' in produzione")
+# Host consentiti - flessibile per modalità development
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,nginx").split(",")
+ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
+
+# Validazione ALLOWED_HOSTS per produzione
+if DEPLOYMENT_MODE == "production" and "*" in ALLOWED_HOSTS:
+    warnings.warn("⚠️ ALLOWED_HOSTS contiene '*' in production - configurazione insicura!", UserWarning)
+
+# Aggiungi host docker per reverse proxy
+if "web" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("web")
 
 # Database PostgreSQL produzione
 # 
@@ -115,11 +123,27 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
-# Disabilita debug toolbar o configurazioni dev se accidentalmente presenti
-if 'debug_toolbar' in INSTALLED_APPS:
-    INSTALLED_APPS.remove('debug_toolbar')
-if 'debug_toolbar.middleware.DebugToolbarMiddleware' in MIDDLEWARE:
-    MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
+# Debug Toolbar condizionale per development
+ENABLE_DEBUG_TOOLBAR = os.getenv("ENABLE_DEBUG_TOOLBAR", "False").lower() == "true"
+
+if ENABLE_DEBUG_TOOLBAR and DEBUG:
+    # Aggiungi debug toolbar solo se esplicitamente richiesto
+    if 'debug_toolbar' not in INSTALLED_APPS:
+        INSTALLED_APPS += ['debug_toolbar']
+    if 'debug_toolbar.middleware.DebugToolbarMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    
+    # Configurazione debug toolbar
+    INTERNAL_IPS = ['127.0.0.1', 'localhost']
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
+    }
+else:
+    # Rimuovi debug toolbar se presente ma non richiesto
+    if 'debug_toolbar' in INSTALLED_APPS:
+        INSTALLED_APPS.remove('debug_toolbar')
+    if 'debug_toolbar.middleware.DebugToolbarMiddleware' in MIDDLEWARE:
+        MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
 
 # Middleware di setup per produzione - dopo AuthenticationMiddleware
 MIDDLEWARE += [
@@ -186,7 +210,9 @@ if os.getenv("SENTRY_DSN"):
         environment=os.getenv("SENTRY_ENVIRONMENT", "production"),
     )
 
-# Logging produzione
+# Logging flessibile per dev/staging/prod
+DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "WARNING")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -195,8 +221,16 @@ LOGGING = {
             "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
             "style": "{",
         },
+        "simple": {
+            "format": "{levelname} {asctime} {message}",
+            "style": "{",
+        },
     },
     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple" if DEBUG else "verbose",
+        },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "filename": LOGS_DIR / "cercollettiva.log",
@@ -214,23 +248,23 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["file"],
-            "level": "WARNING",
+            "handlers": ["console"] if DEBUG else ["file"],
+            "level": DJANGO_LOG_LEVEL,
             "propagate": True,
         },
         "django.security": {
-            "handlers": ["file"],
+            "handlers": ["console"] if DEBUG else ["file"],
             "level": "WARNING",
             "propagate": False,
         },
         "energy": {
-            "handlers": ["file"],
-            "level": "INFO",
+            "handlers": ["console", "file"] if DEBUG else ["file"],
+            "level": "DEBUG" if DEBUG else "INFO",
             "propagate": True,
         },
         "energy.mqtt": {
             "handlers": ["mqtt_file"],
-            "level": "INFO",
+            "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
     },

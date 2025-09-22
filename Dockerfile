@@ -15,11 +15,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    postgresql-client \
     curl \
+    sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # Crea utente non-root
 RUN groupadd -r cercollettiva && useradd -r -g cercollettiva cercollettiva
+
+# Configura sudo per cercollettiva
+RUN echo "cercollettiva ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Imposta directory di lavoro
 WORKDIR /app
@@ -35,9 +40,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copia solo il minimo indispensabile per invalidare cache sui cambi codice
 COPY . .
 
-# Copia script di entrypoint e wait-for-db
+# Crea symlink per supportare bind mount in development
+RUN ln -sf /app/src/cercollettiva /app/cercollettiva || true
+
+# Copia script di entrypoint
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-COPY scripts/wait-for-db.py /app/scripts/
 COPY scripts/nginx-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
 
@@ -58,5 +65,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Entrypoint per setup automatico
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-# Comando di default - flessibile in base a DJANGO_SETTINGS_MODULE
-CMD ["sh", "-c", "if echo $DJANGO_SETTINGS_MODULE | grep -q 'local'; then python manage.py runserver_plus 0.0.0.0:8000; else gunicorn --bind 0.0.0.0:8000 --workers 1 --timeout 30 --log-level debug --access-logfile - --error-logfile - cercollettiva.wsgi:application; fi"]
+# Comando di default (Produzione)
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "30", "--log-level", "debug", "--access-logfile", "-", "--error-logfile", "-", "cercollettiva.wsgi:application"]

@@ -1,8 +1,10 @@
 services:
   # Secrets initializer (generates passwords/keys at first run)
   secrets-init:
-    image: python:3.11-alpine
+    build: .
     container_name: cercollettiva_secrets_init
+    profiles: ["dev", "staging", "prod"]
+    user: cercollettiva
     volumes:
       - secrets_data:/secrets
       - ./scripts/secrets_init.py:/secrets_init.py:ro
@@ -14,6 +16,7 @@ services:
   db:
     image: postgres:15-alpine
     container_name: cercollettiva_db
+    profiles: ["dev", "staging", "prod"]
     environment:
       POSTGRES_DB: cercollettiva
       POSTGRES_USER: cercollettiva_user
@@ -36,6 +39,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: cercollettiva_redis
+    profiles: ["dev", "staging", "prod"]
     command: sh -c "redis-server --appendonly yes --requirepass $(cat /secrets/redis_password)"
     volumes:
       - redis_data:/data
@@ -58,6 +62,7 @@ services:
   mqtt:
     image: eclipse-mosquitto:2.0
     container_name: cercollettiva_mqtt
+    profiles: ["dev", "staging", "prod"]
     volumes:
       - ./config/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./config/mosquitto/passwd:/mosquitto/config/passwd
@@ -75,31 +80,35 @@ services:
       timeout: 10s
       retries: 3
 
-  # Django Application
+  # Django Application - Base (Staging/Production)
   web:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: cercollettiva_web
+    profiles: ["staging", "prod"]
     environment:
-      # Configurazione flessibile - controllata da variabili d'ambiente
+      # Configurazione unificata - modalità controllata da DEPLOYMENT_MODE
+      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-production}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-cercollettiva.settings.production}
       - DEBUG=${DEBUG:-False}
-      - SECRET_KEY=${SECRET_KEY}
+      - DEV_MODE=false
+      - ENABLE_DEBUG_TOOLBAR=False
+      - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL:-WARNING}
+      - SECRET_KEY_FILE=/secrets/django_secret_key
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - DB_NAME=cercollettiva
       - DB_USER=cercollettiva_user
       - DB_PASSWORD=${DB_PASSWORD:-cercollettiva_pass}
       - DB_HOST=db
       - DB_PORT=5432
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/1
+      - REDIS_URL=redis://:$(cat /secrets/redis_password)@redis:6379/1
       - MQTT_HOST=mqtt
       - MQTT_PORT=1883
       - MQTT_USER=${MQTT_USER:-mqtt_user}
-      - MQTT_PASS=${MQTT_PASS:-mqtt_pass}
+      - MQTT_PASS_FILE=/secrets/mqtt_password
     volumes:
-      # Condizionale: bind mount codice SOLO in modalità dev per auto-reload
-      # In produzione: codice è dentro l'immagine (più sicuro e performante)
+      # File statici sempre presenti
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
       - ./logs:/app/logs
@@ -125,13 +134,73 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s  # Give time for setup
+    entrypoint: ["/bin/sh", "/usr/local/bin/docker-entrypoint.sh"]
+    command: >
+      sh -c "
+        echo '[web] Starting production server (gunicorn)';
+        gunicorn --bind 0.0.0.0:8000 --workers 1 --timeout 30 --log-level debug --access-logfile - --error-logfile - --reload cercollettiva.wsgi:application;
+      "
 
-  # Nginx Reverse Proxy
-  nginx:
+  # Django Application - Development
+  web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cercollettiva_web_dev
+    profiles: ["dev"]
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+    environment:
+      # Configurazione development
+      - DEPLOYMENT_MODE=development
+      - DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
+      - DEBUG=True
+      - DEV_MODE=true
+      - ENABLE_DEBUG_TOOLBAR=True
+      - DJANGO_LOG_LEVEL=DEBUG
+      - SECRET_KEY_FILE=/secrets/django_secret_key
+      - ALLOWED_HOSTS=*
+      - DB_NAME=cercollettiva
+      - DB_USER=cercollettiva_user
+      - DB_PASSWORD=${DB_PASSWORD:-cercollettiva_pass}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://:$(cat /secrets/redis_password)@redis:6379/0
+      - MQTT_BROKER_HOST=mqtt
+      - MQTT_BROKER_PORT=1883
+      - MQTT_BROKER_USERNAME=cercollettiva
+      - MQTT_PASS_FILE=/secrets/mqtt_password
+    volumes:
+      # Aggiunge bind mount per live reload
+      - .:/app
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./logs:/app/logs
+      - setup_complete:/app/.setup_complete
+      - secrets_data:/secrets:ro
+    networks:
+      - cercollettiva_network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo '[web-dev] Starting development server (runserver_plus)';
+        python manage.py runserver_plus 0.0.0.0:8000;
+      "
+
+  # Nginx Reverse Proxy - Development
+  nginx-dev:
     build:
       context: .
       dockerfile: Dockerfile.nginx
-    container_name: cercollettiva_nginx
+    container_name: cercollettiva_nginx_dev
+    profiles: ["dev"]
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./config/nginx/conf.d:/etc/nginx/conf.d
@@ -142,14 +211,80 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      # Configurazione flessibile - controllata da variabili d'ambiente
-      - NGINX_ENV=${NGINX_ENV:-prod}
+      - NGINX_ENV=dev
+      - DEPLOYMENT_MODE=development
       - DOMAIN=${DOMAIN}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - AUTO_SSL=false
     networks:
       - cercollettiva_network
     depends_on:
-      - web
+      web-dev:
+        condition: service_started
+        required: false
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy - Staging
+  nginx-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: cercollettiva_nginx_staging
+    profiles: ["staging"]
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./staticfiles:/var/www/static
+      - ./media:/var/www/media
+      - ./config/ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_ENV=staging
+      - DEPLOYMENT_MODE=staging
+      - DOMAIN=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - AUTO_SSL=true
+    networks:
+      - cercollettiva_network
+    depends_on:
+      web:
+        condition: service_started
+        required: false
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy - Production
+  nginx-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: cercollettiva_nginx_prod
+    profiles: ["prod"]
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./staticfiles:/var/www/static
+      - ./media:/var/www/media
+      - ./config/ssl:/etc/nginx/ssl
+      # Volumi Let's Encrypt solo per produzione
+      - letsencrypt_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_ENV=prod
+      - DEPLOYMENT_MODE=production
+      - DOMAIN=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - AUTO_SSL=true
+    networks:
+      - cercollettiva_network
+    depends_on:
+      web:
+        condition: service_started
+        required: false
     restart: unless-stopped
     entrypoint: ["/bin/sh", "/usr/local/bin/nginx-entrypoint.sh"]
     healthcheck:
@@ -233,6 +368,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: cercollettiva_prometheus
+    profiles: ["staging", "prod"]
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -299,6 +435,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: cercollettiva_grafana
+    profiles: ["staging", "prod"]
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
     volumes:
@@ -329,6 +466,10 @@ volumes:
   setup_complete:
     driver: local
   secrets_data:
+    driver: local
+  letsencrypt_certs:
+    driver: local
+  certbot_www:
     driver: local
 
 networks:

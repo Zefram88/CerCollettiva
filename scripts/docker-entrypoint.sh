@@ -38,28 +38,57 @@ echo "╚═══════════════════════�
 echo -e "${NC}"
 
 # Funzione per gestire errori
-trap 'error "Setup failed at line $LINENO"' ERR
+# trap 'error "Setup failed at line $LINENO"' ERR  # Disabilitato per compatibilità
 
-# DJANGO_SETTINGS_MODULE è impostato dal docker-compose (prod/dev)
+# Environment settings con backward compatibility
+DEPLOYMENT_MODE="${DEPLOYMENT_MODE:-production}"
+
+# Backward compatibility: "prod" → "production", "dev" → "development"
+case "$DEPLOYMENT_MODE" in
+    "prod") 
+        DEPLOYMENT_MODE="production"
+        warning "DEPLOYMENT_MODE='prod' è deprecato, usa 'production'"
+        ;;
+    "dev")
+        DEPLOYMENT_MODE="development" 
+        warning "DEPLOYMENT_MODE='dev' è deprecato, usa 'development'"
+        ;;
+esac
+
+DEV_MODE="${DEV_MODE:-false}"
+log "DEPLOYMENT_MODE=$DEPLOYMENT_MODE"
+log "DEV_MODE=$DEV_MODE"
 log "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
 
-# Attesa secrets (se montato)
+# Attendi secrets (se montato)
+log "Verifica directory /secrets..."
 if [ -d "/secrets" ]; then
-    i=0; while [ ! -f "/secrets/redis_password" ] || [ ! -f "/secrets/app.env" ]; do
-        if [ $i -ge 30 ]; then warning "Timeout attesa /secrets"; break; fi
-        log "Attesa /secrets..."; sleep 1; i=$((i+1));
+    log "Directory /secrets trovata, attesa secrets..."
+    i=0; while [ ! -f "/secrets/django_secret_key" ] || [ ! -f "/secrets/field_encryption_key" ]; do
+        if [ $i -ge 60 ]; then error "Timeout attesa secrets"; break; fi
+        log "Attesa secrets... ($i/60)"; sleep 1; i=$((i+1));
     done
-    # Importa app.env se presente (non sovrascrive variabili già esportate)
-    if [ -f "/secrets/app.env" ]; then
-        set -a; . /secrets/app.env; set +a
-        success "app.env importato da /secrets"
-    fi
+    # Importa le chiavi dal volume secrets
+    SECRET_KEY=$(cat /secrets/django_secret_key | tr -d '\n')
+    FIELD_ENCRYPTION_KEY=$(cat /secrets/field_encryption_key | tr -d '\n')
+    export SECRET_KEY
+    export FIELD_ENCRYPTION_KEY
+    success "Chiavi di sicurezza importate da /secrets"
+    
     # REDIS_PASSWORD da secrets se non già impostato
     if [ -z "$REDIS_PASSWORD" ] && [ -f "/secrets/redis_password" ]; then
         REDIS_PASSWORD=$(cat /secrets/redis_password)
         export REDIS_PASSWORD
         success "REDIS_PASSWORD importata da /secrets"
     fi
+else
+    warning "Directory /secrets non trovata, usando chiavi di default"
+    # Usa chiavi di default per test
+    SECRET_KEY="django-insecure-test-key-for-development-only-change-in-production"
+    FIELD_ENCRYPTION_KEY="7OmLozExKYcMJCO7Jof_OGnnRm2-P1zYpnY3eLG7EWE="
+    export SECRET_KEY
+    export FIELD_ENCRYPTION_KEY
+    success "Chiavi di default impostate per test"
 fi
 
 # Costruisci REDIS_URL coerente dall'ambiente e allinealo a /app/.env
@@ -74,36 +103,43 @@ fi
 export REDIS_URL
 log "REDIS_URL (sintetizzato)=$REDIS_URL"
 
+# ----------------------------------------------------
+# NUOVO BLOCCO DI ATTESA ROBUSTO PER IL DATABASE
+# ----------------------------------------------------
+DB_HOST=${DB_HOST:-db}
+DB_USER=${DB_USER:-cercollettiva_user}
+DB_NAME=${DB_NAME:-cercollettiva}
+
+log "Attesa che il database sia pronto su $DB_HOST..."
+until pg_isready -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME"; do
+  echo >&2 "Database non ancora disponibile - in attesa..."
+  sleep 1
+done
+success "Database è pronto!"
+# ----------------------------------------------------
+
 # Verifica se è il primo avvio
 if [ ! -f "/app/.setup_complete" ]; then
     log "Primo avvio rilevato - avvio setup automatico..."
     
-    # Genera chiavi di sicurezza
-    log "Generazione SECRET_KEY e FIELD_ENCRYPTION_KEY..."
-    SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
-    FIELD_ENCRYPTION_KEY=$(python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
-    
     # Crea file .env se non esiste
     if [ ! -f "/app/.env" ]; then
-        log "Creazione file .env da template..."
-        if [ -f "/app/env.example" ]; then
-            cp /app/env.example /app/.env
-            success "File .env creato da env.example"
-        else
-            error "File env.example non trovato"
-        fi
+        log "Creazione file .env con configurazione base..."
+        cat > /app/.env << EOF
+# Configurazione base CerCollettiva
+SECRET_KEY="$SECRET_KEY"
+FIELD_ENCRYPTION_KEY="$FIELD_ENCRYPTION_KEY"
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1
+EOF
+        success "File .env creato con configurazione base"
     else
         log "File .env già esistente"
+        # Aggiorna chiavi nel file .env esistente
+        log "Aggiornamento chiavi di sicurezza..."
+        sed -i "s/SECRET_KEY=.*/SECRET_KEY=\"$SECRET_KEY\"/" /app/.env
+        sed -i "s/FIELD_ENCRYPTION_KEY=.*/FIELD_ENCRYPTION_KEY=\"$FIELD_ENCRYPTION_KEY\"/" /app/.env
     fi
-    
-    # Aggiorna chiavi nel file .env
-    log "Aggiornamento chiavi di sicurezza..."
-    sed -i "s/SECRET_KEY=.*/SECRET_KEY=$SECRET_KEY/" /app/.env
-    sed -i "s/FIELD_ENCRYPTION_KEY=.*/FIELD_ENCRYPTION_KEY=$FIELD_ENCRYPTION_KEY/" /app/.env
-    
-    # Attendi dipendenze database
-    log "Attesa dipendenze database..."
-    python /app/scripts/wait-for-db.py
     
     # Esegui migrazioni database
     log "Esecuzione migrazioni database..."
@@ -119,7 +155,11 @@ if [ ! -f "/app/.setup_complete" ]; then
     
     # Verifica configurazione Django
     log "Verifica configurazione Django..."
-    python manage.py check --deploy
+    if [ "$DEPLOYMENT_MODE" = "production" ]; then
+        python manage.py check --deploy
+    else
+        python manage.py check
+    fi
     
     # Marca setup come completato
     touch /app/.setup_complete

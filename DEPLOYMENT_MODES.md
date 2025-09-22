@@ -1,22 +1,58 @@
-# Modalità di Deployment - CerCollettiva
+# Modalità di Deployment - CerCollettiva (UNIFICATO)
+
+## 🎆 ARCHITETTURA UNIFICATA
+
+**Novità v2.0:**
+- **Single docker-compose.yml** con configurazione dinamica
+- **Environment profiles** per ogni modalità
+- **SSL automation** completo
+- **Command switching** automatico
+- **Bind mount condizionale**
+
+---
 
 ## 🔧 Modalità Sviluppo
 
 **Comando:**
 ```bash
-# Modalità sviluppo - OPZIONE 1 (con override file)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Copia profile development
+cp env.development .env
 
-# Modalità sviluppo - OPZIONE 2 (con variabili)
-DJANGO_SETTINGS_MODULE=cercollettiva.settings.local DEBUG=True NGINX_ENV=dev docker compose up --build
+# Avvio modalità sviluppo
+docker compose up --build
 ```
 
 **Caratteristiche:**
-- ✅ **Auto-reload**: Modifiche codice immediate
-- ✅ **Debug attivo**: Django Debug Toolbar abilitato  
-- ✅ **Settings local**: Configurazione sviluppo
-- ⚠️ **Performance ridotta**: Bind mount più lento
-- ⚠️ **Solo per sviluppo**: Non usare in produzione
+- ✅ **Auto-reload**: Bind mount `.:/app/src` + runserver_plus
+- ✅ **Debug completo**: DEBUG=True + Django Debug Toolbar
+- ✅ **Logging verbose**: Console output + livello DEBUG
+- ✅ **HTTP only**: No SSL per velocità
+- ✅ **Environment validation**: Pre-flight checks automatici
+- ⚠️ **Solo per sviluppo**: Mai usare in staging/prod
+
+---
+
+## 🎭 Modalità Staging
+
+**Comando:**
+```bash
+# Copia profile staging
+cp env.staging .env
+
+# Configura dominio test (opzionale)
+echo "DOMAIN=staging.cercollettiva.local" >> .env
+
+# Avvio modalità staging
+docker compose up --build -d
+```
+
+**Caratteristiche:**
+- ✅ **Codice embedded**: No bind mount, come produzione
+- ✅ **HTTPS**: SSL self-signed automatico
+- ✅ **Gunicorn**: Production server per test performance
+- ✅ **Logging moderato**: Livello INFO
+- ✅ **Debug opzionale**: Configurabile per troubleshooting
+- ✅ **Open monitoring**: Endpoint accessibili per test
 
 ---
 
@@ -24,19 +60,28 @@ DJANGO_SETTINGS_MODULE=cercollettiva.settings.local DEBUG=True NGINX_ENV=dev doc
 
 **Comando:**
 ```bash
-# Modalità produzione - DEFAULT (localhost)
-docker compose up --build -d
+# Copia profile production
+cp env.production .env
 
-# Modalità produzione - CUSTOM hosts
-ALLOWED_HOSTS=example.com,www.example.com docker compose up -d
+# Configura dominio reale e SSL
+echo "DOMAIN=cercollettiva.com" >> .env
+echo "LETSENCRYPT_EMAIL=admin@cercollettiva.com" >> .env
+
+# Genera password sicure
+./scripts/validate-environment.sh
+
+# Avvio modalità produzione
+docker compose up --build -d
 ```
 
 **Caratteristiche:**
-- ✅ **Sicurezza**: Codice isolato nell'immagine
-- ✅ **Performance**: Filesystem container ottimizzato
-- ✅ **Stabilità**: Non dipende da file locali
-- ✅ **Settings produzione**: SSL UI, validazioni complete
-- ❌ **No auto-reload**: Serve rebuild per modifiche
+- ✅ **Sicurezza massima**: Codice embedded + validazioni strict
+- ✅ **Let's Encrypt**: SSL automatico per domini reali
+- ✅ **Performance**: Gunicorn multi-worker + cache aggressive
+- ✅ **Monitoring**: Rate limiting + HTTPS obbligatorio
+- ✅ **Error tracking**: Sentry integration
+- ✅ **Backup automatico**: Database + media files
+- ❌ **Zero debug**: DEBUG=False forzato
 
 ---
 
@@ -137,7 +182,42 @@ Questo progetto usa terminazione TLS a livello Nginx. Le connessioni interne Doc
 
 ## 🎯 Raccomandazioni
 
-- **Sviluppo locale**: Usa sempre `docker-compose.dev.yml`
-- **Test produzione**: Usa `docker-compose.yml` standard
-- **Deploy VPS**: Usa `docker-compose.yml` + variabili ambiente
-- **Mai**: Usare bind mount codice in produzione
+## 🔯 Nuovi Comandi Quick Start
+
+```bash
+# DEVELOPMENT
+cp env.development .env
+docker compose up --build
+# → HTTP localhost:8000 + auto-reload + debug
+
+# STAGING  
+cp env.staging .env
+echo "DOMAIN=staging.local" >> .env
+docker compose up --build -d
+# → HTTPS staging.local + production-like
+
+# PRODUCTION
+cp env.production .env
+echo "DOMAIN=yourdomain.com" >> .env
+echo "LETSENCRYPT_EMAIL=admin@yourdomain.com" >> .env
+./scripts/validate-environment.sh
+docker compose up --build -d
+# → HTTPS yourdomain.com + Let's Encrypt + security
+```
+
+## 🔄 Migrazione da v1.0
+
+```bash
+# Backup configurazione esistente
+cp docker-compose.yml docker-compose.v1.backup
+cp docker-compose.dev.yml docker-compose.dev.v1.backup
+
+# Usa nuova architettura
+cp env.development .env  # per development
+# oppure
+cp env.production .env   # per production
+
+# Test nuova configurazione
+./scripts/validate-environment.sh
+docker compose up --build
+```

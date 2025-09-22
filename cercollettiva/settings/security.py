@@ -61,10 +61,10 @@ CSP_STYLE_SRC = (
     "https://cdn.jsdelivr.net",
     "https://cdnjs.cloudflare.com",
 )
-# Consenti font da Google e CDNJS (Font Awesome)
-CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com")
+# Consenti font da Google, CDNJS (Font Awesome) e jsdelivr (Bootstrap Icons)
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net")
 CSP_IMG_SRC = ("'self'", "data:", "https:")
-_connect_src = ["'self'"]
+_connect_src = ["'self'", "https://cdn.jsdelivr.net"]
 if _API_DOMAIN:
     _connect_src.append(_ensure_https(_API_DOMAIN))
 CSP_CONNECT_SRC = tuple(_connect_src)
@@ -75,7 +75,7 @@ CSP_OBJECT_SRC = ("'none'",)
 # Referrer Policy
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
-# Permissions Policy
+# Permissions Policy - Solo feature supportate universalmente
 PERMISSIONS_POLICY = {
     "camera": [],
     "microphone": [],
@@ -85,19 +85,13 @@ PERMISSIONS_POLICY = {
     "magnetometer": [],
     "gyroscope": [],
     "accelerometer": [],
-    "ambient-light-sensor": [],
     "autoplay": [],
-    "battery": [],
     "bluetooth": [],
     "display-capture": [],
     "fullscreen": [],
     "gamepad": [],
     "midi": [],
-    "notifications": [],
-    "persistent-storage": [],
-    "push": [],
     "screen-wake-lock": [],
-    "speaker-selection": [],
     "sync-xhr": [],
     "web-share": [],
     "xr-spatial-tracking": [],
@@ -114,7 +108,7 @@ CUSTOM_SECURITY_HEADERS = {
     "X-XSS-Protection": "1; mode=block",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), autoplay=(), bluetooth=(), display-capture=(), fullscreen=(), gamepad=(), midi=(), screen-wake-lock=(), sync-xhr=(), web-share=(), xr-spatial-tracking=()",
     "Cross-Origin-Opener-Policy": "same-origin",
     "Cross-Origin-Embedder-Policy": "require-corp",
 }

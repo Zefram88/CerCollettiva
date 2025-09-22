@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = [
     "crispy_bootstrap5",
     "widget_tweaks",
     "django_filters",
+    "django_extensions",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS

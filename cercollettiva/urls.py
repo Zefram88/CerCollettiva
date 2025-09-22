@@ -36,3 +36,11 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+    # Debug Toolbar URLs - solo se esplicitamente abilitato
+    if getattr(settings, 'ENABLE_DEBUG_TOOLBAR', False) and settings.DEBUG:
+        try:
+            import debug_toolbar
+            urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+        except ImportError:
+            pass

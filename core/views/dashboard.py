@@ -15,6 +15,13 @@ class HomeView(TemplateView):
     """Vista homepage pubblica"""
 
     template_name = "core/home.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "show_navbar": True,  # Mostra navbar nella homepage
+        })
+        return context
 
 
 class DashboardView(CerBaseView):
