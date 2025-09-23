@@ -6,7 +6,13 @@ from .base import *
 DEBUG = True
 ALLOWED_HOSTS = ["*"]  # Per sviluppo - accetta tutti gli host
 
-# Database PostgreSQL per coerenza con produzione (configurazione già definita in base.py)
+# Database SQLite per sviluppo locale
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 # Cache in memoria per sviluppo
 CACHES = {
@@ -95,7 +101,45 @@ CACHES = {
 # Email backend per sviluppo
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# Configurazione logging
+# Configurazione logging - gestione intelligente filesystem
+import tempfile
+import os
+
+# Rileva ambiente di esecuzione
+def detect_environment():
+    """Rileva se siamo in WSL, Docker, o filesystem normale"""
+    # Docker: controlla se siamo in container
+    if os.path.exists("/.dockerenv") or os.environ.get("DEPLOYMENT_MODE"):
+        return "docker"
+    
+    # WSL: controlla se siamo su WSL
+    if os.path.exists("/proc/version"):
+        try:
+            with open("/proc/version", "r") as f:
+                if "microsoft" in f.read().lower():
+                    return "wsl"
+        except:
+            pass
+    
+    # Filesystem normale
+    return "normal"
+
+# Crea directory di log appropriata per l'ambiente
+env_type = detect_environment()
+
+if env_type == "docker":
+    # Docker: usa directory del progetto (montata come volume)
+    LOG_DIR = BASE_DIR / "logs"
+    os.makedirs(LOG_DIR, exist_ok=True)
+elif env_type == "wsl":
+    # WSL: usa directory temporanea Linux per evitare problemi di permessi OneDrive
+    LOG_DIR = os.path.join(tempfile.gettempdir(), "cercollettiva_logs")
+    os.makedirs(LOG_DIR, exist_ok=True)
+else:
+    # Filesystem normale: usa directory del progetto
+    LOG_DIR = BASE_DIR / "logs"
+    os.makedirs(LOG_DIR, exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -129,13 +173,13 @@ LOGGING = {
         },
         "file": {
             "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/debug.log",
+            "filename": os.path.join(LOG_DIR, "debug.log"),
             "formatter": "verbose",
             "level": "DEBUG",
         },
         "mqtt_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/mqtt.log",
+            "filename": os.path.join(LOG_DIR, "mqtt.log"),
             "maxBytes": 10485760,
             "backupCount": 5,
             "formatter": "mqtt",
@@ -143,7 +187,7 @@ LOGGING = {
         },
         "measurement_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/measurements.log",
+            "filename": os.path.join(LOG_DIR, "measurements.log"),
             "maxBytes": 10485760,
             "backupCount": 5,
             "formatter": "measurement",
@@ -151,7 +195,7 @@ LOGGING = {
         },
         "device_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/devices.log",
+            "filename": os.path.join(LOG_DIR, "devices.log"),
             "maxBytes": 10485760,
             "backupCount": 5,
             "formatter": "device",
@@ -159,7 +203,7 @@ LOGGING = {
         },
         "general_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/cercollettiva.log",
+            "filename": os.path.join(LOG_DIR, "cercollettiva.log"),
             "maxBytes": 10485760,
             "backupCount": 5,
             "formatter": "verbose",
@@ -168,12 +212,12 @@ LOGGING = {
         "gaudi_file": {
             "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": "logs/gaudi.log",
+            "filename": os.path.join(LOG_DIR, "gaudi.log"),
             "formatter": "verbose",
         },
         "document_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/documents.log",
+            "filename": os.path.join(LOG_DIR, "documents.log"),
             "maxBytes": 10485760,
             "backupCount": 5,
             "formatter": "document_processor",
@@ -181,7 +225,7 @@ LOGGING = {
         },
         "document_error_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs/documents_error.log",
+            "filename": os.path.join(LOG_DIR, "documents_error.log"),
             "maxBytes": 10485760,
             "backupCount": 5,
             "formatter": "document_processor",

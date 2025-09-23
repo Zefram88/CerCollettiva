@@ -42,38 +42,101 @@ echo -e "${NC}"
 # Verifica prerequisiti
 log "Verifica prerequisiti..."
 
-# Python 3.11+
-if command -v python3 &> /dev/null; then
-    PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-    if [[ $(echo "$PYTHON_VERSION >= 3.11" | bc -l) -eq 1 ]]; then
-        success "Python $PYTHON_VERSION trovato"
-    else
-        error "Python 3.11+ richiesto, trovato $PYTHON_VERSION"
-        exit 1
+# Fix per Windows: aggiungi PATH di Windows al PATH di bash (Git Bash su Windows)
+if [ -d "/c/Windows/System32" ]; then
+    export PATH="$PATH:/c/Windows/System32"
+    export PATH="$PATH:/c/Users/$USER/AppData/Local/Microsoft/WindowsApps"
+elif [ -d "/mnt/c/Windows/System32" ]; then
+    export PATH="$PATH:/mnt/c/Windows/System32"
+    export PATH="$PATH:/mnt/c/Users/$USER/AppData/Local/Microsoft/WindowsApps"
+fi
+
+# Python 3.11+ - rilevamento cross-platform robusto
+PYTHON_CMD=""
+
+# Funzione per testare se un comando Python è valido
+test_python() {
+    local cmd="$1"
+    local version
+    version=$($cmd -c 'import sys; print(".".join(map(str, sys.version_info[:2])))' 2>/dev/null)
+    if [ $? -eq 0 ] && [ -n "$version" ]; then
+        local major=$(echo $version | cut -d. -f1)
+        local minor=$(echo $version | cut -d. -f2)
+        if [ "$major" -gt 3 ] || ([ "$major" -eq 3 ] && [ "$minor" -ge 11 ]); then
+            PYTHON_CMD="$cmd"
+            PYTHON_VERSION="$version"
+            return 0
+        fi
     fi
+    return 1
+}
+
+# Prova diversi comandi Python in ordine di preferenza
+for cmd in python3 python py; do
+    if type "$cmd" >/dev/null 2>&1; then
+        if test_python "$cmd"; then
+            break
+        fi
+    fi
+done
+
+# Se non trova Python, prova con percorsi comuni su Windows
+if [ -z "$PYTHON_CMD" ]; then
+    for python_path in "/c/Users/$USER/AppData/Local/Microsoft/WindowsApps/python3.exe" "/c/Users/$USER/AppData/Local/Programs/Python/Python*/python.exe"; do
+        if [ -f "$python_path" ]; then
+            if test_python "$python_path"; then
+                break
+            fi
+        fi
+    done
+fi
+
+if [ -n "$PYTHON_CMD" ]; then
+    success "Python $PYTHON_VERSION trovato ($PYTHON_CMD)"
 else
-    error "Python 3 non trovato"
+    error "Python 3.11+ non trovato. Installa Python 3.11 o superiore."
     exit 1
 fi
 
-# pip
-if command -v pip3 &> /dev/null; then
-    success "pip3 trovato"
+# pip - rilevamento cross-platform usando 'type' (bash builtin)
+PIP_CMD=""
+
+# Funzione per testare se un comando pip è valido
+test_pip() {
+    local cmd="$1"
+    if $cmd --version &> /dev/null; then
+        PIP_CMD="$cmd"
+        return 0
+    fi
+    return 1
+}
+
+# Prova diversi comandi pip in ordine di preferenza usando 'type' (bash builtin)
+for cmd in pip3 pip; do
+    if type "$cmd" >/dev/null 2>&1; then
+        if test_pip "$cmd"; then
+            break
+        fi
+    fi
+done
+
+if [ -n "$PIP_CMD" ]; then
+    success "pip trovato ($PIP_CMD)"
 else
-    error "pip3 non trovato"
+    error "pip non trovato. Installa pip per Python."
     exit 1
 fi
 
-# Git
-if command -v git &> /dev/null; then
+# Git - usando 'type' (bash builtin)
+if type git >/dev/null 2>&1; then
     success "Git trovato"
 else
     error "Git non trovato"
     exit 1
 fi
 
-# Docker (opzionale)
-if command -v docker &> /dev/null; then
+# Docker (opzionale) - usando 'type' (bash builtin)
+if type docker >/dev/null 2>&1; then
     success "Docker trovato"
     DOCKER_AVAILABLE=true
 else
@@ -81,8 +144,8 @@ else
     DOCKER_AVAILABLE=false
 fi
 
-# Docker Compose (opzionale)
-if command -v docker-compose &> /dev/null; then
+# Docker Compose (opzionale) - usando 'type' (bash builtin)
+if type docker-compose >/dev/null 2>&1; then
     success "Docker Compose trovato"
     DOCKER_COMPOSE_AVAILABLE=true
 else
@@ -247,28 +310,76 @@ fi
 # Setup per modalità locale (senza Docker)
 log "Setup modalità locale..."
 
-# Crea ambiente virtuale
+# Crea ambiente virtuale con gestione filesystem WSL
 log "Creazione ambiente virtuale Python..."
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
-    success "Ambiente virtuale creato"
+
+# Verifica se siamo su filesystem Windows (DrvFs) - problema di permessi
+if [[ "$PWD" == /mnt/* ]]; then
+    warning "Rilevato filesystem Windows (DrvFs) - possibile problema di permessi"
+    log "Creazione ambiente virtuale nel filesystem Linux di WSL..."
+    
+    # Crea ambiente virtuale nel filesystem Linux
+    VENV_PATH="$HOME/.local/share/venv/$(basename "$PWD")"
+    mkdir -p "$(dirname "$VENV_PATH")"
+    
+    if [ ! -d "$VENV_PATH" ]; then
+        log "Creazione ambiente virtuale in $VENV_PATH..."
+        if timeout 60 $PYTHON_CMD -m venv "$VENV_PATH"; then
+            success "Ambiente virtuale creato in filesystem Linux"
+        else
+            error "Timeout o errore nella creazione dell'ambiente virtuale"
+            exit 1
+        fi
+    else
+        warning "Ambiente virtuale già esistente in filesystem Linux"
+    fi
+    
+    # Crea symlink per compatibilità (rimuovi symlink esistente se presente)
+    rm -f venv
+    ln -sf "$VENV_PATH" venv
 else
-    warning "Ambiente virtuale già esistente"
+    # Filesystem Linux normale
+    if [ ! -d "venv" ]; then
+        log "Creazione ambiente virtuale in corso..."
+        if timeout 60 $PYTHON_CMD -m venv venv; then
+            success "Ambiente virtuale creato"
+        else
+            error "Timeout o errore nella creazione dell'ambiente virtuale"
+            log "Tentativo con approccio alternativo..."
+            if $PYTHON_CMD -m venv --clear venv; then
+                success "Ambiente virtuale creato (approccio alternativo)"
+            else
+                error "Impossibile creare ambiente virtuale"
+                exit 1
+            fi
+        fi
+    else
+        warning "Ambiente virtuale già esistente"
+    fi
 fi
 
-# Attiva ambiente virtuale
+# Attiva ambiente virtuale (compatibilità Windows)
 log "Attivazione ambiente virtuale..."
-source venv/bin/activate
+if [ -f "venv/bin/activate" ]; then
+    # Linux/macOS
+    source venv/bin/activate
+elif [ -f "venv/Scripts/activate" ]; then
+    # Windows
+    source venv/Scripts/activate
+else
+    error "Script di attivazione ambiente virtuale non trovato"
+    exit 1
+fi
 success "Ambiente virtuale attivato"
 
 # Aggiorna pip
 log "Aggiornamento pip..."
-pip install --upgrade pip
+$PIP_CMD install --upgrade pip
 success "pip aggiornato"
 
 # Installa dipendenze
 log "Installazione dipendenze Python..."
-pip install -r requirements.txt
+$PIP_CMD install -r requirements.txt
 success "Dipendenze installate"
 
 # Configurazione ambiente locale
@@ -279,8 +390,8 @@ cat > .env << EOF
 # Configurazione sviluppo locale
 DEBUG=True
 DJANGO_SETTINGS_MODULE=cercollettiva.settings.local
-SECRET_KEY=$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
-FIELD_ENCRYPTION_KEY=$(python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')
+SECRET_KEY=$($PYTHON_CMD -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+FIELD_ENCRYPTION_KEY=$($PYTHON_CMD -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')
 
 # Database SQLite per sviluppo locale
 DB_NAME=db.sqlite3
@@ -309,7 +420,7 @@ success "File .env creato per sviluppo locale"
 
 # Setup database SQLite
 log "Setup database SQLite..."
-python manage.py migrate
+$PYTHON_CMD manage.py migrate
 success "Database SQLite configurato"
 
 # Creazione superuser (opzionale)
@@ -317,15 +428,15 @@ echo ""
 read -p "Vuoi creare un superuser? (y/n): " CREATE_SUPERUSER
 if [[ $CREATE_SUPERUSER =~ ^[Yy]$ ]]; then
     log "Creazione superuser..."
-    python manage.py createsuperuser
+    $PYTHON_CMD manage.py createsuperuser
     success "Superuser creato"
 else
-    warning "Superuser non creato (puoi crearlo successivamente con: python manage.py createsuperuser)"
+    warning "Superuser non creato (puoi crearlo successivamente con: $PYTHON_CMD manage.py createsuperuser)"
 fi
 
 # Raccolta file statici
 log "Raccolta file statici..."
-python manage.py collectstatic --noinput
+$PYTHON_CMD manage.py collectstatic --noinput
 success "File statici raccolti"
 
 # Creazione directory necessarie
@@ -335,7 +446,7 @@ success "Directory create"
 
 # Test configurazione
 log "Test configurazione..."
-python manage.py check
+$PYTHON_CMD manage.py check
 success "Configurazione Django verificata"
 
 # Avvio servizi
@@ -348,8 +459,12 @@ echo -e "${GREEN}╚════════════════════
 echo ""
 
 echo -e "${BLUE}Per avviare il server di sviluppo:${NC}"
-echo "  source venv/bin/activate"
-echo "  python manage.py runserver"
+if [ -f "venv/bin/activate" ]; then
+    echo "  source venv/bin/activate"
+else
+    echo "  venv\\Scripts\\activate  # Windows"
+fi
+echo "  $PYTHON_CMD manage.py runserver"
 echo ""
 echo -e "${BLUE}Accesso:${NC}"
 echo "  Applicazione: http://127.0.0.1:8000/"
@@ -357,10 +472,10 @@ echo "  Setup: http://127.0.0.1:8000/setup"
 echo "  Admin: http://127.0.0.1:8000/ceradmin/"
 echo ""
 echo -e "${BLUE}Comandi utili:${NC}"
-echo "  Test: python manage.py test"
-echo "  Shell: python manage.py shell"
-echo "  Migrazioni: python manage.py makemigrations && python manage.py migrate"
-echo "  Superuser: python manage.py createsuperuser"
+echo "  Test: $PYTHON_CMD manage.py test"
+echo "  Shell: $PYTHON_CMD manage.py shell"
+echo "  Migrazioni: $PYTHON_CMD manage.py makemigrations && $PYTHON_CMD manage.py migrate"
+echo "  Superuser: $PYTHON_CMD manage.py createsuperuser"
 echo ""
 
 # Avvio automatico (opzionale)
@@ -371,7 +486,7 @@ if [[ $START_SERVER =~ ^[Yy]$ ]]; then
     echo -e "${BLUE}Server in avvio su http://127.0.0.1:8000/${NC}"
     echo -e "${YELLOW}Premi Ctrl+C per fermare il server${NC}"
     echo ""
-    python manage.py runserver
+    $PYTHON_CMD manage.py runserver
 fi
 
 echo ""

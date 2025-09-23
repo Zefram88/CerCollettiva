@@ -1,5 +1,7 @@
 # users/signals.py
 import logging
+import os
+import tempfile
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_login_failed
@@ -7,12 +9,44 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+# Rileva ambiente di esecuzione (stessa logica di local.py)
+def detect_environment():
+    """Rileva se siamo in WSL, Docker, o filesystem normale"""
+    # Docker: controlla se siamo in container
+    if os.path.exists("/.dockerenv") or os.environ.get("DEPLOYMENT_MODE"):
+        return "docker"
+    
+    # WSL: controlla se siamo su WSL
+    if os.path.exists("/proc/version"):
+        try:
+            with open("/proc/version", "r") as f:
+                if "microsoft" in f.read().lower():
+                    return "wsl"
+        except:
+            pass
+    
+    # Filesystem normale
+    return "normal"
+
 # Configurazione del logger
 logger = logging.getLogger("access_logger")
 logger.setLevel(logging.INFO)
 
+# Determina il percorso del file di log in base all'ambiente
+env_type = detect_environment()
+
+if env_type == "docker":
+    # Docker: usa directory del progetto
+    log_file = "access_logs.log"
+elif env_type == "wsl":
+    # WSL: usa directory temporanea Linux
+    log_file = os.path.join(tempfile.gettempdir(), "access_logs.log")
+else:
+    # Filesystem normale: usa directory corrente
+    log_file = "access_logs.log"
+
 # Handler per file
-file_handler = logging.FileHandler("access_logs.log")
+file_handler = logging.FileHandler(log_file)
 file_handler.setLevel(logging.INFO)
 
 # Handler per console (utile in development)
